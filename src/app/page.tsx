@@ -1,65 +1,211 @@
+import Link from "next/link";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import { sanityFetch } from "@/lib/sanity/client";
+import {
+  featuredProductsQuery,
+  allCollectionsQuery,
+} from "@/lib/sanity/queries";
+import { ProductGrid } from "@/components/product/ProductGrid";
+import { LocalBusinessJsonLd } from "@/components/JsonLd";
+import type { Product, Collection } from "@/lib/types";
+import { mockProducts, mockCollections } from "@/lib/mock-data";
 
-export default function Home() {
+export const revalidate = 60;
+
+async function getData() {
+  const [featuredProducts, collections] = await Promise.all([
+    sanityFetch<Product[]>(featuredProductsQuery),
+    sanityFetch<Collection[]>(allCollectionsQuery),
+  ]);
+  return { featuredProducts, collections };
+}
+
+export default async function HomePage() {
+  let featuredProducts: Product[] = mockProducts.filter(p => p.featured);
+  let collections: Collection[] = mockCollections;
+
+  try {
+    const data = await getData();
+    // If Sanity returns data, use it instead of mock data
+    if (data.featuredProducts.length > 0) {
+      featuredProducts = data.featuredProducts;
+    }
+    if (data.collections.length > 0) {
+      collections = data.collections;
+    }
+  } catch {
+    // Sanity not configured — using mock data
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <>
+      <LocalBusinessJsonLd />
+
+      {/* Hero */}
+      <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center bg-cream-dark overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/20 to-charcoal/40 z-10" />
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/images/hero-jewellery.jpg"
+          alt="Handcrafted botanical jewellery"
+          fill
+          className="object-cover"
           priority
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+        <div className="relative z-20 text-center text-charcoal px-4">
+          <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-light tracking-wider mb-4">
+            Blossom
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-lg sm:text-xl tracking-wide font-light mb-2">
+            Jewellery Art
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <p className="text-sm sm:text-base text-warm-gray max-w-md mx-auto mb-8">
+            Handcrafted pieces inspired by nature, made with love in Europe
+          </p>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 bg-charcoal text-cream px-8 py-3 rounded text-sm tracking-wide hover:bg-charcoal/90 transition-colors"
           >
+            Shop Now
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      {featuredProducts.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-heading text-3xl font-light">Featured Pieces</h2>
+            <Link
+              href="/products"
+              className="text-sm text-warm-gray hover:text-charcoal transition-colors flex items-center gap-1"
+            >
+              View all <ArrowRight size={14} />
+            </Link>
+          </div>
+          <ProductGrid products={featuredProducts} />
+        </section>
+      )}
+
+      {/* Placeholder when no products yet */}
+      {featuredProducts.length === 0 && (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
+          <h2 className="font-heading text-3xl font-light mb-4">Coming Soon</h2>
+          <p className="text-warm-gray max-w-md mx-auto">
+            Our collection is being curated. Connect your Sanity CMS to start
+            adding products.
+          </p>
+        </section>
+      )}
+
+      {/* Collections */}
+      {collections.length > 0 && (
+        <section className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 className="font-heading text-3xl font-light text-center mb-12">
+              Collections
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {collections.slice(0, 3).map((collection, idx) => {
+                const collectionImages = [
+                  "/images/collection-earrings.jpg",
+                  "/images/collection-necklaces.jpg",
+                  "/images/collection-rings.jpg",
+                ];
+                return (
+                  <Link
+                    key={collection._id}
+                    href={`/collections/${collection.slug.current}`}
+                    className="group relative aspect-[4/5] overflow-hidden rounded-lg bg-cream-dark"
+                  >
+                    <Image
+                      src={collectionImages[idx]}
+                      alt={collection.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-cream">
+                    <h3 className="font-heading text-2xl mb-1">
+                      {collection.name}
+                    </h3>
+                    {collection.productCount !== undefined && (
+                      <p className="text-sm text-cream-dark">
+                        {collection.productCount} pieces
+                      </p>
+                    )}
+                  </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* About Teaser */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="aspect-square rounded-lg bg-cream-dark overflow-hidden relative">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/images/artisan-work.jpg"
+              alt="Artisan crafting jewellery"
+              fill
+              className="object-cover"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+          <div>
+            <h2 className="font-heading text-3xl font-light mb-6">
+              Crafted with Love
+            </h2>
+            <p className="text-warm-gray leading-relaxed mb-4">
+              Every piece of Blossom jewellery is handcrafted by Olha, an artisan
+              who draws inspiration from the natural beauty around her. Each
+              creation tells a story of patience, creativity, and dedication to
+              the craft.
+            </p>
+            <p className="text-warm-gray leading-relaxed mb-8">
+              From delicate floral earrings to bold botanical necklaces, every
+              piece is unique — just like the person who wears it.
+            </p>
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 text-sm text-charcoal border-b border-charcoal pb-0.5 hover:text-sage-dark hover:border-sage-dark transition-colors"
+            >
+              Read Olha&apos;s Story
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="bg-sage/10 py-16">
+        <div className="mx-auto max-w-xl px-4 text-center">
+          <h2 className="font-heading text-3xl font-light mb-3">
+            Join the Blossom Family
+          </h2>
+          <p className="text-warm-gray text-sm mb-6">
+            Be the first to know about new collections, exclusive offers, and
+            behind-the-scenes stories.
+          </p>
+          <form className="flex gap-2 max-w-sm mx-auto">
+            <input
+              type="email"
+              placeholder="Your email address"
+              className="flex-1 border border-sage/30 rounded px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-sage"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-sage text-white px-6 py-2.5 rounded text-sm hover:bg-sage-dark transition-colors"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </section>
+    </>
   );
 }

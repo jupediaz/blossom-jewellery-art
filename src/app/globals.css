@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap");
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand colors */
+  --color-sage: #9CAF88;
+  --color-sage-light: #B8C7A8;
+  --color-sage-dark: #7A8E6A;
+  --color-dusty-rose: #D4A5A5;
+  --color-dusty-rose-light: #E3C1C1;
+  --color-dusty-rose-dark: #B88A8A;
+  --color-cream: #FAF5F0;
+  --color-cream-dark: #F0E8DE;
+  --color-gold: #C9B37E;
+  --color-gold-light: #D9CA9E;
+  --color-gold-dark: #A89460;
+  --color-charcoal: #2C2C2C;
+  --color-warm-gray: #6B6B6B;
+
+  /* Semantic tokens */
+  --background: var(--color-cream);
+  --foreground: var(--color-charcoal);
+  --muted: var(--color-warm-gray);
+  --accent: var(--color-sage);
+  --accent-secondary: var(--color-dusty-rose);
+  --highlight: var(--color-gold);
 }
 
 @theme inline {
+  /* Brand palette */
+  --color-sage: var(--color-sage);
+  --color-sage-light: var(--color-sage-light);
+  --color-sage-dark: var(--color-sage-dark);
+  --color-dusty-rose: var(--color-dusty-rose);
+  --color-dusty-rose-light: var(--color-dusty-rose-light);
+  --color-dusty-rose-dark: var(--color-dusty-rose-dark);
+  --color-cream: var(--color-cream);
+  --color-cream-dark: var(--color-cream-dark);
+  --color-gold: var(--color-gold);
+  --color-gold-light: var(--color-gold-light);
+  --color-gold-dark: var(--color-gold-dark);
+  --color-charcoal: var(--color-charcoal);
+  --color-warm-gray: var(--color-warm-gray);
+
+  /* Semantic */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Fonts */
+  --font-heading: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "Inter", system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-dusty-rose-light);
+  color: var(--color-charcoal);
 }
