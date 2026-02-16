@@ -1,7 +1,19 @@
 {
   "project": "blossom-jewellery-art",
+  "domain": "blossomjewellery.art",
+  "localDomain": "dev.blossomjewellery.art",
   "configured_at": "2026-02-16T18:30:00.000Z",
   "services": [
+    {
+      "name": "Caddy",
+      "type": "proxy",
+      "start": "caddy run --config .claude/Caddyfile --adapter caddyfile",
+      "port": 80,
+      "navigable": false,
+      "background": true,
+      "order": 0,
+      "healthcheck": "curl -s http://localhost:2019/config/ > /dev/null && echo 'OK'"
+    },
     {
       "name": "Next.js",
       "type": "web",
@@ -9,7 +21,8 @@
       "port": 8525,
       "navigable": true,
       "background": true,
-      "order": 1
+      "order": 1,
+      "proxyUrl": "http://dev.blossomjewellery.art"
     }
   ]
 }
