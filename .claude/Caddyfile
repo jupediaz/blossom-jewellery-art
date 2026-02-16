@@ -1,21 +1,18 @@
 {
-    # Global options
     auto_https off
-    local_certs
+    admin localhost:2019
 }
 
 dev.blossomjewellery.art {
+    tls .claude/dev.blossomjewellery.art.pem .claude/dev.blossomjewellery.art-key.pem
     reverse_proxy localhost:8525
 
-    # Enable logging
     log {
         output file .claude/caddy.log
         level INFO
     }
 
-    # Headers for development
     header {
-        # Enable CORS for local development
         Access-Control-Allow-Origin *
         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
         Access-Control-Allow-Headers *
