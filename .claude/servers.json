@@ -1,0 +1,15 @@
+{
+  "project": "blossom-jewellery-art",
+  "configured_at": "2026-02-16T18:30:00.000Z",
+  "services": [
+    {
+      "name": "Next.js",
+      "type": "web",
+      "start": "ulimit -n 65536 && npm run dev -- -p 8525",
+      "port": 8525,
+      "navigable": true,
+      "background": true,
+      "order": 1
+    }
+  ]
+}
