@@ -80,8 +80,10 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="text-sm font-medium text-charcoal group-hover:text-sage-dark transition-colors">
           {product.name}
         </h3>
-        {product.category && (
-          <p className="text-xs text-warm-gray">{product.category.name}</p>
+        {(product.collection || product.category) && (
+          <p className="text-xs text-warm-gray">
+            {product.collection?.name || product.category?.name}
+          </p>
         )}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">

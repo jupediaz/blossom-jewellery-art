@@ -108,7 +108,18 @@ export default async function HomePage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {collections.slice(0, 3).map((collection, idx) => {
-                const collectionImages = [
+                const collectionImages: Record<string, string> = {
+                  "ukrainian-heritage": "/images/collections/ukrainian-heritage-cover.jpg",
+                  "red-roses": "/images/collections/red-roses-cover.jpg",
+                  "pink-roses": "/images/collections/pink-roses-cover.jpg",
+                  "yellow-roses": "/images/collections/yellow-roses-cover.jpg",
+                  "orchid-dreams": "/images/collections/orchid-dreams-cover.jpg",
+                  "dark-bloom": "/images/collections/dark-bloom-cover.jpg",
+                  "peony-delicates": "/images/collections/peony-delicates-cover.jpg",
+                  "mediterranean-garden": "/images/collection-necklaces.jpg",
+                  "stud-earrings": "/images/collections/stud-earrings-cover.jpg",
+                };
+                const fallbackImages = [
                   "/images/collection-earrings.jpg",
                   "/images/collection-necklaces.jpg",
                   "/images/collection-rings.jpg",
@@ -120,7 +131,7 @@ export default async function HomePage() {
                     className="group relative aspect-[4/5] overflow-hidden rounded-lg bg-cream-dark"
                   >
                     <Image
-                      src={collectionImages[idx]}
+                      src={collectionImages[collection.slug.current] || fallbackImages[idx] || fallbackImages[0]}
                       alt={collection.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -144,38 +155,54 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* About Teaser */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="aspect-square rounded-lg bg-cream-dark overflow-hidden relative">
-            <Image
-              src="/images/artisan-work.jpg"
-              alt="Artisan crafting jewellery"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <h2 className="font-heading text-3xl font-light mb-6">
-              Crafted with Love
-            </h2>
-            <p className="text-warm-gray leading-relaxed mb-4">
-              Every piece of Blossom jewellery is handcrafted by Olha, an artisan
-              who draws inspiration from the natural beauty around her. Each
-              creation tells a story of patience, creativity, and dedication to
-              the craft.
-            </p>
-            <p className="text-warm-gray leading-relaxed mb-8">
-              From delicate floral earrings to bold botanical necklaces, every
-              piece is unique — just like the person who wears it.
-            </p>
-            <Link
-              href="/about"
-              className="inline-flex items-center gap-2 text-sm text-charcoal border-b border-charcoal pb-0.5 hover:text-sage-dark hover:border-sage-dark transition-colors"
-            >
-              Read Olha&apos;s Story
-              <ArrowRight size={14} />
-            </Link>
+      {/* Meet the Artist */}
+      <section className="bg-cream-dark/40 py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="relative">
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-xl">
+                <Image
+                  src="/images/about/olha-artist-portrait.jpg"
+                  alt="Olha Finiv-Hoshovska — Blossom Jewellery Art creator, surrounded by flowers"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+              <div className="absolute -bottom-4 -right-4 bg-white rounded-xl px-5 py-3 shadow-lg hidden sm:block">
+                <p className="text-xs text-warm-gray uppercase tracking-wider">Handmade in</p>
+                <p className="font-heading text-lg text-charcoal">Europe</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-sage text-sm font-medium tracking-widest uppercase mb-3">
+                Meet the Artist
+              </p>
+              <h2 className="font-heading text-3xl sm:text-4xl font-light mb-2">
+                Olha Finiv-Hoshovska
+              </h2>
+              <p className="text-sage-dark text-sm italic mb-6">
+                Founder &amp; Artisan behind Blossom Jewellery Art
+              </p>
+              <p className="text-warm-gray leading-relaxed mb-4">
+                Every petal, every leaf, every tiny bud is sculpted by hand with the same love
+                that nature puts into growing a flower. Olha transforms polymer clay into
+                miniature botanical masterpieces — wearable art that carries the soul of
+                handcraft.
+              </p>
+              <p className="text-warm-gray leading-relaxed mb-8">
+                Inspired by Ukrainian floral traditions and the gardens of Europe,
+                each piece is a one-of-a-kind creation. No moulds, no shortcuts —
+                just patience, passion, and an eye for the beauty that blooms
+                around us.
+              </p>
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 text-sm text-charcoal border-b border-charcoal pb-0.5 hover:text-sage-dark hover:border-sage-dark transition-colors"
+              >
+                Read Olha&apos;s Full Story
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

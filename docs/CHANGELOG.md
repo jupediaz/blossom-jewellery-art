@@ -7,6 +7,73 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Photo Organization System** - 48 original images analyzed, categorized, and optimized for web
+  - Hero images (1920px): 3 options + main hero replacement
+  - About/Artisan images (1500px): 4 images (portraits, workshop, crafting process)
+  - Collection covers (1200px): 8 collection cover images
+  - Product images (1000px): 40 product photos organized by collection
+  - AI avatar reference photos (1024px): 12 training images of Olha
+  - Directory structure: `public/images/{hero,about,collections,products/*,models}/`
+
+- **9 Product Collections** defined from actual jewelry inventory:
+  1. Ukrainian Heritage (vyshyvanka earrings, poppy/sunflower sets)
+  2. Red Roses (bracelets, rings, earrings)
+  3. Pink Roses (full sets, bracelets)
+  4. Yellow Roses (complete sets, studs, necklaces)
+  5. Orchid Dreams (orchids + agate stones)
+  6. Dark Bloom (black, green, blue flowers)
+  7. Peony Delicates (shimmer peonies + Swarovski)
+  8. Mediterranean Garden (mixed bouquet sets)
+  9. Stud Earrings (mini bouquet studs)
+
+- **17 Real Products** in mock data with actual photos, descriptions, pricing, and materials
+  - Replaced all Unsplash placeholder images with real product photography
+  - Products linked to collections with proper slugs
+
+- **AI Avatar Pipeline** (`scripts/ai-avatar/`)
+  - `enhance-photos.ts` - Gemini-powered photo enhancement script
+    - 6 background presets (studio-white, marble, botanical, Mediterranean, velvet, gallery)
+    - Supports single image, batch processing, and custom prompts
+    - Uses NanoBanana Pro (gemini-3-pro-image-preview)
+  - `README.md` - Complete documentation for avatar training pipeline
+    - Flux LoRA training options (Replicate, fal.ai, RunPod)
+    - 12 reference photos cataloged with descriptions
+    - 6 ideal generation scenarios documented
+  - Gemini API key integrated from image-metadata project
+
+- **Homepage Updated** - Collection images now dynamically mapped to real photos by slug
+
+- **About Page Rewritten** - Full artisan story page with real photos
+  - Hero section with Olha's portrait and biography
+  - "The Craft" section with crafting process photo
+  - "What Makes Blossom Special" values (Handcrafted, Nature-Inspired, Quality Materials)
+  - "The Workshop" section with atelier photo
+  - Creative process steps (Inspiration → Sculpting → Assembly → Finishing)
+  - CTA section linking to Shop and Collections
+
+- **Collections Page Improved** - 3-column grid with real cover photos
+  - Slug-based image mapping (same as homepage) for all 9 collections
+  - Description and piece count shown on each card
+  - Singular/plural piece count ("1 piece" vs "3 pieces")
+
+- **Collection Detail Pages Enhanced**
+  - Hero banner with collection cover image and description overlay
+  - Breadcrumb navigation back to All Collections
+  - Fixed product filtering: now uses `collection._id` match instead of broken index-based math
+  - Piece count displayed
+
+- **Products Page Enhanced**
+  - Collection-based filter pills for mock data (9 collection filters)
+  - Sort options (Price low/high, Name) with collection-preserving URLs
+  - Product cards now show collection name below product name
+
+- **Product Detail Page Fixed**
+  - Product image now renders from `imageUrl` when Sanity images are empty (was showing ShoppingBag placeholder)
+  - Collection name shown as link to collection page
+  - Sale badge on discounted products
+  - Related products now prioritize same-collection items
+  - Removed hardcoded "Product description" placeholder text
+
 - Registered idea in CodeLabs Hub (ID: 4e8c25f9-984d-476d-ba23-7eba47da88ff)
   - All 10 analysis sections populated with research data
   - Score: 82/100

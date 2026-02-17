@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
@@ -17,7 +18,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [selectedVariant, setSelectedVariant] = useState<string | undefined>();
   const { addItem, openCart } = useCartStore();
 
-  const images = product.images || [];
+  const sanityImages = product.images || [];
+  const hasSanityImages = sanityImages.length > 0;
   const currentVariant = product.variants?.find(
     (v) => v.name === selectedVariant
   );
@@ -29,8 +31,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
     : product.inStock;
 
   const handleAddToCart = () => {
-    const imageUrl =
-      images.length > 0 ? urlFor(images[0]).width(200).url() : "";
+    const imageUrl = hasSanityImages
+      ? urlFor(sanityImages[0]).width(200).url()
+      : product.imageUrl || "";
     addItem({
       id: product._id,
       name: product.name,
@@ -43,26 +46,26 @@ export function ProductDetail({ product }: ProductDetailProps) {
   };
 
   const nextImage = () =>
-    setSelectedImage((prev) => (prev + 1) % images.length);
+    setSelectedImage((prev) => (prev + 1) % sanityImages.length);
   const prevImage = () =>
-    setSelectedImage((prev) => (prev - 1 + images.length) % images.length);
+    setSelectedImage((prev) => (prev - 1 + sanityImages.length) % sanityImages.length);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
       {/* Image Gallery */}
       <div className="space-y-4">
         <div className="relative aspect-square overflow-hidden rounded-lg bg-cream-dark">
-          {images.length > 0 ? (
+          {hasSanityImages ? (
             <>
               <Image
-                src={urlFor(images[selectedImage]).width(800).url()}
-                alt={images[selectedImage].alt || product.name}
+                src={urlFor(sanityImages[selectedImage]).width(800).url()}
+                alt={sanityImages[selectedImage].alt || product.name}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
-              {images.length > 1 && (
+              {sanityImages.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
@@ -81,17 +84,33 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 </>
               )}
             </>
+          ) : product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
           ) : (
             <div className="flex h-full items-center justify-center text-warm-gray">
               <ShoppingBag size={60} />
             </div>
           )}
+
+          {/* Sale badge */}
+          {product.compareAtPrice && product.compareAtPrice > product.price && (
+            <span className="absolute top-4 left-4 bg-dusty-rose text-white text-xs px-3 py-1.5 rounded">
+              Sale
+            </span>
+          )}
         </div>
 
-        {/* Thumbnails */}
-        {images.length > 1 && (
+        {/* Thumbnails (Sanity images only) */}
+        {sanityImages.length > 1 && (
           <div className="flex gap-2 overflow-x-auto">
-            {images.map((img, i) => (
+            {sanityImages.map((img, i) => (
               <button
                 key={i}
                 onClick={() => setSelectedImage(i)}
@@ -117,7 +136,15 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
       {/* Product Info */}
       <div className="flex flex-col">
-        {product.category && (
+        {product.collection && (
+          <Link
+            href={`/collections/${product.collection.slug.current}`}
+            className="text-xs text-sage tracking-wide uppercase mb-2 hover:text-sage-dark transition-colors"
+          >
+            {product.collection.name}
+          </Link>
+        )}
+        {!product.collection && product.category && (
           <p className="text-xs text-warm-gray tracking-wide uppercase mb-2">
             {product.category.name}
           </p>
@@ -178,10 +205,9 @@ export function ProductDetail({ product }: ProductDetailProps) {
         </button>
 
         {/* Description */}
-        {product.description && (
+        {product.description && Array.isArray(product.description) && product.description.length > 0 && (
           <div className="prose prose-sm text-warm-gray mb-6">
             {/* Portable text would render here with @portabletext/react */}
-            <p>Product description</p>
           </div>
         )}
 

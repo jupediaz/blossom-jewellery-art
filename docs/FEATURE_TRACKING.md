@@ -83,22 +83,37 @@ Last Updated: 2026-02-12
 ## Implementation
 
 ### Website / E-Commerce Store
-**Status:** Planned
-**Priority:** High
-**Target:** 2026-03
+**Status:** In Progress
+**Priority:** Critical
+**Started:** 2026-02-12
 
 Features:
-- [ ] Choose platform (Shopify vs Custom Next.js)
-- [ ] Purchase domain
-- [ ] Set up store with jewelry theme
-- [ ] Create "About" page with brand story
-- [ ] Product photography for all existing pieces
-- [ ] Product listings with descriptions
-- [ ] Stripe payment integration
+- [x] Choose platform: Custom Next.js 16 + Sanity CMS + Stripe
+- [ ] Purchase domain (blossomjewellery.art selected)
+- [x] Set up store with jewelry theme (Next.js + Tailwind 4)
+- [x] Create "About" page with brand story (rewritten with real photos: portrait, workshop, crafting)
+- [x] Product photography - 48 images analyzed, optimized, and organized
+- [x] Product listings with descriptions (16 products, 9 collections)
+- [x] Collection pages with cover images, descriptions, and filtered products
+- [x] Product detail pages with real images, collection links, sale badges, related products
+- [x] Products page with collection filtering and sorting
+- [x] Stripe payment integration (configured, needs keys)
 - [ ] Instagram Shopping connection
-- [ ] Multi-language support (EN primary, ES secondary)
-- [ ] Mobile-responsive design
-- [ ] SEO optimization
+- [x] Multi-language support (next-intl configured)
+- [x] Mobile-responsive design (Tailwind responsive)
+- [x] SEO optimization (JSON-LD, sitemap, meta tags)
+- [ ] Sanity CMS populated with real content
+- [ ] Deploy to production
+
+**Technical Stack:**
+- Next.js 16 + React 19
+- Sanity CMS (headless)
+- Stripe (payments)
+- Zustand (state management)
+- Tailwind CSS 4
+- Framer Motion (animations)
+- next-intl (i18n)
+- Radix UI (components)
 
 ---
 
@@ -150,16 +165,28 @@ Features:
 
 ---
 
-### AI Photography
-**Status:** Planned
+### AI Photography & Avatar Pipeline
+**Status:** In Progress
 **Priority:** Medium
-**Target:** 2026-03
+**Started:** 2026-02-17
 
 Features:
-- [ ] Collect Olha's photos for AI training
-- [ ] Create AI-enhanced lifestyle imagery
-- [ ] Mood boards and campaign visuals
+- [x] Collect Olha's photos for AI training (12 reference images prepared)
+- [x] Gemini integration for photo enhancement (NanoBanana Pro)
+  - 6 background presets (studio, marble, botanical, Mediterranean, velvet, gallery)
+  - Batch processing support
+  - EXIF preservation from image-metadata project
+- [ ] Create AI-enhanced lifestyle imagery (Gemini enhance script ready)
+- [ ] Train Flux LoRA model on Olha's reference photos
+- [ ] Generate editorial campaign images
 - [ ] Background environments for product shots
+- [ ] Mood boards and campaign visuals
+
+**Technical Details:**
+- Script: `scripts/ai-avatar/enhance-photos.ts`
+- Models: gemini-3-pro-image-preview, gemini-2.5-flash-image
+- Training data: 12 images in `/public/images/models/`
+- Planned training: Flux LoRA via Replicate or fal.ai
 
 ---
 

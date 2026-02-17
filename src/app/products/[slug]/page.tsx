@@ -82,11 +82,15 @@ export default async function ProductPage({
   // TypeScript now knows product is not null and has slug
   const currentProduct: Product = product;
 
-  // Add related products from mock data if not present
+  // Add related products: prefer same collection, then fill with other products
   if (!currentProduct.relatedProducts || currentProduct.relatedProducts.length === 0) {
-    currentProduct.relatedProducts = mockProducts
-      .filter(p => p._id !== currentProduct._id)
-      .slice(0, 4);
+    const sameCollection = mockProducts.filter(
+      (p) => p._id !== currentProduct._id && p.collection?._id === currentProduct.collection?._id
+    );
+    const otherProducts = mockProducts.filter(
+      (p) => p._id !== currentProduct._id && p.collection?._id !== currentProduct.collection?._id
+    );
+    currentProduct.relatedProducts = [...sameCollection, ...otherProducts].slice(0, 4);
   }
 
   return (
