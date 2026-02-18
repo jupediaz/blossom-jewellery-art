@@ -162,7 +162,7 @@ export default async function HomePage() {
             <div className="relative">
               <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-xl">
                 <Image
-                  src="/images/about/olha-artist-portrait.jpg"
+                  src="/images/about/olha-portrait.jpg"
                   alt="Olha Finiv-Hoshovska — Blossom Jewellery Art creator, surrounded by flowers"
                   fill
                   className="object-cover object-top"

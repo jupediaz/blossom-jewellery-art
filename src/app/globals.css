@@ -68,8 +68,9 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Smooth scrolling */
+/* Base font size bump: 16px → 17px for better readability */
 html {
+  font-size: 17px;
   scroll-behavior: smooth;
 }
 

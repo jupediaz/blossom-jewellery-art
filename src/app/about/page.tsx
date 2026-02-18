@@ -12,54 +12,61 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div>
-      {/* Hero */}
-      <section className="relative bg-cream-dark/40">
+      {/* Hero — Meet the Artist */}
+      <section className="bg-cream-dark/40">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="relative">
-              <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-xl">
-                <Image
-                  src="/images/about/olha-artist-portrait.jpg"
-                  alt="Olha Finiv-Hoshovska — Blossom Jewellery Art creator"
-                  fill
-                  className="object-cover object-top"
-                  priority
-                />
-              </div>
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-xl px-5 py-3 shadow-lg hidden sm:block">
-                <p className="text-xs text-warm-gray uppercase tracking-wider">Handmade in</p>
-                <p className="font-heading text-lg text-charcoal">Europe</p>
+          {/* Intro text first on all screens */}
+          <div className="text-center mb-12">
+            <p className="text-sage text-sm font-medium tracking-widest uppercase mb-3">
+              Meet the Artist
+            </p>
+            <h1 className="font-heading text-4xl sm:text-5xl font-light mb-2">
+              Olha Finiv-Hoshovska
+            </h1>
+            <p className="text-sage-dark text-sm italic">
+              Founder &amp; Artisan behind Blossom Jewellery Art
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14 items-start">
+            {/* Portrait — contained, centered, shows the full face */}
+            <div className="lg:col-span-2 flex justify-center">
+              <div className="relative w-72 sm:w-80 lg:w-full">
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-xl">
+                  <Image
+                    src="/images/about/olha-artist-portrait.jpg"
+                    alt="Olha Finiv-Hoshovska, creator of Blossom Jewellery Art, surrounded by flowers"
+                    fill
+                    className="object-cover object-center"
+                    priority
+                  />
+                </div>
+                <div className="absolute -bottom-3 -right-3 bg-white rounded-xl px-4 py-2 shadow-lg">
+                  <p className="text-xs text-warm-gray uppercase tracking-wider">Handmade in</p>
+                  <p className="font-heading text-base text-charcoal">Europe</p>
+                </div>
               </div>
             </div>
-            <div>
-              <p className="text-sage text-sm font-medium tracking-widest uppercase mb-3">
-                Meet the Artist
+
+            {/* Bio text */}
+            <div className="lg:col-span-3 space-y-4 text-warm-gray leading-relaxed">
+              <p>
+                Every petal, every leaf, every tiny bud is sculpted by hand with the same love
+                that nature puts into growing a flower. Olha transforms polymer clay into
+                miniature botanical masterpieces — wearable art that carries the soul of
+                handcraft.
               </p>
-              <h1 className="font-heading text-4xl sm:text-5xl font-light mb-2">
-                Olha Finiv-Hoshovska
-              </h1>
-              <p className="text-sage-dark text-sm italic mb-6">
-                Founder &amp; Artisan behind Blossom Jewellery Art
+              <p>
+                Born in Ukraine with a background in psychology and education, Olha discovered
+                her true calling in the art of polymer clay flower sculpting. What began as a
+                creative escape became a lifelong passion — each piece a meditation on beauty
+                and patience.
               </p>
-              <div className="space-y-4 text-warm-gray leading-relaxed">
-                <p>
-                  Every petal, every leaf, every tiny bud is sculpted by hand with the same love
-                  that nature puts into growing a flower. Olha transforms polymer clay into
-                  miniature botanical masterpieces — wearable art that carries the soul of
-                  handcraft.
-                </p>
-                <p>
-                  Born in Ukraine with a background in psychology and education, Olha discovered
-                  her true calling in the art of polymer clay flower sculpting. What began as a
-                  creative escape became a lifelong passion — each piece a meditation on beauty
-                  and patience.
-                </p>
-                <p>
-                  Now based in Europe, she draws inspiration from both her Ukrainian floral
-                  heritage — the vibrant poppies, golden sunflowers, and intricate vyshyvanka
-                  patterns — and the lush Mediterranean gardens that surround her.
-                </p>
-              </div>
+              <p>
+                Now based in Europe, she draws inspiration from both her Ukrainian floral
+                heritage — the vibrant poppies, golden sunflowers, and intricate vyshyvanka
+                patterns — and the lush Mediterranean gardens that surround her.
+              </p>
             </div>
           </div>
         </div>
@@ -97,7 +104,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
                 <Image
                   src="/images/about/crafting-process.jpg"
                   alt="Olha's crafting process — hand-sculpting polymer clay flowers"
@@ -147,7 +154,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
                 <Image
                   src="/images/about/workshop-atelier.jpg"
                   alt="Olha's workshop and atelier where the jewellery is created"
