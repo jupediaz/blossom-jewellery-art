@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **E-Commerce Backend Infrastructure (Phase 0)**
+  - Prisma 7 ORM with full database schema (17 models, 8 enums) for orders, inventory, customers, coupons, shipping, offers, wishlists, email logs
+  - NextAuth v5 (Auth.js) with JWT strategy, Credentials + Google OAuth providers, role-based access control (Admin, Product Manager, Customer)
+  - Middleware for admin panel and customer account route protection
+  - Resend email client with transactional email helper
+  - Anthropic Claude AI client with multilingual product description generator (EN/ES/UK)
+  - Notion API client for project management integration (roadmap, tasks, products)
+  - Admin/PM seed script with 5 shipping zones and 10 shipping methods
+  - Node.js upgraded to v20.19.0 (Prisma 7 requirement)
+
+### Changed
+- Updated `.env.example` with all new environment variables (database, auth, email, AI, Notion)
+- Updated `.gitignore` to exclude Prisma generated client
+- Added `prisma.config.ts` for Prisma 7 configuration (replaces in-schema URL)
+- Added database management scripts to `package.json` (db:generate, db:migrate, db:push, db:seed, db:studio)
+
 - **Photo Organization System** - 48 original images analyzed, categorized, and optimized for web
   - Hero images (1920px): 3 options + main hero replacement
   - About/Artisan images (1500px): 4 images (portraits, workshop, crafting process)

@@ -219,6 +219,50 @@ Features:
 
 ---
 
+### E-Commerce Platform Backend (Phase 0: Infrastructure)
+**Status:** In Progress
+**Priority:** Critical
+**Started:** 2026-02-20
+
+Features:
+- [x] Install all backend dependencies (Prisma, NextAuth, Resend, Claude AI SDK, Notion, Zod, etc.)
+- [x] Create Prisma schema (17 models: User, Order, Inventory, Coupon, CartSession, ShippingZone, etc.)
+- [x] Configure Prisma 7 with prisma.config.ts and PrismaPg adapter
+- [x] Set up Prisma client singleton with connection pooling guard
+- [x] Configure NextAuth v5 (JWT strategy, Credentials + Google OAuth providers, role-based access)
+- [x] Create auth API route handler (/api/auth/[...nextauth])
+- [x] Create middleware for /admin/* and /account/* route protection
+- [x] Create Resend email client with helper function
+- [x] Create Anthropic Claude AI client with product description generator
+- [x] Create Notion API client with task/roadmap helpers
+- [x] Create admin seed script (admin + product manager users, shipping zones/methods)
+- [x] Update .env.example with all new environment variables
+- [x] TypeScript compiles clean (zero errors)
+- [ ] Set up Neon PostgreSQL database
+- [ ] Run initial Prisma migration
+- [ ] Verify admin login works end-to-end
+- [ ] Configure Sanity project (project ID, dataset, API token)
+
+**Technical Details:**
+- Prisma 7 (new config format, driver adapters, no Rust engine)
+- NextAuth v5 beta (Auth.js, JWT strategy, authorized callback)
+- Two-layer architecture: Sanity (content) + PostgreSQL (transactional)
+- Node.js upgraded to v20.19.0 (required by Prisma 7)
+
+**Files Created:**
+- `prisma/schema.prisma` - Full database schema (17 models, 8 enums)
+- `prisma.config.ts` - Prisma 7 configuration
+- `prisma/seed.ts` - Database seed script
+- `src/lib/db.ts` - Prisma client singleton
+- `src/lib/auth.ts` - NextAuth v5 configuration
+- `src/lib/email.ts` - Resend email client
+- `src/lib/ai.ts` - Anthropic Claude AI client
+- `src/lib/notion.ts` - Notion API client
+- `src/middleware.ts` - Auth/route protection middleware
+- `src/app/api/auth/[...nextauth]/route.ts` - Auth API handler
+
+---
+
 ## Project Integration
 
 ### Register in CodeLabs Hub
