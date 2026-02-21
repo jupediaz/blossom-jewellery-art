@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { AdminShell } from './AdminShell'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Admin | Blossom Jewellery',
 }

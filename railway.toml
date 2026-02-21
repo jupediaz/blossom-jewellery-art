@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "DATABASE_URL='postgresql://placeholder:placeholder@localhost:5432/placeholder' npx prisma generate && npm run build"
+buildCommand = "(DATABASE_URL='postgresql://placeholder:placeholder@localhost:5432/placeholder' npx prisma generate) && npm run build"
 
 [deploy]
 startCommand = "cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public && node .next/standalone/server.js"
