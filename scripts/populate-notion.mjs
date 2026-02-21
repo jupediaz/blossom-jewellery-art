@@ -1,6 +1,6 @@
 /**
- * Blossom Jewellery Art — Populate Notion databases
- * Roadmap, Tasks, Products, Decisions Log
+ * Blossom Jewellery Art — Populate Notion databases (English)
+ * Clears existing entries and repopulates in English
  */
 
 import { readFileSync } from 'fs'
@@ -10,16 +10,13 @@ import { dirname, join } from 'path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const envPath = join(__dirname, '../.env.local')
 const env = readFileSync(envPath, 'utf-8')
-
 const get = (key) => env.match(new RegExp(`${key}=(.+)`))?.[1]?.trim()
 
-const API_KEY         = get('NOTION_API_KEY')
-const ROADMAP_DB      = get('NOTION_ROADMAP_DB_ID')
-const TASKS_DB        = get('NOTION_TASKS_DB_ID')
-const PRODUCTS_DB     = get('NOTION_PRODUCTS_DB_ID')
-const MARKET_DB       = get('NOTION_MARKET_DB_ID')
-const B2B_DB          = get('NOTION_B2B_DB_ID')
-const DECISIONS_DB    = get('NOTION_DECISIONS_DB_ID')
+const API_KEY       = get('NOTION_API_KEY')
+const ROADMAP_DB    = get('NOTION_ROADMAP_DB_ID')
+const TASKS_DB      = get('NOTION_TASKS_DB_ID')
+const PRODUCTS_DB   = get('NOTION_PRODUCTS_DB_ID')
+const DECISIONS_DB  = get('NOTION_DECISIONS_DB_ID')
 
 const headers = {
   'Authorization': `Bearer ${API_KEY}`,
@@ -27,149 +24,152 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-async function addPage(databaseId, properties) {
-  const res = await fetch('https://api.notion.com/v1/pages', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ parent: { database_id: databaseId }, properties }),
+async function api(path, method = 'GET', body = null) {
+  const res = await fetch(`https://api.notion.com/v1${path}`, {
+    method, headers,
+    body: body ? JSON.stringify(body) : undefined,
   })
   const data = await res.json()
-  if (!res.ok) throw new Error(`${res.status}: ${JSON.stringify(data.message)}`)
+  if (!res.ok) throw new Error(`${res.status}: ${data.message}`)
   return data
 }
 
-const title = (text) => ({ title: [{ text: { content: text } }] })
-const text  = (t)    => ({ rich_text: [{ text: { content: t } }] })
-const sel   = (name) => ({ select: { name } })
-const date  = (d)    => ({ date: { start: d } })
-const num   = (n)    => ({ number: n })
-const check = (b)    => ({ checkbox: b })
+async function addPage(databaseId, properties) {
+  return api('/pages', 'POST', { parent: { database_id: databaseId }, properties })
+}
+
+const title = (t) => ({ title: [{ text: { content: t } }] })
+const text  = (t) => ({ rich_text: [{ text: { content: t } }] })
+const sel   = (n) => ({ select: { name: n } })
+const date  = (d) => ({ date: { start: d } })
+const num   = (n) => ({ number: n })
+const check = (b) => ({ checkbox: b })
 
 // ─── ROADMAP ─────────────────────────────────────────────────────────────────
 
 const roadmapItems = [
-  // PHASE 1
+  // PHASE 1 — Market Research
   {
-    Name: title('Investigar joyerías locales (Ola visita tiendas)'),
+    Name: title('Visit local jewelry stores (observe & photograph)'),
     Phase: sel('Phase 1 — Market Research'),
     Status: sel('🟡 In Progress'),
     Priority: sel('Critical'),
     'Start Date': date('2026-02-21'),
     'End Date': date('2026-03-07'),
-    Notes: text('Ola visita joyerías y boutiques en su área. Fotografiar discret. productos, anotar precios y presentación. No hace falta hablar con nadie.'),
+    Notes: text('Ola visits nearby jewelry stores and boutiques as a customer. Discreetly photograph products, note prices and presentation styles. No need to talk to anyone or explain anything.'),
   },
   {
-    Name: title('Analizar competencia online (Etsy, Instagram)'),
+    Name: title('Online competitor analysis (Etsy, Instagram)'),
     Phase: sel('Phase 1 — Market Research'),
     Status: sel('🟢 Complete'),
     Priority: sel('High'),
     'Start Date': date('2026-02-12'),
     'End Date': date('2026-02-21'),
-    Notes: text('Análisis de mercado global completado. Ver docs/MARKET_ANALYSIS.md'),
+    Notes: text('Global market analysis complete. See docs/MARKET_ANALYSIS.md'),
   },
   {
-    Name: title('Definir 6-10 productos de lanzamiento'),
+    Name: title('Select 6-10 launch products from existing catalog'),
     Phase: sel('Phase 1 — Market Research'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-03-01'),
     'End Date': date('2026-03-15'),
-    Notes: text('Ola selecciona de su catálogo existente los productos que mejor representan la marca y son reproducibles. Criterios: que le gusten, que sean reproducibles, que tengan buena relación calidad-precio.'),
+    Notes: text('Ola picks the best pieces from her current catalog for the launch. Criteria: she loves them, they are reproducible, they represent the brand well, good price-quality ratio.'),
   },
   {
-    Name: title('Estrategia de precios y márgenes'),
+    Name: title('Pricing strategy & margin structure'),
     Phase: sel('Phase 1 — Market Research'),
     Status: sel('🟢 Complete'),
     Priority: sel('High'),
     'Start Date': date('2026-02-12'),
     'End Date': date('2026-02-21'),
-    Notes: text('Estructura de precios definida. Retail 3-5x coste. Wholesale 50% del retail. Ver docs/PRICING_STRATEGY.md'),
+    Notes: text('Pricing structure defined. Retail = 3-5x production cost. Wholesale = 50% of retail. Range: €22-58 per piece. See docs/PRICING_STRATEGY.md'),
   },
 
-  // PHASE 2
+  // PHASE 2 — Identity & Product
   {
-    Name: title('Diseñar packaging (tarjeta, bolsita, caja)'),
+    Name: title('Design packaging (card, pouch, box)'),
     Phase: sel('Phase 2 — Identity & Product'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-03-10'),
     'End Date': date('2026-03-31'),
-    Notes: text('Ola diseña el packaging completo. Tarjeta de joya (con nombre marca, cuidados, web), bolsita de organza o kraft, caja opcional para sets. Colores: rosa suave + oro.'),
+    Notes: text('Ola designs the full packaging: jewelry card (brand name, care instructions, website), organza or kraft pouch, optional box for sets. Colors: soft rose + gold.'),
   },
   {
-    Name: title('Fabricar 10-15 piezas de lanzamiento'),
+    Name: title('Produce 10-15 launch pieces (initial stock)'),
     Phase: sel('Phase 2 — Identity & Product'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-03-15'),
     'End Date': date('2026-04-15'),
-    Notes: text('Ola produce las piezas seleccionadas para el lanzamiento. Al menos 2-3 unidades de cada modelo para tener stock inicial.'),
+    Notes: text('Ola produces the selected launch pieces. At least 2-3 units of each design for initial stock.'),
   },
   {
-    Name: title('Fotografía de producto (teléfono + luz natural)'),
+    Name: title('Product photography (phone + natural light setup)'),
     Phase: sel('Phase 2 — Identity & Product'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-04-01'),
     'End Date': date('2026-04-20'),
-    Notes: text('Ola fotografia los productos. Setup básico: fondo blanco o mármol, luz natural lateral, teléfono en trípode. Múltiples ángulos por pieza. Fotos en uso (con modelo = Ola misma).'),
+    Notes: text('Basic setup: white background (cardboard or fabric), natural side window light, phone on tripod. Per piece: 3-4 photos (front, close-up detail, on hand/neck, with packaging). Best time: morning soft light.'),
   },
   {
-    Name: title('Rediseño web: paleta rosa+oro, estilo editorial'),
+    Name: title('Website redesign: rose+gold palette, editorial style'),
     Phase: sel('Phase 2 — Identity & Product'),
     Status: sel('🟢 Complete'),
     Priority: sel('High'),
     'Start Date': date('2026-02-21'),
     'End Date': date('2026-02-21'),
-    Notes: text('Completado. Paleta actualizada de sage verde a blush rosa + oro cálido. Hero editorial bottom-anchored. Font 18px.'),
+    Notes: text('Complete. Palette updated from sage green to blush rose + warm gold. Editorial bottom-anchored hero. Font 18px. Cleaner white background.'),
   },
   {
-    Name: title('Subir productos reales a la web'),
+    Name: title('Upload real product photos to website'),
     Phase: sel('Phase 2 — Identity & Product'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-04-20'),
     'End Date': date('2026-05-01'),
-    Notes: text('José sube las fotos reales y descripciones a Sanity CMS. Activar Stripe en modo live.'),
+    Notes: text('José uploads real photos and descriptions to Sanity CMS. Activate Stripe in live mode.'),
   },
 
-  // PHASE 3
+  // PHASE 3 — Pre-launch
   {
-    Name: title('Visitar boutiques en Marbella (B2B pitch)'),
+    Name: title('Visit boutiques in Marbella (B2B pitch)'),
     Phase: sel('Phase 3 — Pre-launch'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-05-01'),
     'End Date': date('2026-05-20'),
-    Notes: text('José visita boutiques premium en Marbella, Puerto Banús, Estepona. Llevar lookbook físico + muestras. Precio wholesale = 50% del retail.'),
+    Notes: text('José visits premium boutiques in Marbella, Puerto Banús, Estepona. Bring printed lookbook + 2-3 physical samples. Wholesale price = 50% of retail.'),
   },
   {
-    Name: title('Instagram: primeros 9 posts + bio'),
+    Name: title('Instagram: first 9 posts + bio setup'),
     Phase: sel('Phase 3 — Pre-launch'),
     Status: sel('🔵 Planned'),
     Priority: sel('High'),
     'Start Date': date('2026-05-01'),
     'End Date': date('2026-05-15'),
-    Notes: text('Ola prepara el grid inicial de Instagram. 9 posts coherentes visualmente. Bio clara: quién eres, qué haces, dónde comprar. Link a la web.'),
+    Notes: text('Ola prepares the initial Instagram grid. 9 visually consistent posts. Clear bio: who you are, what you make, where to buy. Link to website.'),
   },
   {
-    Name: title('Configurar dominio y deployment producción'),
+    Name: title('Domain setup & production deployment'),
     Phase: sel('Phase 3 — Pre-launch'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-04-25'),
     'End Date': date('2026-05-01'),
-    Notes: text('José: comprar dominio blossomjewellery.art, configurar DNS, desplegar en Railway, verificar email SPF/DKIM, activar Stripe live.'),
+    Notes: text('Buy domain blossomjewellery.art, configure DNS, deploy on Railway, verify email (SPF/DKIM/DMARC), enable SSL, full store test.'),
   },
 
-  // PHASE 4
+  // PHASE 4 — Launch
   {
-    Name: title('Lanzamiento oficial'),
+    Name: title('Official launch'),
     Phase: sel('Phase 4 — Launch'),
     Status: sel('🔵 Planned'),
     Priority: sel('Critical'),
     'Start Date': date('2026-05-20'),
-    Notes: text('Publicar web, anunciar en Instagram, enviar email a contactos. Monitorizar primeros pedidos.'),
+    Notes: text('Publish website, announce on Instagram, send email to contacts. Monitor first orders together.'),
   },
 ]
 
@@ -178,294 +178,294 @@ const roadmapItems = [
 const tasks = [
   // OLA — PHASE 1
   {
-    Name: title('Visitar joyerías cercanas — anotar precios y fotos'),
+    Name: title('Visit local jewelry stores — note prices & take photos'),
     Status: sel('🔄 In Progress'),
     Assigned: sel('Ola'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('Critical'),
-    Notes: text('Entrar como clienta. Fotografiar discretamente los productos (precio, presentación, estilo). No hace falta hablar ni explicar nada. Anotar: tipo de joya, precio, packaging visible, marca. Subir fotos a la base de datos "Market Research" aquí en Notion.'),
+    Notes: text('Go in as a customer. Discreetly photograph products (prices, presentation, style). No need to speak to anyone or explain anything. Notes to capture: type of jewelry, price, visible packaging, brand. Upload photos to the "Market Research" database here in Notion.'),
   },
   {
-    Name: title('Buscar inspiración de packaging en Pinterest'),
+    Name: title('Create packaging inspiration board on Pinterest'),
     Status: sel('⬜ Todo'),
     Assigned: sel('Ola'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('High'),
-    Notes: text('Crear tablero de Pinterest "Blossom Packaging" con referencias de packaging de joyería que le gusten. Énfasis en: cajas, bolsas, tarjetas de joya, colores rosa y dorado.'),
+    Notes: text('Create a Pinterest board "Blossom Packaging" with jewelry packaging references you love. Focus on: boxes, pouches, jewelry cards, soft rose and gold color palette.'),
   },
   {
-    Name: title('Seleccionar 6-10 piezas de lanzamiento'),
+    Name: title('Choose 6-10 launch pieces from existing catalog'),
     Status: sel('⬜ Todo'),
     Assigned: sel('Ola'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('Critical'),
     'Due Date': date('2026-03-15'),
-    Notes: text('De todo el catálogo actual, elegir las piezas para lanzar primero. Criterios: (1) que le gusten mucho, (2) que pueda reproducirlas, (3) que representen bien la marca. Añadirlas a la base de datos "Products" aquí.'),
+    Notes: text('From your full catalog, select the pieces to launch first. Criteria: (1) you love them, (2) you can reproduce them, (3) they represent the brand well. Add them to the "Products" database here in Notion.'),
   },
   {
-    Name: title('Buscar referencia fotográfica de estilo que le guste'),
+    Name: title('Find photo style references you love (Instagram/Pinterest)'),
     Status: sel('⬜ Todo'),
     Assigned: sel('Ola'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('Medium'),
-    Notes: text('Buscar en Instagram y Pinterest 10-20 fotos de joyería artesanal que le gusten visualmente. Guardarlas para definir el estilo fotográfico de Blossom.'),
+    Notes: text('Save 10-20 photos of handmade jewelry you love visually. These will define Blossom\'s photography style. Save them in a Pinterest board or share them in Notion.'),
   },
 
   // JOSÉ — PHASE 1
   {
-    Name: title('Configurar Notion workspace y bases de datos'),
+    Name: title('Set up Notion workspace & databases'),
     Status: sel('✅ Done'),
     Assigned: sel('José'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('Critical'),
-    Notes: text('Completado 2026-02-21. Workspace Blossom creado con 6 bases de datos: Roadmap, Tasks, Products, Market Research, B2B Leads, Decisions Log.'),
+    Notes: text('Completed 2026-02-21. Blossom workspace created with 6 databases: Roadmap, Tasks, Products, Market Research, B2B Leads, Decisions Log.'),
   },
   {
-    Name: title('Rediseñar web: paleta rosa+oro'),
+    Name: title('Website redesign: rose + gold palette'),
     Status: sel('✅ Done'),
     Assigned: sel('José'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('High'),
-    Notes: text('Completado 2026-02-21. Paleta actualizada. Hero editorial. Fuente 18px.'),
+    Notes: text('Completed 2026-02-21. Updated palette, editorial hero, 18px font, cleaner white background.'),
   },
   {
-    Name: title('Investigar proveedores de packaging en España'),
+    Name: title('Research packaging suppliers in Spain/Europe'),
     Status: sel('⬜ Todo'),
     Assigned: sel('José'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('Medium'),
     'Due Date': date('2026-03-15'),
-    Notes: text('Buscar proveedores de: cajas de joyería, bolsas de organza, tarjetas de presentación, papel de seda. Requisitos: pedido mínimo bajo, precio razonable, calidad aceptable. Referencias: Alibaba, Packly, Made in Design.'),
+    Notes: text('Find suppliers for: jewelry boxes, organza pouches, presentation cards, tissue paper. Requirements: low minimum order, reasonable price, decent quality. References: Alibaba, Packly, Made in Design.'),
   },
   {
-    Name: title('Preparar lista de boutiques en Marbella a visitar'),
+    Name: title('Build list of Marbella boutiques to visit for B2B'),
     Status: sel('⬜ Todo'),
     Assigned: sel('José'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('High'),
     'Due Date': date('2026-04-01'),
-    Notes: text('Buscar en Google Maps boutiques y joyerías en: Marbella centro, Puerto Banús, Golden Mile, Estepona, Benahavís. Añadir a la base "B2B Leads" con nombre, dirección, tipo de tienda.'),
-  },
-
-  // OLA — PHASE 2
-  {
-    Name: title('Diseñar tarjeta de joya (nombre, cuidados, web)'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('Ola'),
-    Phase: sel('Phase 2 — Identity & Product'),
-    Priority: sel('Critical'),
-    'Due Date': date('2026-03-31'),
-    Notes: text('Tarjeta pequeña que acompañará cada joya. Contenido: nombre de la pieza (opcional), instrucciones de cuidado (evitar agua, perfume, sudor), web blossomjewellery.art, Instagram @blossomjewelleryart. Diseño: rosa suave + dorado, elegante y minimalista.'),
+    Notes: text('Search Google Maps for boutiques and jewelry stores in: Marbella centre, Puerto Banús, Golden Mile, Estepona, Benahavís. Add them to the "B2B Leads" database.'),
   },
   {
-    Name: title('Diseñar bolsita/caja de presentación'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('Ola'),
-    Phase: sel('Phase 2 — Identity & Product'),
-    Priority: sel('Critical'),
-    'Due Date': date('2026-03-31'),
-    Notes: text('Elegir entre bolsa de organza, bolsa kraft o caja pequeña. Preferiblemente algo que se pueda personalizar con etiqueta adhesiva o estampado. Pensar en el unboxing: ¿qué siente alguien al recibirlo?'),
-  },
-  {
-    Name: title('Fabricar piezas de lanzamiento (stock inicial)'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('Ola'),
-    Phase: sel('Phase 2 — Identity & Product'),
-    Priority: sel('Critical'),
-    'Due Date': date('2026-04-15'),
-    Notes: text('Producir 2-3 unidades de cada pieza seleccionada. Total: ~25-30 piezas para el lanzamiento. Priorizar las que más le gusten y las que sean más fotogénicas.'),
-  },
-  {
-    Name: title('Fotografiar productos (setup básico en casa)'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('Ola'),
-    Phase: sel('Phase 2 — Identity & Product'),
-    Priority: sel('Critical'),
-    'Due Date': date('2026-04-20'),
-    Notes: text('Setup: fondo blanco (cartulina o tela), luz natural de ventana lateral, teléfono en trípode. Por cada pieza: 3-4 fotos (frontal, detalle, en mano/cuello, con packaging). Hora ideal: mañana con sol suave.'),
-  },
-
-  // JOSÉ — PHASE 2
-  {
-    Name: title('Subir fotos reales a Sanity CMS'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('José'),
-    Phase: sel('Phase 2 — Identity & Product'),
-    Priority: sel('Critical'),
-    'Due Date': date('2026-05-01'),
-    Notes: text('Cuando Ola tenga las fotos listas, José las sube a Sanity CMS y actualiza las fichas de producto con fotos reales, precios definitivos y descripciones.'),
-  },
-  {
-    Name: title('Activar Stripe en modo live (pagos reales)'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('José'),
-    Phase: sel('Phase 2 — Identity & Product'),
-    Priority: sel('Critical'),
-    'Due Date': date('2026-05-01'),
-    Notes: text('Crear cuenta Stripe, verificar identidad, añadir cuenta bancaria. Cambiar keys de test a live en .env.local. Hacer pedido de prueba real de 1€.'),
-  },
-
-  // PHASE 3 — BOTH
-  {
-    Name: title('Invitar a Ola al workspace de Notion'),
+    Name: title('Invite Ola to Blossom Notion workspace'),
     Status: sel('⬜ Todo'),
     Assigned: sel('José'),
     Phase: sel('Phase 1 — Market Research'),
     Priority: sel('Critical'),
     'Due Date': date('2026-02-28'),
-    Notes: text('Settings → People → Invite → email de Ola. Darle acceso a todas las bases de datos.'),
+    Notes: text('Settings → People → Invite → Ola\'s email. Give her access to all databases so she can update tasks, add market research, and track products.'),
+  },
+
+  // OLA — PHASE 2
+  {
+    Name: title('Design jewelry card (brand, care instructions, website)'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('Ola'),
+    Phase: sel('Phase 2 — Identity & Product'),
+    Priority: sel('Critical'),
+    'Due Date': date('2026-03-31'),
+    Notes: text('Small card to include with every piece. Content: piece name (optional), care instructions (avoid water, perfume, sweat), website blossomjewellery.art, Instagram @blossomjewelleryart. Design: soft rose + gold, elegant and minimal.'),
   },
   {
-    Name: title('Visitar boutiques Marbella — pitch B2B'),
+    Name: title('Design pouch or box for packaging'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('Ola'),
+    Phase: sel('Phase 2 — Identity & Product'),
+    Priority: sel('Critical'),
+    'Due Date': date('2026-03-31'),
+    Notes: text('Choose between organza pouch, kraft bag, or small box. Something that can be personalized with a sticker or stamp. Think about the unboxing moment: what does someone feel when they receive it?'),
+  },
+  {
+    Name: title('Produce launch pieces (initial stock)'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('Ola'),
+    Phase: sel('Phase 2 — Identity & Product'),
+    Priority: sel('Critical'),
+    'Due Date': date('2026-04-15'),
+    Notes: text('Produce 2-3 units of each selected piece. Total: ~25-30 pieces for launch. Prioritize the ones you love most and those that photograph well.'),
+  },
+  {
+    Name: title('Photograph products (home setup with phone)'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('Ola'),
+    Phase: sel('Phase 2 — Identity & Product'),
+    Priority: sel('Critical'),
+    'Due Date': date('2026-04-20'),
+    Notes: text('Setup: white background (cardboard or fabric), natural side window light, phone on tripod. Per piece: 3-4 shots (front, close detail, on hand/neck, with packaging). Best time: morning with soft natural light.'),
+  },
+
+  // JOSÉ — PHASE 2
+  {
+    Name: title('Upload real product photos to Sanity CMS'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('José'),
+    Phase: sel('Phase 2 — Identity & Product'),
+    Priority: sel('Critical'),
+    'Due Date': date('2026-05-01'),
+    Notes: text('Once Ola has the photos ready, upload them to Sanity CMS and update product pages with real photos, final prices, and descriptions.'),
+  },
+  {
+    Name: title('Activate Stripe live mode (real payments)'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('José'),
+    Phase: sel('Phase 2 — Identity & Product'),
+    Priority: sel('Critical'),
+    'Due Date': date('2026-05-01'),
+    Notes: text('Create Stripe account, verify identity, add bank account. Switch keys from test to live in environment config. Run a real €1 test order.'),
+  },
+
+  // PHASE 3 — José
+  {
+    Name: title('Visit Marbella boutiques — B2B pitch'),
     Status: sel('⬜ Todo'),
     Assigned: sel('José'),
     Phase: sel('Phase 3 — Pre-launch'),
     Priority: sel('Critical'),
     'Due Date': date('2026-05-20'),
-    Notes: text('Llevar: lookbook impreso (fotos de producto + precios wholesale), 2-3 muestras físicas, tarjeta de visita. Discurso: "Joyería artesanal de arcilla polimérica, hecha a mano en Europa, precio wholesale €X". Registrar resultado en B2B Leads.'),
+    Notes: text('Bring: printed lookbook (product photos + wholesale prices), 2-3 physical samples, business card. Pitch: "Handmade polymer clay jewelry, made in Europe, wholesale price €X". Log results in B2B Leads.'),
   },
   {
-    Name: title('Crear bio y primeros 9 posts de Instagram'),
-    Status: sel('⬜ Todo'),
-    Assigned: sel('Ola'),
-    Phase: sel('Phase 3 — Pre-launch'),
-    Priority: sel('High'),
-    'Due Date': date('2026-05-15'),
-    Notes: text('Bio: nombre, qué haces, dónde comprar (link web). 9 primeros posts coherentes: mix de producto solo, producto en uso, proceso de creación, packaging. Consistencia visual: tonos claros, fondo neutro.'),
-  },
-  {
-    Name: title('Configurar dominio + deployment producción'),
+    Name: title('Set up domain + production deployment'),
     Status: sel('⬜ Todo'),
     Assigned: sel('José'),
     Phase: sel('Phase 3 — Pre-launch'),
     Priority: sel('Critical'),
     'Due Date': date('2026-05-01'),
-    Notes: text('1. Comprar dominio blossomjewellery.art\n2. Configurar DNS\n3. Deploy en Railway con variables de entorno\n4. Verificar email (SPF, DKIM, DMARC)\n5. Activar SSL\n6. Test completo de la tienda'),
+    Notes: text('1. Buy domain blossomjewellery.art\n2. Configure DNS\n3. Deploy on Railway with production env vars\n4. Verify email (SPF, DKIM, DMARC)\n5. Enable SSL\n6. Full store end-to-end test'),
   },
+
+  // OLA — PHASE 3
   {
-    Name: title('Lanzamiento: anuncio en Instagram + email'),
+    Name: title('Set up Instagram bio + first 9 posts'),
+    Status: sel('⬜ Todo'),
+    Assigned: sel('Ola'),
+    Phase: sel('Phase 3 — Pre-launch'),
+    Priority: sel('High'),
+    'Due Date': date('2026-05-15'),
+    Notes: text('Bio: who you are, what you make, where to buy (website link). 9 first posts: mix of product alone, product being worn, making process, packaging. Visual consistency: light tones, neutral background.'),
+  },
+
+  // BOTH — PHASE 4
+  {
+    Name: title('Official launch: Instagram post + email announcement'),
     Status: sel('⬜ Todo'),
     Assigned: sel('Both'),
     Phase: sel('Phase 4 — Launch'),
     Priority: sel('Critical'),
     'Due Date': date('2026-05-20'),
-    Notes: text('Publicar post de lanzamiento en Instagram. Enviar email a lista de contactos. Activar tienda online. Monitorizar primeros pedidos juntos.'),
+    Notes: text('Publish launch post on Instagram. Send email to contact list. Open the online store. Monitor first orders together.'),
   },
 ]
 
 // ─── PRODUCTS ────────────────────────────────────────────────────────────────
 
 const products = [
-  // Ukrainian Heritage
-  { name: 'Embroidered Circle Earrings', collection: 'Ukrainian Heritage', type: 'Earrings', retail: 28, wholesale: 14, cost: 6, status: '📸 Needs Photography' },
-  { name: 'Red Vyshyvanka Drop Earrings', collection: 'Ukrainian Heritage', type: 'Earrings', retail: 32, wholesale: 16, cost: 7, status: '📸 Needs Photography' },
-  { name: 'Heritage Statement Necklace', collection: 'Ukrainian Heritage', type: 'Necklace', retail: 55, wholesale: 28, cost: 12, status: '📸 Needs Photography' },
-  // Red Roses
-  { name: 'Red Rose Stud Earrings', collection: 'Red Roses', type: 'Earrings', retail: 24, wholesale: 12, cost: 5, status: '📸 Needs Photography' },
-  { name: 'Red Rose Drop Earrings', collection: 'Red Roses', type: 'Earrings', retail: 29, wholesale: 15, cost: 6, status: '📸 Needs Photography' },
-  // Pink Roses
-  { name: 'Blush Rose Stud Earrings', collection: 'Pink Roses', type: 'Earrings', retail: 24, wholesale: 12, cost: 5, status: '📸 Needs Photography' },
-  { name: 'Pink Rose Necklace', collection: 'Pink Roses', type: 'Necklace', retail: 48, wholesale: 24, cost: 10, status: '📸 Needs Photography' },
-  // Yellow Roses
-  { name: 'Yellow Rose Drop Earrings', collection: 'Yellow Roses', type: 'Earrings', retail: 26, wholesale: 13, cost: 5, status: '📸 Needs Photography' },
-  // Orchid Dreams
-  { name: 'Purple Orchid Earrings', collection: 'Orchid Dreams', type: 'Earrings', retail: 32, wholesale: 16, cost: 7, status: '📸 Needs Photography' },
-  { name: 'Orchid Statement Necklace', collection: 'Orchid Dreams', type: 'Necklace', retail: 58, wholesale: 29, cost: 13, status: '📸 Needs Photography' },
-  // Dark Bloom
-  { name: 'Dark Bloom Earrings', collection: 'Dark Bloom', type: 'Earrings', retail: 35, wholesale: 18, cost: 8, status: '📸 Needs Photography' },
-  // Peony Delicates
-  { name: 'Peony Mini Studs', collection: 'Peony Delicates', type: 'Earrings', retail: 22, wholesale: 11, cost: 4, status: '📸 Needs Photography' },
-  { name: 'Peony Drop Earrings', collection: 'Peony Delicates', type: 'Earrings', retail: 30, wholesale: 15, cost: 6, status: '📸 Needs Photography' },
-  // Mediterranean Garden
-  { name: 'Garden Blossom Necklace', collection: 'Mediterranean Garden', type: 'Necklace', retail: 52, wholesale: 26, cost: 11, status: '📸 Needs Photography' },
-  { name: 'Mediterranean Hoop Earrings', collection: 'Mediterranean Garden', type: 'Earrings', retail: 34, wholesale: 17, cost: 7, status: '📸 Needs Photography' },
-  // Stud Earrings
-  { name: 'Classic Clay Studs Set', collection: 'Peony Delicates', type: 'Set', retail: 45, wholesale: 23, cost: 10, status: '📸 Needs Photography' },
+  { name: 'Embroidered Circle Earrings', collection: 'Ukrainian Heritage', type: 'Earrings', retail: 28, wholesale: 14, cost: 6 },
+  { name: 'Red Vyshyvanka Drop Earrings', collection: 'Ukrainian Heritage', type: 'Earrings', retail: 32, wholesale: 16, cost: 7 },
+  { name: 'Heritage Statement Necklace', collection: 'Ukrainian Heritage', type: 'Necklace', retail: 55, wholesale: 28, cost: 12 },
+  { name: 'Red Rose Stud Earrings', collection: 'Red Roses', type: 'Earrings', retail: 24, wholesale: 12, cost: 5 },
+  { name: 'Red Rose Drop Earrings', collection: 'Red Roses', type: 'Earrings', retail: 29, wholesale: 15, cost: 6 },
+  { name: 'Blush Rose Stud Earrings', collection: 'Pink Roses', type: 'Earrings', retail: 24, wholesale: 12, cost: 5 },
+  { name: 'Pink Rose Necklace', collection: 'Pink Roses', type: 'Necklace', retail: 48, wholesale: 24, cost: 10 },
+  { name: 'Yellow Rose Drop Earrings', collection: 'Yellow Roses', type: 'Earrings', retail: 26, wholesale: 13, cost: 5 },
+  { name: 'Purple Orchid Earrings', collection: 'Orchid Dreams', type: 'Earrings', retail: 32, wholesale: 16, cost: 7 },
+  { name: 'Orchid Statement Necklace', collection: 'Orchid Dreams', type: 'Necklace', retail: 58, wholesale: 29, cost: 13 },
+  { name: 'Dark Bloom Earrings', collection: 'Dark Bloom', type: 'Earrings', retail: 35, wholesale: 18, cost: 8 },
+  { name: 'Peony Mini Studs', collection: 'Peony Delicates', type: 'Earrings', retail: 22, wholesale: 11, cost: 4 },
+  { name: 'Peony Drop Earrings', collection: 'Peony Delicates', type: 'Earrings', retail: 30, wholesale: 15, cost: 6 },
+  { name: 'Garden Blossom Necklace', collection: 'Mediterranean Garden', type: 'Necklace', retail: 52, wholesale: 26, cost: 11 },
+  { name: 'Mediterranean Hoop Earrings', collection: 'Mediterranean Garden', type: 'Earrings', retail: 34, wholesale: 17, cost: 7 },
+  { name: 'Classic Clay Studs Set', collection: 'Peony Delicates', type: 'Set', retail: 45, wholesale: 23, cost: 10 },
 ]
 
 // ─── DECISIONS ───────────────────────────────────────────────────────────────
 
 const decisions = [
   {
-    Decision: title('Plataforma: Next.js + Sanity CMS (no Shopify)'),
+    Decision: title('Platform: Next.js + Sanity CMS (not Shopify)'),
     Area: sel('Tech'),
     'Made By': sel('José'),
     Date: date('2026-02-12'),
-    Rationale: text('Shopify tiene fees del 2-3% por venta + cuota mensual de €29-79. Con Next.js propio el coste es solo hosting (~€20/mes Railway). A largo plazo es más barato y da control total.'),
+    Rationale: text('Shopify charges 2-3% per sale + €29-79/month plan. Custom Next.js costs only hosting (~€20/month on Railway). More control, lower long-term cost.'),
   },
   {
-    Decision: title('Precio retail base: 3-5x coste de producción'),
+    Decision: title('Retail pricing: 3-5x production cost'),
     Area: sel('Business'),
     'Made By': sel('Both'),
     Date: date('2026-02-12'),
-    Rationale: text('Estándar del mercado artesanal. Permite margen wholesale del 50% sin perder rentabilidad. Rango: €22-58 según pieza.'),
+    Rationale: text('Standard for the handmade market. Allows 50% wholesale margin without losing profitability. Range: €22-58 per piece depending on complexity.'),
   },
   {
-    Decision: title('Modelo wholesale: 50% del precio retail'),
+    Decision: title('Wholesale model: 50% of retail price'),
     Area: sel('Business'),
     'Made By': sel('Both'),
     Date: date('2026-02-12'),
-    Rationale: text('Estándar para B2B en joyería. Permite a las tiendas tener margen de 100% (markup 2x). Si retail es €30, wholesale es €15.'),
+    Rationale: text('Industry standard for B2B jewelry. Gives boutiques a 100% markup (2x). If retail is €30, wholesale is €15.'),
   },
   {
-    Decision: title('Paleta de marca: rosa suave + oro cálido (sin verde sage)'),
+    Decision: title('Brand palette: soft blush rose + warm gold (no sage green)'),
     Area: sel('Design'),
     'Made By': sel('Both'),
     Date: date('2026-02-21'),
-    Rationale: text('Rosa suave = femenino, premium, editorial. Oro cálido = lujo accesible, artesanal. Eliminamos el verde sage que daba un look demasiado "orgánico/natural" y no encajaba con el posicionamiento premium.'),
+    Rationale: text('Soft rose = feminine, premium, editorial. Warm gold = accessible luxury, artisanal feel. Removed sage green which felt too organic/natural and didn\'t match the premium positioning.'),
   },
   {
-    Decision: title('Idiomas web: Español, Inglés, Ucraniano'),
+    Decision: title('Website languages: English, Spanish, Ukrainian'),
     Area: sel('Product'),
     'Made By': sel('Both'),
     Date: date('2026-02-15'),
-    Rationale: text('Español: mercado local Costa del Sol. Inglés: turistas y mercado internacional. Ucraniano: comunidad de Ola y clientes potenciales de Europa del Este.'),
+    Rationale: text('English: international market and Costa del Sol tourists. Spanish: local market. Ukrainian: Ola\'s community and Eastern European diaspora in Western Europe.'),
   },
   {
-    Decision: title('Canal principal: Instagram + web propia (no Etsy al inicio)'),
+    Decision: title('Main channel: Instagram + own website (not Etsy at launch)'),
     Area: sel('Marketing'),
     'Made By': sel('Both'),
     Date: date('2026-02-12'),
-    Rationale: text('Etsy tiene fees del 6.5% + €0.20 por listing + conversión de moneda. Instagram como canal de descubrimiento + web propia para conversión. Etsy como canal secundario una vez establecidos.'),
+    Rationale: text('Etsy takes 6.5% fee + €0.20 per listing + currency conversion. Instagram for discovery, own website for conversion. Etsy as secondary channel once established.'),
   },
   {
-    Decision: title('Notion como herramienta de colaboración central'),
+    Decision: title('Notion as central collaboration tool'),
     Area: sel('Business'),
     'Made By': sel('José'),
     Date: date('2026-02-21'),
-    Rationale: text('José en Marbella, Ola en otro país. Notion permite compartir roadmap, tareas, catálogo de productos y research sin reuniones. Integrado con la web vía API de Notion.'),
+    Rationale: text('José is in Marbella, Ola is in another country. Notion lets us share roadmap, tasks, product catalog, and market research without constant calls. Integrated with the website via Notion API.'),
   },
 ]
 
 // ─── Execute ─────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('🌸 Populating Blossom Notion databases...\n')
+  console.log('🌸 Clearing old entries...\n')
 
-  // Roadmap
+  const dbs = [
+    { name: 'Roadmap', id: ROADMAP_DB },
+    { name: 'Tasks', id: TASKS_DB },
+    { name: 'Products', id: PRODUCTS_DB },
+    { name: 'Decisions', id: DECISIONS_DB },
+  ]
+
+  for (const db of dbs) {
+    const count = await clearDatabase(db.id)
+    console.log(`   ✓ Cleared ${count} entries from ${db.name}`)
+  }
+
+  console.log('\n🌸 Populating in English...\n')
+
   console.log(`🗺️  Adding ${roadmapItems.length} roadmap items...`)
-  for (const item of roadmapItems) {
-    await addPage(ROADMAP_DB, item)
-    process.stdout.write('.')
-  }
-  console.log(' ✓\n')
+  for (const item of roadmapItems) { await addPage(ROADMAP_DB, item); process.stdout.write('.') }
+  console.log(' ✓')
 
-  // Tasks
   console.log(`✅ Adding ${tasks.length} tasks...`)
-  for (const task of tasks) {
-    await addPage(TASKS_DB, task)
-    process.stdout.write('.')
-  }
-  console.log(' ✓\n')
+  for (const task of tasks) { await addPage(TASKS_DB, task); process.stdout.write('.') }
+  console.log(' ✓')
 
-  // Products
   console.log(`💍 Adding ${products.length} products...`)
   for (const p of products) {
     await addPage(PRODUCTS_DB, {
       Name: title(p.name),
       Collection: sel(p.collection),
       Type: sel(p.type),
-      Status: sel(p.status),
+      Status: sel('📸 Needs Photography'),
       'Retail Price (€)': num(p.retail),
       'Wholesale Price (€)': num(p.wholesale),
       'Cost to Make (€)': num(p.cost),
@@ -473,23 +473,34 @@ async function main() {
     })
     process.stdout.write('.')
   }
-  console.log(' ✓\n')
+  console.log(' ✓')
 
-  // Decisions
   console.log(`📋 Adding ${decisions.length} decisions...`)
-  for (const d of decisions) {
-    await addPage(DECISIONS_DB, d)
-    process.stdout.write('.')
-  }
-  console.log(' ✓\n')
+  for (const d of decisions) { await addPage(DECISIONS_DB, d); process.stdout.write('.') }
+  console.log(' ✓')
 
-  console.log('═══════════════════════════════════════════')
-  console.log('✅ All databases populated!')
+  console.log('\n═══════════════════════════════════════════')
+  console.log('✅ Done! All content is now in English.')
   console.log(`   Roadmap:   ${roadmapItems.length} items`)
   console.log(`   Tasks:     ${tasks.length} tasks`)
   console.log(`   Products:  ${products.length} products`)
   console.log(`   Decisions: ${decisions.length} decisions`)
   console.log('═══════════════════════════════════════════')
+}
+
+async function clearDatabase(dbId) {
+  let cursor, count = 0
+  do {
+    const body = { page_size: 100 }
+    if (cursor) body.start_cursor = cursor
+    const res = await api(`/databases/${dbId}/query`, 'POST', body)
+    for (const page of res.results) {
+      await api(`/pages/${page.id}`, 'PATCH', { archived: true })
+      count++
+    }
+    cursor = res.has_more ? res.next_cursor : undefined
+  } while (cursor)
+  return count
 }
 
 main().catch(console.error)
