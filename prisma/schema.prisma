@@ -25,8 +25,9 @@ model User {
   sessions     Session[]
   orders       Order[]
   addresses    Address[]
-  cartSessions CartSession[]
-  wishlists    Wishlist[]
+  cartSessions  CartSession[]
+  wishlists     Wishlist[]
+  imageSessions ImageGenerationSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -370,6 +371,18 @@ model Address {
   updatedAt DateTime @updatedAt
 }
 
+// ─── NEWSLETTER ─────────────────────────────────
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  locale    String   @default("en")
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ─── EMAIL LOG ──────────────────────────────────
 
 model EmailLog {
@@ -396,4 +409,76 @@ enum EmailType {
   NEW_COLLECTION
   BACK_IN_STOCK
   REFUND_CONFIRMATION
+}
+
+// ─── AI IMAGE STUDIO ───────────────────────────
+
+model BrandModelProfile {
+  id              String   @id @default(cuid())
+  name            String   @default("Ola")
+  referenceImages Json     @default("[]") // Array of {path, type, filename}
+  isActive        Boolean  @default(true)
+  notes           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GeneratedImage {
+  id                   String              @id @default(cuid())
+  prompt               String
+  mode                 ImageGenerationMode
+  modelUsed            String
+  imagePath            String
+  thumbnailPath        String?
+  dimensions           Json?               // {width, height}
+  tags                 String[]
+  linkedProductId      String?
+  linkedCollectionSlug String?
+  isFavorite           Boolean             @default(false)
+  sessionId            String?
+  session              ImageGenerationSession? @relation(fields: [sessionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([mode])
+  @@index([linkedProductId])
+  @@index([isFavorite])
+  @@index([createdAt])
+}
+
+model ImageGenerationSession {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  mode            ImageGenerationMode
+  prompt          String
+  referenceImages Json             @default("[]")
+  modelUsed       String
+  status          GenerationStatus @default(PENDING)
+  resultCount     Int              @default(0)
+  errorMessage    String?
+  durationMs      Int?
+
+  images GeneratedImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum ImageGenerationMode {
+  SCENE
+  ENHANCE
+  COMPOSE
+}
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }

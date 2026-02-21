@@ -1,26 +1,30 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Menu, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/lib/store/cart";
 import { cn } from "@/lib/utils";
-
-const navigation = [
-  { name: "Shop", href: "/products" },
-  { name: "Collections", href: "/collections" },
-  { name: "About", href: "/about" },
-  { name: "Blog", href: "/blog" },
-  { name: "Contact", href: "/contact" },
-];
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SearchDialog } from "@/components/SearchDialog";
 
 export function Header() {
+  const t = useTranslations("Nav");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { openCart, totalItems } = useCartStore();
   const itemCount = totalItems();
 
+  const navigation = [
+    { name: t("shop"), href: "/products" as const },
+    { name: t("collections"), href: "/collections" as const },
+    { name: t("about"), href: "/about" as const },
+    { name: t("blog"), href: "/blog" as const },
+    { name: t("contact"), href: "/contact" as const },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-sm border-b border-cream-dark">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-sage/40">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Mobile menu button */}
@@ -56,7 +60,7 @@ export function Header() {
           </Link>
 
           {/* Right nav + cart */}
-          <div className="flex items-center gap-x-6">
+          <div className="flex items-center gap-x-4">
             <div className="hidden lg:flex lg:gap-x-8">
               {navigation.slice(2).map((item) => (
                 <Link
@@ -69,21 +73,18 @@ export function Header() {
               ))}
             </div>
 
-            <button
-              className="hidden lg:block p-2 text-warm-gray hover:text-charcoal transition-colors"
-              aria-label="Search"
-            >
-              <Search size={20} />
-            </button>
+            <LanguageSwitcher />
+
+            <SearchDialog />
 
             <button
               onClick={openCart}
               className="relative p-2 text-warm-gray hover:text-charcoal transition-colors"
-              aria-label="Open cart"
+              aria-label={t("cart")}
             >
               <ShoppingBag size={20} />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-sage text-white text-xs">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dusty-rose text-white text-xs">
                   {itemCount}
                 </span>
               )}

@@ -1,12 +1,16 @@
 import { Resend } from 'resend'
 
 const globalForResend = globalThis as unknown as {
-  resend: Resend | undefined
+  resend: Resend | null | undefined
 }
 
-export const resend =
-  globalForResend.resend ??
-  new Resend(process.env.RESEND_API_KEY)
+function createResendClient() {
+  const key = process.env.RESEND_API_KEY
+  if (!key) return null
+  return new Resend(key)
+}
+
+export const resend = globalForResend.resend ?? createResendClient()
 
 if (process.env.NODE_ENV !== 'production') globalForResend.resend = resend
 
@@ -24,7 +28,7 @@ export async function sendEmail({
   html: string
   replyTo?: string
 }) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!resend) {
     console.warn('[Email] RESEND_API_KEY not set, skipping email send')
     return null
   }

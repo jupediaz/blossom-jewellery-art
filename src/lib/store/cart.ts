@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { trackAddToCart } from "@/lib/analytics";
 
 export interface CartItem {
   id: string;
@@ -37,6 +38,7 @@ export const useCartStore = create<CartState>()(
 
       addItem: (item) => {
         const key = itemKey(item.id, item.variant);
+        trackAddToCart({ id: item.id, name: item.name, price: item.price });
         set((state) => {
           const existing = state.items.find(
             (i) => itemKey(i.id, i.variant) === key

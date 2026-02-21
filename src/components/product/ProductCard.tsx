@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import type { Product } from "@/lib/types";
 
 interface ProductCardProps {
@@ -12,6 +13,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const t = useTranslations("Products");
   const { addItem, openCart } = useCartStore();
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -51,7 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Sale badge */}
         {isOnSale && (
           <span className="absolute top-3 left-3 bg-dusty-rose text-white text-xs px-2 py-1 rounded">
-            Sale
+            {t("sale")}
           </span>
         )}
 
@@ -59,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {!product.inStock && (
           <div className="absolute inset-0 bg-cream/60 flex items-center justify-center">
             <span className="bg-charcoal text-cream text-xs px-3 py-1.5 rounded">
-              Sold Out
+              {t("soldOut")}
             </span>
           </div>
         )}
@@ -77,7 +79,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <div className="mt-3 space-y-1">
-        <h3 className="text-sm font-medium text-charcoal group-hover:text-sage-dark transition-colors">
+        <h3 className="text-sm font-medium text-charcoal group-hover:text-dusty-rose transition-colors">
           {product.name}
         </h3>
         {(product.collection || product.category) && (

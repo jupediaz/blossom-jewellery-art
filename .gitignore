@@ -40,6 +40,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Screenshots (dev debug artifacts)
+*.png
+!public/**/*.png
+!docs/images/**/*.png
+!src/**/*.png
+
 # Vercel
 .vercel
 
@@ -52,3 +58,6 @@ yarn-error.log*
 
 # Prisma
 src/generated/
+
+# AI Studio uploads (user-generated content)
+public/uploads/

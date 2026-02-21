@@ -9,23 +9,23 @@
 }
 
 :root {
-  /* Brand colors */
-  --color-sage: #9CAF88;
-  --color-sage-light: #B8C7A8;
-  --color-sage-dark: #7A8E6A;
-  --color-dusty-rose: #D4A5A5;
-  --color-dusty-rose-light: #E3C1C1;
-  --color-dusty-rose-dark: #B88A8A;
-  --color-cream: #FAF5F0;
-  --color-cream-dark: #F0E8DE;
-  --color-gold: #C9B37E;
-  --color-gold-light: #D9CA9E;
-  --color-gold-dark: #A89460;
-  --color-charcoal: #2C2C2C;
+  /* Brand colors — Blossom palette: soft blush rose + warm gold */
+  --color-sage: #F0D0D0;        /* blush rose — primary brand color */
+  --color-sage-light: #FAF0F0;  /* near-white rose */
+  --color-sage-dark: #D4AAAA;   /* medium rose for hover states */
+  --color-dusty-rose: #B87070;  /* deep rose — CTAs, badges */
+  --color-dusty-rose-light: #F5DCDC;
+  --color-dusty-rose-dark: #9A5252;
+  --color-cream: #FAFAF8;       /* clean near-white */
+  --color-cream-dark: #F2EDE8;  /* subtle warm off-white */
+  --color-gold: #C4A060;        /* warm amber gold */
+  --color-gold-light: #D8BB8A;
+  --color-gold-dark: #9A7A40;
+  --color-charcoal: #1E1E1E;
   --color-warm-gray: #6B6B6B;
 
   /* Semantic tokens */
-  --background: var(--color-cream);
+  --background: #FFFFFF;
   --foreground: var(--color-charcoal);
   --muted: var(--color-warm-gray);
   --accent: var(--color-sage);
@@ -68,9 +68,9 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Base font size bump: 16px → 17px for better readability */
+/* Base font size: 18px for comfortable reading */
 html {
-  font-size: 17px;
+  font-size: 18px;
   scroll-behavior: smooth;
 }
 

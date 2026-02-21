@@ -2,14 +2,17 @@
 
 import { Fragment } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQuantity, totalPrice } =
     useCartStore();
+  const t = useTranslations("Cart");
+  const tc = useTranslations("Common");
 
   if (!isOpen) return null;
 
@@ -25,11 +28,11 @@ export function CartDrawer() {
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-cream z-50 shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-cream-dark">
-          <h2 className="font-heading text-xl">Your Cart</h2>
+          <h2 className="font-heading text-xl">{t("title")}</h2>
           <button
             onClick={closeCart}
             className="p-1 text-warm-gray hover:text-charcoal transition-colors"
-            aria-label="Close cart"
+            aria-label={tc("close")}
           >
             <X size={20} />
           </button>
@@ -40,12 +43,12 @@ export function CartDrawer() {
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-warm-gray">
               <ShoppingBag size={48} className="mb-4 opacity-30" />
-              <p className="text-sm">Your cart is empty</p>
+              <p className="text-sm">{t("empty")}</p>
               <button
                 onClick={closeCart}
                 className="mt-4 text-sm text-sage hover:text-sage-dark underline transition-colors"
               >
-                Continue shopping
+                {tc("continueShopping")}
               </button>
             </div>
           ) : (
@@ -116,7 +119,7 @@ export function CartDrawer() {
                         onClick={() => removeItem(item.id, item.variant)}
                         className="text-xs text-warm-gray hover:text-dusty-rose-dark underline"
                       >
-                        Remove
+                        {t("remove")}
                       </button>
                     </div>
                   </div>
@@ -130,18 +133,18 @@ export function CartDrawer() {
         {items.length > 0 && (
           <div className="border-t border-cream-dark px-6 py-4 space-y-4">
             <div className="flex justify-between text-sm">
-              <span>Subtotal</span>
+              <span>{tc("subtotal")}</span>
               <span className="font-medium">{formatPrice(totalPrice())}</span>
             </div>
             <p className="text-xs text-warm-gray">
-              Shipping calculated at checkout
+              {t("shippingNote")}
             </p>
             <Link
-              href="/checkout"
+              href="/cart"
               onClick={closeCart}
               className="block w-full bg-charcoal text-cream text-center py-3 rounded hover:bg-charcoal/90 transition-colors text-sm tracking-wide"
             >
-              Checkout
+              {t("checkout")}
             </Link>
           </div>
         )}

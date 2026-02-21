@@ -1,7 +1,13 @@
-import Link from "next/link";
+"use client";
+
 import { Instagram, Mail } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { NewsletterForm } from "@/components/NewsletterForm";
 
 export function Footer() {
+  const t = useTranslations("Footer");
+
   return (
     <footer className="bg-charcoal text-cream">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
@@ -15,32 +21,22 @@ export function Footer() {
               Jewellery Art
             </p>
             <p className="text-sm text-cream-dark leading-relaxed">
-              Handcrafted artisan jewelry inspired by nature. Each piece is unique, made with love in Europe.
+              {t("tagline")}
             </p>
           </div>
 
           {/* Shop */}
           <div>
-            <h4 className="font-heading text-lg mb-4">Shop</h4>
+            <h4 className="font-heading text-lg mb-4">{t("shop")}</h4>
             <ul className="space-y-2 text-sm text-cream-dark">
               <li>
                 <Link href="/products" className="hover:text-cream transition-colors">
-                  All Products
+                  {t("shop")}
                 </Link>
               </li>
               <li>
                 <Link href="/collections" className="hover:text-cream transition-colors">
-                  Collections
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=earrings" className="hover:text-cream transition-colors">
-                  Earrings
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=necklaces" className="hover:text-cream transition-colors">
-                  Necklaces
+                  {t("collections")}
                 </Link>
               </li>
             </ul>
@@ -48,26 +44,26 @@ export function Footer() {
 
           {/* Info */}
           <div>
-            <h4 className="font-heading text-lg mb-4">Info</h4>
+            <h4 className="font-heading text-lg mb-4">{t("help")}</h4>
             <ul className="space-y-2 text-sm text-cream-dark">
               <li>
                 <Link href="/about" className="hover:text-cream transition-colors">
-                  About Olha
+                  {t("about")}
                 </Link>
               </li>
               <li>
                 <Link href="/shipping" className="hover:text-cream transition-colors">
-                  Shipping & Returns
+                  {t("shippingReturns")}
                 </Link>
               </li>
               <li>
                 <Link href="/size-guide" className="hover:text-cream transition-colors">
-                  Size Guide
+                  {t("sizeGuide")}
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="hover:text-cream transition-colors">
-                  Contact
+                  {t("contact")}
                 </Link>
               </li>
             </ul>
@@ -75,26 +71,13 @@ export function Footer() {
 
           {/* Newsletter + Social */}
           <div>
-            <h4 className="font-heading text-lg mb-4">Stay Connected</h4>
-            <p className="text-sm text-cream-dark mb-4">
-              Get updates on new collections and exclusive offers.
-            </p>
-            <form className="flex gap-2 mb-6">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 bg-transparent border border-cream-dark/30 rounded px-3 py-2 text-sm text-cream placeholder:text-cream-dark/50 focus:outline-none focus:border-gold"
-              />
-              <button
-                type="submit"
-                className="bg-sage hover:bg-sage-dark text-white px-4 py-2 rounded text-sm transition-colors"
-              >
-                Join
-              </button>
-            </form>
+            <h4 className="font-heading text-lg mb-4">{t("connect")}</h4>
+            <div className="mb-6">
+              <NewsletterForm variant="dark" />
+            </div>
             <div className="flex gap-4">
               <a
-                href="https://instagram.com"
+                href="https://instagram.com/blossomjewelleryart"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cream-dark hover:text-cream transition-colors"
@@ -103,7 +86,7 @@ export function Footer() {
                 <Instagram size={20} />
               </a>
               <a
-                href="mailto:hello@blossomjewelleryart.com"
+                href="mailto:hello@blossomjewellery.art"
                 className="text-cream-dark hover:text-cream transition-colors"
                 aria-label="Email"
               >
@@ -114,7 +97,10 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-cream-dark/20 text-center text-xs text-cream-dark">
-          <p>&copy; {new Date().getFullYear()} Blossom Jewellery Art. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} Blossom Jewellery Art. {t("rights")}.
+          </p>
+          <p className="mt-1">{t("madeWith")}</p>
         </div>
       </div>
     </footer>

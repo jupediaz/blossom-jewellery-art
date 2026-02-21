@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
 import { urlFor } from "@/lib/sanity/client";
+import { useTranslations } from "next-intl";
+import { PortableText } from "@portabletext/react";
+import { WishlistButton } from "./WishlistButton";
+import { useToast } from "@/components/Toast";
 import type { Product } from "@/lib/types";
 
 interface ProductDetailProps {
@@ -14,9 +18,12 @@ interface ProductDetailProps {
 }
 
 export function ProductDetail({ product }: ProductDetailProps) {
+  const t = useTranslations("Products");
+  const tc = useTranslations("Common");
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<string | undefined>();
   const { addItem, openCart } = useCartStore();
+  const { toast } = useToast();
 
   const sanityImages = product.images || [];
   const hasSanityImages = sanityImages.length > 0;
@@ -41,6 +48,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
       image: imageUrl,
       slug: product.slug.current,
       variant: selectedVariant,
+    });
+    toast({
+      title: tc("addedToCart"),
+      description: product.name,
+      type: "success",
     });
     openCart();
   };
@@ -102,7 +114,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {/* Sale badge */}
           {product.compareAtPrice && product.compareAtPrice > product.price && (
             <span className="absolute top-4 left-4 bg-dusty-rose text-white text-xs px-3 py-1.5 rounded">
-              Sale
+              {t("sale")}
             </span>
           )}
         </div>
@@ -150,9 +162,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
           </p>
         )}
 
-        <h1 className="font-heading text-3xl lg:text-4xl font-light mb-4">
-          {product.name}
-        </h1>
+        <div className="flex items-start justify-between gap-2">
+          <h1 className="font-heading text-3xl lg:text-4xl font-light mb-4">
+            {product.name}
+          </h1>
+          <WishlistButton productId={product._id} variant={selectedVariant} />
+        </div>
 
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xl font-medium">{formatPrice(finalPrice)}</span>
@@ -166,7 +181,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         {/* Variants */}
         {product.variants && product.variants.length > 0 && (
           <div className="mb-6">
-            <p className="text-sm font-medium mb-2">Options</p>
+            <p className="text-sm font-medium mb-2">{t("options")}</p>
             <div className="flex flex-wrap gap-2">
               {product.variants.map((variant) => (
                 <button
@@ -201,13 +216,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
           )}
         >
           <ShoppingBag size={16} />
-          {isInStock ? "Add to Cart" : "Sold Out"}
+          {isInStock ? tc("addToCart") : t("soldOut")}
         </button>
 
         {/* Description */}
         {product.description && Array.isArray(product.description) && product.description.length > 0 && (
           <div className="prose prose-sm text-warm-gray mb-6">
-            {/* Portable text would render here with @portabletext/react */}
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            <PortableText value={product.description as any} />
           </div>
         )}
 
@@ -215,7 +231,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         <div className="space-y-4 text-sm border-t border-cream-dark pt-6">
           {product.materials && product.materials.length > 0 && (
             <div>
-              <span className="font-medium">Materials:</span>{" "}
+              <span className="font-medium">{t("materials")}:</span>{" "}
               <span className="text-warm-gray">
                 {product.materials.join(", ")}
               </span>
@@ -223,13 +239,13 @@ export function ProductDetail({ product }: ProductDetailProps) {
           )}
           {product.dimensions && (
             <div>
-              <span className="font-medium">Dimensions:</span>{" "}
+              <span className="font-medium">{t("dimensions")}:</span>{" "}
               <span className="text-warm-gray">{product.dimensions}</span>
             </div>
           )}
           {product.careInstructions && (
             <div>
-              <span className="font-medium">Care:</span>{" "}
+              <span className="font-medium">{t("care")}:</span>{" "}
               <span className="text-warm-gray">
                 {product.careInstructions}
               </span>

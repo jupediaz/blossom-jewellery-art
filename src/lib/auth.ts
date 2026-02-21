@@ -82,15 +82,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session
     },
     async authorized({ auth, request }) {
-      const isAdmin = request.nextUrl.pathname.startsWith('/admin')
-      const isAdminLogin = request.nextUrl.pathname === '/admin/login'
+      const path = request.nextUrl.pathname
 
-      if (isAdminLogin) return true
+      // Strip locale prefix for path matching (e.g. /es/account → /account)
+      const pathWithoutLocale = path.replace(/^\/(en|es|uk)/, '') || '/'
 
-      if (isAdmin) {
+      // Admin routes (never localized)
+      if (path === '/admin/login') return true
+      if (path.startsWith('/admin')) {
         if (!auth?.user) return false
         const role = auth.user.role
         return role === 'ADMIN' || role === 'PRODUCT_MANAGER'
+      }
+
+      // Customer account routes - allow login/register without auth
+      if (pathWithoutLocale === '/account/login' || pathWithoutLocale === '/account/register') return true
+      if (pathWithoutLocale.startsWith('/account')) {
+        if (!auth?.user) {
+          const loginUrl = new URL('/account/login', request.url)
+          return Response.redirect(loginUrl)
+        }
+        return true
       }
 
       return true
