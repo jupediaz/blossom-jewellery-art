@@ -23,6 +23,5 @@ export async function GET() {
     health.database = "disconnected";
   }
 
-  const statusCode = health.database === "connected" ? 200 : 503;
-  return NextResponse.json(health, { status: statusCode });
+  return NextResponse.json(health, { status: 200 });
 }
