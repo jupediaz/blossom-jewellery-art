@@ -229,10 +229,15 @@ Features:
 
 **Architecture:**
 - 3 modes as tabs: Product Enhancement | Scene Generator | Full Composition
-- Storage abstraction (ImageStorageProvider interface) — local filesystem now, R2/S3 swap later
+- Storage: Cloudflare R2 (bucket: `blossom-jewellery`, prefix: `ai-studio/`, WEUR region)
+- Storage abstraction (ImageStorageProvider interface) — R2ImageStorage + LocalImageStorage fallback
+- Public URL: `https://pub-8901f7dc70734521bb212bbabaad0187.r2.dev/ai-studio/`
 - Session tracking for every API call (cost/usage monitoring)
 - Rate limiting: 10 req/min (enhance), 5 req/min (generate)
-- Gemini models: Flash (fast enhancement), Pro (multi-reference generation)
+- Gemini models: `gemini-2.5-flash` (fast enhancement), `gemini-2.5-pro` (multi-reference generation)
+- Database migration: `20260225162115_add_ai_image_studio` applied
+
+**Known Limitation:** Gemini image generation is blocked in Spain (country restriction). Text generation works. Options: Vertex AI endpoint, VPN, or cloud function proxy in US region.
 
 **Files Created (27):**
 - `src/lib/ai/gemini-image.ts`, `types.ts`, `storage.ts`, `scene-presets.ts`
@@ -254,6 +259,7 @@ Features:
 **Dependencies Added:**
 - `sharp` (image processing, thumbnails)
 - `piexifjs` (EXIF metadata preservation)
+- `@aws-sdk/client-s3` (Cloudflare R2 storage)
 
 ---
 

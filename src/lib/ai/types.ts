@@ -2,11 +2,11 @@
 
 export type ImageMode = 'SCENE' | 'ENHANCE' | 'COMPOSE'
 export type GenerationStatusType = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
-export type GeminiModel = 'gemini-2.5-flash-image' | 'gemini-3-pro-image-preview'
+export type GeminiModel = 'gemini-2.5-flash' | 'gemini-2.5-pro'
 
 export const GEMINI_MODELS = {
-  FLASH: 'gemini-2.5-flash-image' as const,
-  PRO: 'gemini-3-pro-image-preview' as const,
+  FLASH: 'gemini-2.5-flash' as const,
+  PRO: 'gemini-2.5-pro' as const,
 }
 
 export interface ReferenceImage {

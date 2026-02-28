@@ -1,13 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCartStore } from "@/lib/store/cart";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SearchDialog } from "@/components/SearchDialog";
+import { useSession } from "next-auth/react";
+
+function AccountButton() {
+  const { data: session } = useSession();
+  const role = session?.user?.role;
+
+  // Admin and store owner go straight to admin panel
+  const href =
+    role === "ADMIN" || role === "STORE_OWNER" ? "/admin" : "/account";
+
+  return (
+    <Link
+      href={href}
+      className="p-2 text-warm-gray hover:text-charcoal transition-colors"
+      aria-label="My account"
+    >
+      <User size={20} />
+    </Link>
+  );
+}
 
 export function Header() {
   const t = useTranslations("Nav");
@@ -36,7 +56,7 @@ export function Header() {
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Desktop navigation */}
+          {/* Desktop navigation — left */}
           <div className="hidden lg:flex lg:gap-x-8">
             {navigation.slice(0, 2).map((item) => (
               <Link
@@ -59,7 +79,7 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Right nav + cart */}
+          {/* Desktop navigation — right + icons */}
           <div className="flex items-center gap-x-4">
             <div className="hidden lg:flex lg:gap-x-8">
               {navigation.slice(2).map((item) => (
@@ -74,8 +94,8 @@ export function Header() {
             </div>
 
             <LanguageSwitcher />
-
             <SearchDialog />
+            <AccountButton />
 
             <button
               onClick={openCart}
@@ -96,7 +116,7 @@ export function Header() {
         <div
           className={cn(
             "lg:hidden overflow-hidden transition-all duration-300",
-            mobileMenuOpen ? "max-h-64 pb-4" : "max-h-0"
+            mobileMenuOpen ? "max-h-80 pb-4" : "max-h-0"
           )}
         >
           <div className="flex flex-col gap-y-3 pt-2">
@@ -110,6 +130,13 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            <Link
+              href="/account"
+              className="text-sm tracking-wide text-warm-gray hover:text-charcoal transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              My Account
+            </Link>
           </div>
         </div>
       </nav>

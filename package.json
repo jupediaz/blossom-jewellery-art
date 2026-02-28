@@ -23,6 +23,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@auth/prisma-adapter": "^2.11.1",
+    "@aws-sdk/client-s3": "^3.997.0",
     "@google/generative-ai": "^0.24.1",
     "@notionhq/client": "^5.9.0",
     "@portabletext/react": "^6.0.2",

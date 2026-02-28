@@ -92,7 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (path.startsWith('/admin')) {
         if (!auth?.user) return false
         const role = auth.user.role
-        return role === 'ADMIN' || role === 'PRODUCT_MANAGER'
+        return role === 'ADMIN' || role === 'STORE_OWNER'
       }
 
       // Customer account routes - allow login/register without auth

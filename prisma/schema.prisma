@@ -35,7 +35,7 @@ model User {
 
 enum UserRole {
   ADMIN
-  PRODUCT_MANAGER
+  STORE_OWNER
   CUSTOMER
 }
 

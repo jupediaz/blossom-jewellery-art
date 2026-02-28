@@ -52,7 +52,12 @@ export async function editImageWithGemini(params: EditImageParams): Promise<Edit
   const modelName = params.model || GEMINI_MODELS.FLASH
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: modelName })
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: {
+      responseModalities: ['TEXT', 'IMAGE'],
+    } as any,
+  })
 
   type Part = { inlineData: { mimeType: string; data: string } } | { text: string }
   const parts: Part[] = []
@@ -130,7 +135,12 @@ export async function generateImageWithReferences(
   const modelName = params.model || GEMINI_MODELS.PRO
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: modelName })
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: {
+      responseModalities: ['TEXT', 'IMAGE'],
+    } as any,
+  })
 
   type Part = { inlineData: { mimeType: string; data: string } } | { text: string }
   const parts: Part[] = []

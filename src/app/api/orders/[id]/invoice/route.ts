@@ -27,7 +27,7 @@ export async function GET(
   }
 
   // Verify access: admin or order owner
-  const isAdmin = session.user.role === 'ADMIN' || session.user.role === 'PRODUCT_MANAGER'
+  const isAdmin = session.user.role === 'ADMIN' || session.user.role === 'STORE_OWNER'
   const isOwner = order.customerId === session.user.id
   if (!isAdmin && !isOwner) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

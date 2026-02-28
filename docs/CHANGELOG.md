@@ -11,11 +11,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - 3 generation modes: Product Enhancement (Gemini Flash), Scene Generator (lifestyle), Full Composition (multi-reference)
   - Brand Model Profile management with 5-slot reference photo grid
   - Image Gallery with search, filtering, favorites, and pagination
-  - Storage abstraction layer (local filesystem, ready for R2/S3 swap)
+  - Cloudflare R2 storage (bucket: blossom-jewellery, WEUR region) with local filesystem fallback
+  - Storage abstraction layer (ImageStorageProvider interface — R2ImageStorage + LocalImageStorage)
   - Session tracking for cost/usage monitoring
   - Product page integration ("AI Images" quick action per product)
-  - 6 API endpoints, 27 new files, Prisma schema extended with 3 models
-  - Dependencies: sharp (image processing), piexifjs (EXIF preservation)
+  - 6 API endpoints, 27 new files, Prisma schema extended with 3 models (migration: 20260225162115)
+  - Gemini models updated to gemini-2.5-flash and gemini-2.5-pro (previous model names deprecated)
+  - Dependencies: sharp (image processing), piexifjs (EXIF preservation), @aws-sdk/client-s3 (R2)
 - **Health Check Endpoint** (/api/health) — status, uptime, database connectivity check
 - **Railway Deployment Config** (railway.toml) — standalone output, health check, restart policy
 - **Admin Error Pages** — error.tsx with Sentry capture, not-found.tsx with back-to-dashboard

@@ -4,6 +4,8 @@ import { collection } from "./collection";
 import { blogPost } from "./blog-post";
 import { siteSettings } from "./site-settings";
 import { author } from "./author";
+import { aboutPage } from "./about-page";
+import { homepage } from "./homepage";
 
 export const schemaTypes = [
   product,
@@ -12,4 +14,6 @@ export const schemaTypes = [
   blogPost,
   siteSettings,
   author,
+  aboutPage,
+  homepage,
 ];

@@ -38,7 +38,7 @@ async function main() {
       email: pmEmail,
       name: 'Olha',
       passwordHash: await hash(pmPassword, 12),
-      role: UserRole.PRODUCT_MANAGER,
+      role: UserRole.STORE_OWNER,
       emailVerified: new Date(),
       locale: 'uk',
       currency: 'EUR',

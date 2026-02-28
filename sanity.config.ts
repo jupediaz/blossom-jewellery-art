@@ -17,41 +17,59 @@ export default defineConfig({
     structureTool({
       structure: (S) =>
         S.list()
-          .title("Content")
+          .title("Blossom Studio")
           .items([
+            // ── CATALOGUE ──────────────────────────────
             S.listItem()
-              .title("Products")
-              .child(
-                S.documentTypeList("product").title("Products")
-              ),
+              .title("Products / Товари")
+              .child(S.documentTypeList("product").title("Products")),
             S.listItem()
-              .title("Categories")
-              .child(
-                S.documentTypeList("category").title("Categories")
-              ),
+              .title("Collections / Колекції")
+              .child(S.documentTypeList("collection").title("Collections")),
             S.listItem()
-              .title("Collections")
-              .child(
-                S.documentTypeList("collection").title("Collections")
-              ),
+              .title("Categories / Категорії")
+              .child(S.documentTypeList("category").title("Categories")),
+
             S.divider(),
+
+            // ── PAGES ──────────────────────────────────
+            S.listItem()
+              .title("Homepage / Головна")
+              .child(
+                S.document()
+                  .schemaType("homepage")
+                  .documentId("homepage")
+                  .title("Homepage")
+              ),
+            S.listItem()
+              .title("About Page / Про мене")
+              .child(
+                S.document()
+                  .schemaType("aboutPage")
+                  .documentId("aboutPage")
+                  .title("About Page")
+              ),
+
+            S.divider(),
+
+            // ── BLOG ───────────────────────────────────
             S.listItem()
               .title("Blog Posts")
-              .child(
-                S.documentTypeList("blogPost").title("Blog Posts")
-              ),
+              .child(S.documentTypeList("blogPost").title("Blog Posts")),
             S.listItem()
               .title("Authors")
-              .child(
-                S.documentTypeList("author").title("Authors")
-              ),
+              .child(S.documentTypeList("author").title("Authors")),
+
             S.divider(),
+
+            // ── SETTINGS ───────────────────────────────
             S.listItem()
-              .title("Site Settings")
+              .title("Site Settings / Налаштування")
               .child(
                 S.document()
                   .schemaType("siteSettings")
                   .documentId("siteSettings")
+                  .title("Site Settings")
               ),
           ]),
     }),
