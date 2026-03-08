@@ -29,20 +29,20 @@ export default async function ContactPage() {
             <h2 className="font-heading text-xl mb-4">{t("title")}</h2>
             <div className="space-y-4">
               <a
-                href="mailto:hello@blossomjewellery.art"
+                href="mailto:hello@blossombyolha.com"
                 className="flex items-center gap-3 text-sm text-warm-gray hover:text-charcoal transition-colors"
               >
                 <Mail size={18} />
-                hello@blossomjewellery.art
+                hello@blossombyolha.com
               </a>
               <a
-                href="https://instagram.com/blossomjewelleryart"
+                href="https://instagram.com/blossombyolha"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-sm text-warm-gray hover:text-charcoal transition-colors"
               >
                 <Instagram size={18} />
-                @blossomjewelleryart
+                @blossombyolha
               </a>
               <div className="flex items-center gap-3 text-sm text-warm-gray">
                 <MapPin size={18} />

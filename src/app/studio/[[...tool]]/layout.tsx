@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Blossom Jewellery Art — Studio",
+  title: "Blossom by Olha — Studio",
 };
 
 export default function StudioLayout({

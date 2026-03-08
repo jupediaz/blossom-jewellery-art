@@ -39,7 +39,7 @@ export async function generateProductDescription({
     messages: [
       {
         role: 'user',
-        content: `You are a luxury artisan jewelry copywriter for "Blossom Jewellery Art", a brand creating handmade polymer clay botanical jewelry in Marbella, Spain. The artist is Ukrainian.
+        content: `You are a luxury artisan jewelry copywriter for "Blossom by Olha", a brand creating handmade polymer clay botanical jewelry in Marbella, Spain. The artist is Ukrainian.
 
 Brand voice: Organic elegance, botanical inspiration, artisanal warmth. Each piece tells a story of nature's beauty captured in polymer clay.
 

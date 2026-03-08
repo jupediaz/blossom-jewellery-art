@@ -284,7 +284,7 @@ function buildOrderConfirmationEmail(
   return `
     <div style="max-width:600px;margin:0 auto;font-family:Georgia,serif;color:#1a1a1a">
       <div style="text-align:center;padding:32px 0;border-bottom:2px solid #1a1a1a">
-        <h1 style="font-size:24px;margin:0">Blossom Jewellery Art</h1>
+        <h1 style="font-size:24px;margin:0">Blossom by Olha</h1>
         <p style="color:#666;margin:8px 0 0">Thank you for your order</p>
       </div>
       <div style="padding:24px 0">
@@ -307,7 +307,7 @@ function buildOrderConfirmationEmail(
         </div>
       </div>
       <div style="text-align:center;padding:24px 0;border-top:1px solid #eee;color:#999;font-size:12px">
-        <p>Blossom Jewellery Art &mdash; Handcrafted polymer clay jewelry</p>
+        <p>Blossom by Olha &mdash; Handcrafted polymer clay jewelry</p>
         <p>Marbella, Spain</p>
       </div>
     </div>

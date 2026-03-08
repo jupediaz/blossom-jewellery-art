@@ -30,7 +30,7 @@ export default function CartRecovery({
     { name: 'Petal Necklace', price: 65 },
   ],
   subtotal = 110,
-  recoveryUrl = 'https://blossomjewellery.art/cart/recover/abc123',
+  recoveryUrl = 'https://blossombyolha.com/cart/recover/abc123',
   discountCode,
 }: CartRecoveryProps) {
   const headlines: Record<string, { heading: string; body: string }> = {

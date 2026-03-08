@@ -23,7 +23,7 @@ export function EmailLayout({ preview, children }: LayoutProps) {
       <Body style={body}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>Blossom Jewellery Art</Text>
+            <Text style={logo}>Blossom by Olha</Text>
             <Text style={tagline}>Handcrafted polymer clay jewelry</Text>
           </Section>
 
@@ -33,7 +33,7 @@ export function EmailLayout({ preview, children }: LayoutProps) {
 
           <Section style={footer}>
             <Text style={footerText}>
-              Blossom Jewellery Art &mdash; Marbella, Spain
+              Blossom by Olha &mdash; Marbella, Spain
             </Text>
             <Text style={footerText}>
               Handcrafted with love by Olha

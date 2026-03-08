@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     };
 
     await sendEmail({
-      to: "hello@blossomjewellery.art",
+      to: "hello@blossombyolha.com",
       subject: `[${subjectMap[data.subject] || data.subject}] from ${data.name}`,
       html: `
         <h2>New Contact Form Submission</h2>

@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 
 // Sanity webhook: sync product inventory records when products are created/updated/deleted
 // Configure in Sanity: Settings > API > Webhooks > Add webhook
-// URL: https://blossomjewellery.art/api/sanity/webhook
+// URL: https://blossombyolha.com/api/sanity/webhook
 // Trigger: Create, Update, Delete on "product" type
 // Secret: SANITY_WEBHOOK_SECRET env var
 

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const items = cart.items as Array<{ name: string; price: number; image?: string }>
     const subtotal = Number(cart.subtotal)
-    const recoveryUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://blossomjewellery.art'}/cart/recover/${cart.sessionToken}`
+    const recoveryUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://blossombyolha.com'}/cart/recover/${cart.sessionToken}`
 
     try {
       // Determine which stage of recovery email to send

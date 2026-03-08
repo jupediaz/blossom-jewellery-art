@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://blossomjewellery.art",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://blossombyolha.com",
   generateRobotsTxt: false,
   changefreq: "weekly",
   priority: 0.7,

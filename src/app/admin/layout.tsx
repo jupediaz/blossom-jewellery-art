@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Admin | Blossom Jewellery Art',
+  title: 'Admin | Blossom by Olha',
 }
 
 export default function AdminLayout({

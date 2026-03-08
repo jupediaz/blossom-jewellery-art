@@ -40,13 +40,13 @@ export async function GET(
 
   // Header
   doc.setFontSize(20)
-  doc.text('BLOSSOM JEWELLERY ART', margin, y)
+  doc.text('BLOSSOM BY OLHA', margin, y)
   y += 8
   doc.setFontSize(9)
   doc.setTextColor(100)
   doc.text('Handcrafted polymer clay jewelry | Marbella, Spain', margin, y)
   y += 4
-  doc.text('hello@blossomjewellery.art', margin, y)
+  doc.text('hello@blossombyolha.com', margin, y)
   y += 12
 
   // Invoice title

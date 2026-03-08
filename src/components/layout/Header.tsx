@@ -75,7 +75,7 @@ export function Header() {
               Blossom
             </span>
             <span className="text-[10px] tracking-[0.3em] uppercase text-warm-gray -mt-1">
-              Jewellery Art
+              by Olha
             </span>
           </Link>
 

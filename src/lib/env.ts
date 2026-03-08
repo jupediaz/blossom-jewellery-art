@@ -24,9 +24,9 @@ export const stripeConfig = {
 };
 
 export const siteConfig = {
-  name: "Blossom Jewellery Art",
+  name: "Blossom by Olha",
   description: "Handcrafted artisan jewelry by Olha — unique pieces inspired by nature and crafted with love in Europe.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://blossomjewellery.art",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://blossombyolha.com",
   ogImage: "/og-image.jpg",
   creator: "Olha",
   keywords: [

@@ -12,11 +12,11 @@ interface WelcomeProps {
 
 export default function Welcome({ name = 'there' }: WelcomeProps) {
   return (
-    <EmailLayout preview="Welcome to Blossom Jewellery Art">
+    <EmailLayout preview="Welcome to Blossom by Olha">
       <Section style={content}>
         <Text style={heading}>Welcome, {name}</Text>
         <Text style={body}>
-          Thank you for creating an account with Blossom Jewellery Art. Each
+          Thank you for creating an account with Blossom by Olha. Each
           piece in our collection is handcrafted from polymer clay, inspired by
           the organic beauty of botanical forms.
         </Text>
@@ -29,7 +29,7 @@ export default function Welcome({ name = 'there' }: WelcomeProps) {
       <Section style={ctaSection}>
         <Button
           style={button}
-          href="https://blossomjewellery.art/products"
+          href="https://blossombyolha.com/products"
         >
           Explore the Collection
         </Button>
@@ -42,7 +42,7 @@ export default function Welcome({ name = 'there' }: WelcomeProps) {
           Olha
           <br />
           <span style={{ fontSize: '12px', color: '#999' }}>
-            Founder &amp; Artist, Blossom Jewellery Art
+            Founder &amp; Artist, Blossom by Olha
           </span>
         </Text>
       </Section>

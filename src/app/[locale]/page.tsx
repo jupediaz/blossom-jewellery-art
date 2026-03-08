@@ -69,7 +69,7 @@ export default async function HomePage() {
         <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-sage/30 to-transparent z-10 pointer-events-none" />
         <Image
           src="/images/hero-jewellery.jpg"
-          alt="Blossom Jewellery Art"
+          alt="Blossom by Olha"
           fill
           sizes="100vw"
           className="object-cover object-center"
@@ -83,7 +83,7 @@ export default async function HomePage() {
             Blossom
           </h1>
           <p className="text-base sm:text-lg tracking-[0.35em] font-light text-white/60 uppercase mb-10">
-            Jewellery Art
+            by Olha
           </p>
           <div className="flex gap-4 flex-wrap">
             <Link

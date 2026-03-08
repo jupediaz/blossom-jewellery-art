@@ -10,7 +10,7 @@ async function main() {
 
   // Create admin user
   const adminPassword = process.env.ADMIN_SEED_PASSWORD || 'changeme-in-production'
-  const adminEmail = process.env.ADMIN_SEED_EMAIL || 'admin@blossomjewellery.art'
+  const adminEmail = process.env.ADMIN_SEED_EMAIL || 'admin@blossombyolha.com'
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
@@ -28,7 +28,7 @@ async function main() {
   console.log(`Admin user created: ${admin.email}`)
 
   // Create product manager user (Olha)
-  const pmEmail = process.env.PM_SEED_EMAIL || 'olha@blossomjewellery.art'
+  const pmEmail = process.env.PM_SEED_EMAIL || 'olha@blossombyolha.com'
   const pmPassword = process.env.PM_SEED_PASSWORD || 'changeme-in-production'
 
   const pm = await prisma.user.upsert({

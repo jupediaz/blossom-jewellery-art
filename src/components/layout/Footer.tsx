@@ -18,7 +18,7 @@ export function Footer() {
               Blossom
             </h3>
             <p className="text-[10px] tracking-[0.3em] uppercase text-cream-dark -mt-1 mb-4">
-              Jewellery Art
+              by Olha
             </p>
             <p className="text-sm text-cream-dark leading-relaxed">
               {t("tagline")}
@@ -77,7 +77,7 @@ export function Footer() {
             </div>
             <div className="flex gap-4">
               <a
-                href="https://instagram.com/blossomjewelleryart"
+                href="https://instagram.com/blossombyolha"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cream-dark hover:text-cream transition-colors"
@@ -86,7 +86,7 @@ export function Footer() {
                 <Instagram size={20} />
               </a>
               <a
-                href="mailto:hello@blossomjewellery.art"
+                href="mailto:hello@blossombyolha.com"
                 className="text-cream-dark hover:text-cream transition-colors"
                 aria-label="Email"
               >
@@ -98,9 +98,18 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-cream-dark/20 text-center text-xs text-cream-dark">
           <p>
-            &copy; {new Date().getFullYear()} Blossom Jewellery Art. {t("rights")}.
+            &copy; {new Date().getFullYear()} Blossom by Olha. {t("rights")}.
           </p>
           <p className="mt-1">{t("madeWith")}</p>
+          <div className="flex justify-center gap-4 mt-3">
+            <Link href="/privacy" className="hover:text-cream transition-colors">
+              {t("privacyPolicy")}
+            </Link>
+            <span aria-hidden="true">&middot;</span>
+            <Link href="/terms" className="hover:text-cream transition-colors">
+              {t("termsOfService")}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

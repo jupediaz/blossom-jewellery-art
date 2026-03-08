@@ -57,7 +57,7 @@ export default function ShippingNotification({
       </Section>
 
       <Section style={{ padding: '0 24px 24px', textAlign: 'center' as const }}>
-        <Button style={button} href={`https://blossomjewellery.art/account/orders`}>
+        <Button style={button} href={`https://blossombyolha.com/account/orders`}>
           View Order Details
         </Button>
       </Section>

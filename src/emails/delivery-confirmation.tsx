@@ -25,7 +25,7 @@ export default function DeliveryConfirmation({
       <Section style={content}>
         <Text style={heading}>Your Order Has Arrived</Text>
         <Text style={subtext}>
-          Hi {customerName}, your handcrafted pieces from Blossom Jewellery Art
+          Hi {customerName}, your handcrafted pieces from Blossom by Olha
           have been delivered. We hope you love them!
         </Text>
       </Section>
@@ -52,7 +52,7 @@ export default function DeliveryConfirmation({
       </Section>
 
       <Section style={{ padding: '0 24px 24px', textAlign: 'center' as const }}>
-        <Button style={button} href="https://blossomjewellery.art/products">
+        <Button style={button} href="https://blossombyolha.com/products">
           Explore More Pieces
         </Button>
       </Section>

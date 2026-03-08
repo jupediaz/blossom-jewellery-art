@@ -14,8 +14,8 @@ export const resend = globalForResend.resend ?? createResendClient()
 
 if (process.env.NODE_ENV !== 'production') globalForResend.resend = resend
 
-const FROM_EMAIL = 'Blossom Jewellery <hello@blossomjewellery.art>'
-const REPLY_TO = 'olha@blossomjewellery.art'
+const FROM_EMAIL = 'Blossom by Olha <hello@blossombyolha.com>'
+const REPLY_TO = 'olha@blossombyolha.com'
 
 export async function sendEmail({
   to,

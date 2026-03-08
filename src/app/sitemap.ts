@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { sanityFetch } from '@/lib/sanity/client'
 import { routing } from '@/i18n/routing'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blossomjewellery.art'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blossombyolha.com'
 
 function localePrefix(locale: string) {
   return locale === routing.defaultLocale ? '' : `/${locale}`
