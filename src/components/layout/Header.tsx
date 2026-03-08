@@ -11,8 +11,8 @@ import { SearchDialog } from "@/components/SearchDialog";
 import { useSession } from "next-auth/react";
 
 function AccountButton() {
-  const { data: session } = useSession();
-  const role = session?.user?.role;
+  const sessionResult = useSession();
+  const role = sessionResult?.data?.user?.role;
 
   // Admin and store owner go straight to admin panel
   const href =

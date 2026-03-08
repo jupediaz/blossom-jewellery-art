@@ -9,6 +9,7 @@ import { CartDrawer } from '@/components/cart/CartDrawer'
 import { HtmlLangUpdater } from '@/components/HtmlLangUpdater'
 import { CartSyncInit } from '@/components/CartSyncInit'
 import { ToastProvider } from '@/components/Toast'
+import { Providers } from '@/components/Providers'
 
 type Props = {
   children: React.ReactNode
@@ -30,6 +31,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider>
+      <Providers>
       <ToastProvider>
         <HtmlLangUpdater locale={locale} />
         <Header />
@@ -38,6 +40,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         <CartDrawer />
         <CartSyncInit />
       </ToastProvider>
+      </Providers>
     </NextIntlClientProvider>
   )
 }
