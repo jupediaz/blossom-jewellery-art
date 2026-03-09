@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Link } from '@/i18n/navigation';
-import { ArrowLeft } from "lucide-react";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { sanityFetch } from "@/lib/sanity/client";
 import { collectionBySlugQuery, allCollectionsQuery } from "@/lib/sanity/queries";
 import { ProductGrid } from "@/components/product/ProductGrid";
@@ -67,6 +66,7 @@ export default async function CollectionPage({
   params: Promise<{ slug: string }>;
 }) {
   const t = await getTranslations("Collections");
+  const tc = await getTranslations("Common");
   const { slug } = await params;
   let collection: Collection | null = null;
 
@@ -124,21 +124,13 @@ export default async function CollectionPage({
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
-        <div className="mb-8 flex items-center gap-2">
-          <Link
-            href="/collections"
-            className="text-sm text-warm-gray hover:text-charcoal transition-colors flex items-center gap-1"
-          >
-            <ArrowLeft size={14} />
-            {t("title")}
-          </Link>
-          {!coverImage && (
-            <>
-              <span className="text-warm-gray">/</span>
-              <span className="text-sm text-charcoal">{collection.name}</span>
-            </>
-          )}
-        </div>
+        <Breadcrumbs
+          items={[
+            { name: tc("home"), href: "/" },
+            { name: tc("collections"), href: "/collections" },
+            { name: collection.name },
+          ]}
+        />
 
         {/* Title (only if no hero image) */}
         {!coverImage && (

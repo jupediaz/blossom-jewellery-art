@@ -75,7 +75,7 @@ export default function CustomerLoginPage() {
           <div className="h-px flex-1 bg-gray-200" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
           {error && (
             <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
               {error}
@@ -90,6 +90,7 @@ export default function CustomerLoginPage() {
               name="email"
               type="email"
               required
+              autoComplete="email"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"
             />
           </div>
@@ -102,6 +103,7 @@ export default function CustomerLoginPage() {
               name="password"
               type="password"
               required
+              autoComplete="current-password"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"
             />
           </div>

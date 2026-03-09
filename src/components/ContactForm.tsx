@@ -65,6 +65,7 @@ export function ContactForm() {
           id="name"
           name="name"
           required
+          autoComplete="name"
           className="w-full border border-cream-dark rounded px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-sage"
         />
       </div>
@@ -77,6 +78,7 @@ export function ContactForm() {
           id="email"
           name="email"
           required
+          autoComplete="email"
           className="w-full border border-cream-dark rounded px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-sage"
         />
       </div>

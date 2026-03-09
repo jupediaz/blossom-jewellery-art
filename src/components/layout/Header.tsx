@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -10,21 +10,56 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SearchDialog } from "@/components/SearchDialog";
 import { useSession } from "next-auth/react";
 
-function AccountButton() {
-  const sessionResult = useSession();
-  const role = sessionResult?.data?.user?.role;
-
-  // Admin and store owner go straight to admin panel
+function AccountButton({ scrolled }: { scrolled: boolean }) {
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
   const href =
-    role === "ADMIN" || role === "STORE_OWNER" ? "/admin" : "/account";
+    status !== "loading" && (role === "ADMIN" || role === "STORE_OWNER")
+      ? "/admin"
+      : "/account";
 
   return (
     <Link
       href={href}
-      className="p-2 text-warm-gray hover:text-charcoal transition-colors"
+      className={cn(
+        "p-2 transition-colors",
+        scrolled ? "text-muted hover:text-navy" : "text-navy/70 hover:text-navy"
+      )}
       aria-label="My account"
     >
-      <User size={20} />
+      <User size={18} strokeWidth={1.5} />
+    </Link>
+  );
+}
+
+/* Nav link with Bijoux-style "—" prefix for non-home items */
+function NavLink({
+  href,
+  children,
+  showDash,
+  scrolled,
+  onClick,
+}: {
+  href: string;
+  children: React.ReactNode;
+  showDash?: boolean;
+  scrolled: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href={href as "/"}
+      onClick={onClick}
+      className={cn(
+        "relative flex items-center gap-2 text-[11px] font-semibold tracking-[0.1em] uppercase transition-colors font-body",
+        "after:absolute after:bottom-[-3px] after:left-0 after:h-px after:w-0 after:bg-terracotta after:transition-all after:duration-300 hover:after:w-full",
+        scrolled ? "text-navy hover:text-terracotta" : "text-navy/80 hover:text-navy"
+      )}
+    >
+      {showDash && (
+        <span className="block w-4 h-px bg-current flex-shrink-0" />
+      )}
+      {children}
     </Link>
   );
 }
@@ -32,83 +67,103 @@ function AccountButton() {
 export function Header() {
   const t = useTranslations("Nav");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { openCart, totalItems } = useCartStore();
-  const itemCount = totalItems();
+  const [mounted, setMounted] = useState(false);
 
-  const navigation = [
-    { name: t("shop"), href: "/products" as const },
-    { name: t("collections"), href: "/collections" as const },
-    { name: t("about"), href: "/about" as const },
-    { name: t("blog"), href: "/blog" as const },
-    { name: t("contact"), href: "/contact" as const },
+  useEffect(() => {
+    setMounted(true);
+    const handler = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", handler, { passive: true });
+    handler();
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  const itemCount = mounted ? totalItems() : 0;
+
+  const navLeft = [
+    { name: t("shop"), href: "/products", dash: false },
+    { name: t("about"), href: "/about", dash: true },
+    { name: t("collections"), href: "/collections", dash: true },
+  ];
+  const navRight = [
+    { name: t("blog"), href: "/blog", dash: false },
+    { name: t("contact"), href: "/contact", dash: false },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-sage/40">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        scrolled
+          ? "bg-cream/96 backdrop-blur-sm border-b border-cream-dark/60"
+          : "bg-transparent"
+      )}
+    >
+      <nav className="mx-auto max-w-[1260px] px-6 lg:px-10">
+        <div className="flex h-[78px] items-center justify-between">
+
           {/* Mobile menu button */}
           <button
             type="button"
-            className="lg:hidden p-2 text-charcoal"
+            className="lg:hidden p-2 text-navy"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
           </button>
 
-          {/* Desktop navigation — left */}
-          <div className="hidden lg:flex lg:gap-x-8">
-            {navigation.slice(0, 2).map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm tracking-wide text-warm-gray hover:text-charcoal transition-colors"
-              >
+          {/* Desktop left nav */}
+          <div className="hidden lg:flex lg:items-center lg:gap-x-8">
+            {navLeft.map((item) => (
+              <NavLink key={item.href} href={item.href} showDash={item.dash} scrolled={scrolled}>
                 {item.name}
-              </Link>
+              </NavLink>
             ))}
           </div>
 
-          {/* Logo */}
-          <Link href="/" className="flex flex-col items-center">
-            <span className="font-heading text-2xl font-light tracking-wider text-charcoal">
-              Blossom
+          {/* Logo — center */}
+          <Link
+            href="/"
+            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none"
+          >
+            <span className="font-heading text-[1.55rem] tracking-[0.22em] text-navy leading-none">
+              BLOSSOM
             </span>
-            <span className="text-[10px] tracking-[0.3em] uppercase text-warm-gray -mt-1">
+            <span className="text-[8px] font-body font-semibold tracking-[0.4em] uppercase text-terracotta mt-[3px]">
               by Olha
             </span>
           </Link>
 
-          {/* Desktop navigation — right + icons */}
-          <div className="flex items-center gap-x-4">
-            <div className="hidden lg:flex lg:gap-x-8">
-              {navigation.slice(2).map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-sm tracking-wide text-warm-gray hover:text-charcoal transition-colors"
-                >
+          {/* Desktop right nav + icons */}
+          <div className="flex items-center gap-x-6">
+            <div className="hidden lg:flex lg:items-center lg:gap-x-8">
+              {navRight.map((item) => (
+                <NavLink key={item.href} href={item.href} showDash={item.dash} scrolled={scrolled}>
                   {item.name}
-                </Link>
+                </NavLink>
               ))}
             </div>
 
-            <LanguageSwitcher />
-            <SearchDialog />
-            <AccountButton />
-
-            <button
-              onClick={openCart}
-              className="relative p-2 text-warm-gray hover:text-charcoal transition-colors"
-              aria-label={t("cart")}
-            >
-              <ShoppingBag size={20} />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dusty-rose text-white text-xs">
-                  {itemCount}
-                </span>
-              )}
-            </button>
+            <div className="flex items-center gap-x-1">
+              <LanguageSwitcher />
+              <SearchDialog />
+              <AccountButton scrolled={scrolled} />
+              <button
+                onClick={openCart}
+                className={cn(
+                  "relative p-2 transition-colors",
+                  scrolled ? "text-muted hover:text-navy" : "text-navy/70 hover:text-navy"
+                )}
+                aria-label={t("cart")}
+              >
+                <ShoppingBag size={18} strokeWidth={1.5} />
+                {itemCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-[16px] w-[16px] items-center justify-center bg-terracotta text-cream text-[9px] font-semibold font-body leading-none">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -116,27 +171,24 @@ export function Header() {
         <div
           className={cn(
             "lg:hidden overflow-hidden transition-all duration-300",
-            mobileMenuOpen ? "max-h-80 pb-4" : "max-h-0"
+            mobileMenuOpen ? "max-h-96 pb-5" : "max-h-0"
           )}
         >
-          <div className="flex flex-col gap-y-3 pt-2">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
+          <div className="flex flex-col gap-y-4 pt-4 border-t border-cream-dark/60">
+            {[...navLeft, ...navRight].map((item) => (
+              <NavLink
+                key={item.href}
                 href={item.href}
-                className="text-sm tracking-wide text-warm-gray hover:text-charcoal transition-colors"
+                showDash={item.dash}
+                scrolled={true}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
-              </Link>
+              </NavLink>
             ))}
-            <Link
-              href="/account"
-              className="text-sm tracking-wide text-warm-gray hover:text-charcoal transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
+            <NavLink href="/account" showDash={false} scrolled={true} onClick={() => setMobileMenuOpen(false)}>
               My Account
-            </Link>
+            </NavLink>
           </div>
         </div>
       </nav>

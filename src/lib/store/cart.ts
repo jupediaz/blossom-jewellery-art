@@ -15,7 +15,7 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity">, qty?: number) => void;
   removeItem: (id: string, variant?: string) => void;
   updateQuantity: (id: string, quantity: number, variant?: string) => void;
   clearCart: () => void;
@@ -36,7 +36,7 @@ export const useCartStore = create<CartState>()(
       items: [],
       isOpen: false,
 
-      addItem: (item) => {
+      addItem: (item, qty = 1) => {
         const key = itemKey(item.id, item.variant);
         trackAddToCart({ id: item.id, name: item.name, price: item.price });
         set((state) => {
@@ -47,12 +47,12 @@ export const useCartStore = create<CartState>()(
             return {
               items: state.items.map((i) =>
                 itemKey(i.id, i.variant) === key
-                  ? { ...i, quantity: i.quantity + 1 }
+                  ? { ...i, quantity: i.quantity + qty }
                   : i
               ),
             };
           }
-          return { items: [...state.items, { ...item, quantity: 1 }] };
+          return { items: [...state.items, { ...item, quantity: qty }] };
         });
       },
 

@@ -35,7 +35,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <ToastProvider>
         <HtmlLangUpdater locale={locale} />
         <Header />
-        <main className="min-h-screen">{children}</main>
+        <main>{children}</main>
         <Footer />
         <CartDrawer />
         <CartSyncInit />

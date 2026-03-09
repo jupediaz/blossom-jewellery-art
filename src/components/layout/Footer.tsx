@@ -3,113 +3,105 @@
 import { Instagram, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { NewsletterForm } from "@/components/NewsletterForm";
 
 export function Footer() {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="bg-charcoal text-cream">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <h3 className="font-heading text-2xl font-light tracking-wider">
-              Blossom
-            </h3>
-            <p className="text-[10px] tracking-[0.3em] uppercase text-cream-dark -mt-1 mb-4">
-              by Olha
-            </p>
-            <p className="text-sm text-cream-dark leading-relaxed">
-              {t("tagline")}
-            </p>
-          </div>
+    <footer className="bg-cream overflow-hidden">
+      {/* Main footer grid */}
+      <div className="mx-auto max-w-[1260px] px-6 lg:px-10 pt-16 pb-10">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-12">
+          <span className="font-heading text-[1.6rem] tracking-[0.22em] text-navy leading-none">
+            BLOSSOM
+          </span>
+          <span className="text-[8px] font-body font-semibold tracking-[0.4em] uppercase text-terracotta mt-[3px]">
+            by Olha
+          </span>
+        </div>
 
-          {/* Shop */}
+        {/* 3 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center mb-12">
+          {/* About */}
           <div>
-            <h4 className="font-heading text-lg mb-4">{t("shop")}</h4>
-            <ul className="space-y-2 text-sm text-cream-dark">
-              <li>
-                <Link href="/products" className="hover:text-cream transition-colors">
-                  {t("shop")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/collections" className="hover:text-cream transition-colors">
-                  {t("collections")}
-                </Link>
-              </li>
+            <h4 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-navy font-body mb-5">
+              About
+            </h4>
+            <ul className="space-y-3 text-[13px] text-muted font-body">
+              <li><Link href="/about" className="hover:text-navy transition-colors">Our Story</Link></li>
+              <li><Link href="/blog" className="hover:text-navy transition-colors">Journal</Link></li>
+              <li><Link href="/about" className="hover:text-navy transition-colors">Our Materials</Link></li>
+              <li><Link href="/contact" className="hover:text-navy transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
-          {/* Info */}
+          {/* Store */}
           <div>
-            <h4 className="font-heading text-lg mb-4">{t("help")}</h4>
-            <ul className="space-y-2 text-sm text-cream-dark">
-              <li>
-                <Link href="/about" className="hover:text-cream transition-colors">
-                  {t("about")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/shipping" className="hover:text-cream transition-colors">
-                  {t("shippingReturns")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/size-guide" className="hover:text-cream transition-colors">
-                  {t("sizeGuide")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-cream transition-colors">
-                  {t("contact")}
-                </Link>
-              </li>
+            <h4 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-navy font-body mb-5">
+              Store
+            </h4>
+            <ul className="space-y-3 text-[13px] text-muted font-body">
+              <li><Link href="/collections" className="hover:text-navy transition-colors">Collections</Link></li>
+              <li><Link href="/products" className="hover:text-navy transition-colors">All Pieces</Link></li>
+              <li><Link href="/products" className="hover:text-navy transition-colors">New Arrivals</Link></li>
+              <li><Link href="/shipping" className="hover:text-navy transition-colors">Shipping Info</Link></li>
             </ul>
           </div>
 
-          {/* Newsletter + Social */}
+          {/* Care */}
           <div>
-            <h4 className="font-heading text-lg mb-4">{t("connect")}</h4>
-            <div className="mb-6">
-              <NewsletterForm variant="dark" />
-            </div>
-            <div className="flex gap-4">
-              <a
-                href="https://instagram.com/blossombyolha"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-cream-dark hover:text-cream transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram size={20} />
-              </a>
-              <a
-                href="mailto:hello@blossombyolha.com"
-                className="text-cream-dark hover:text-cream transition-colors"
-                aria-label="Email"
-              >
-                <Mail size={20} />
-              </a>
-            </div>
+            <h4 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-navy font-body mb-5">
+              Care
+            </h4>
+            <ul className="space-y-3 text-[13px] text-muted font-body">
+              <li><Link href="/shipping" className="hover:text-navy transition-colors">{t("shippingReturns")}</Link></li>
+              <li><Link href="/size-guide" className="hover:text-navy transition-colors">{t("sizeGuide")}</Link></li>
+              <li><Link href="/privacy" className="hover:text-navy transition-colors">{t("privacyPolicy")}</Link></li>
+              <li><Link href="/terms" className="hover:text-navy transition-colors">{t("termsOfService")}</Link></li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-cream-dark/20 text-center text-xs text-cream-dark">
-          <p>
+        {/* Social + copyright */}
+        <div className="flex flex-col items-center gap-4 text-center border-t border-cream-dark/60 pt-8">
+          <div className="flex gap-5">
+            <a
+              href="https://instagram.com/blossombyolha"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted hover:text-navy transition-colors"
+              aria-label="Instagram"
+            >
+              <Instagram size={17} strokeWidth={1.5} />
+            </a>
+            <a
+              href="mailto:hello@blossombyolha.com"
+              className="text-muted hover:text-navy transition-colors"
+              aria-label="Email"
+            >
+              <Mail size={17} strokeWidth={1.5} />
+            </a>
+          </div>
+          <p className="text-[11px] text-muted font-body">
             &copy; {new Date().getFullYear()} Blossom by Olha. {t("rights")}.
           </p>
-          <p className="mt-1">{t("madeWith")}</p>
-          <div className="flex justify-center gap-4 mt-3">
-            <Link href="/privacy" className="hover:text-cream transition-colors">
-              {t("privacyPolicy")}
-            </Link>
-            <span aria-hidden="true">&middot;</span>
-            <Link href="/terms" className="hover:text-cream transition-colors">
-              {t("termsOfService")}
-            </Link>
-          </div>
+        </div>
+      </div>
+
+      {/* Giant watermark at the very bottom */}
+      <div aria-hidden="true" className="overflow-hidden leading-none select-none pointer-events-none">
+        <div
+          className="font-heading whitespace-nowrap"
+          style={{ fontSize: "clamp(60px,11vw,160px)", color: "#EEE8E3", lineHeight: 0.95 }}
+        >
+          Anything less is
+        </div>
+        <div
+          className="font-heading whitespace-nowrap"
+          style={{ fontSize: "clamp(60px,11vw,160px)", color: "#EEE8E3", lineHeight: 0.95 }}
+        >
+          simply unacceptable.
         </div>
       </div>
     </footer>

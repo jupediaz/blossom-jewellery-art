@@ -772,6 +772,256 @@ Features:
 
 ---
 
+## Production Audit — Full Store Review (2026-03-09)
+
+**Auditor:** Claude Code (autonomous QA pass)
+**Method:** Playwright browser testing (storefront + admin), direct DB queries, server log analysis, role-empathy review
+**Status:** In Progress
+**Priority:** Critical
+
+---
+
+### BUGS FIXED (during this audit session)
+
+#### BUG-001: SSL/TLS Certificate Error — ALL Database Operations Failing
+**Status:** ✅ FIXED
+**Severity:** CRITICAL — Checkout, cart save, inventory, orders all returned 500
+**Root cause:** `pg` v8 parses `sslmode=require` from the connection string and overrides `ssl: { rejectUnauthorized: false }` passed to the Pool. Self-signed cert on `db.codelabs.studio:54321` caused P1011 errors.
+**Fix:** `src/lib/db.ts` — Strip `sslmode` from URL before constructing `pg.Pool`, pass `ssl: { rejectUnauthorized: false }` explicitly.
+**Impact:** Checkout now generates Stripe sessions. Cart save works. All DB-dependent APIs operational.
+
+#### BUG-002: Hydration Error on All Storefront Pages
+**Status:** ✅ FIXED
+**Severity:** HIGH — Console errors, potential SSR/client mismatch affecting SEO
+**Root cause:** Two causes:
+1. `AccountButton` in Header uses `useSession()` — server renders `/account` href, but after client hydration with admin session it switches to `/admin`, causing React hydration mismatch.
+2. Cart count from Zustand localStorage is `0` on server but has items after client hydration.
+**Fix:** `src/components/layout/Header.tsx` — Check `status !== 'loading'` before applying admin href. Added `mounted` state for cart count.
+
+#### BUG-003: WishlistButton 401 Errors in Console on Every Product Page
+**Status:** ✅ FIXED
+**Severity:** MEDIUM — Console noise, unnecessary API calls, 401 logged as error
+**Root cause:** WishlistButton calls `GET /api/account/wishlist` in `useEffect` unconditionally, even for unauthenticated users.
+**Fix:** `src/components/product/WishlistButton.tsx` — Added `useSession()` check, only calls API when `status === 'authenticated'`.
+
+#### BUG-004: Duplicate Shipping Methods in Database
+**Status:** ✅ FIXED (data)
+**Severity:** MEDIUM — Each zone showed Standard and Express methods twice
+**Root cause:** Prisma seed script was run twice (first run IDs `cmlum9*`, second run `cmm28u*`). The seed used `create` not `upsert` for shipping methods.
+**Fix:** Deleted 10 duplicate rows from `ShippingMethod` table directly. Each zone now has exactly Standard + Express.
+**Next action:** Update seed script to use `upsert` or check-before-create to be idempotent.
+
+---
+
+### CRITICAL BLOCKERS — Must Fix Before Launch
+
+#### BLOCK-001: Sanity CMS Empty — Storefront Uses Hardcoded Mock Data
+**Status:** 🚨 OPEN
+**Priority:** CRITICAL
+**Detail:** Admin Products page shows "0 products in Sanity CMS". The 16 products visible in the storefront are hardcoded fallback data in the source code, NOT real Sanity content. This means:
+- All product images, descriptions, prices are static/hardcoded
+- Olha cannot manage her own products from the admin
+- Changes to products require code deploys
+- The AI Studio has nothing to enhance (no real product images in CMS)
+- Inventory tracking doesn't link to real Sanity product IDs
+**Action:** Populate Sanity CMS with all 16 products (names, descriptions, images, prices, collections). This is the single most important task before launch.
+
+#### BLOCK-002: Admin Users on Old Domain (blossomjewellery.art)
+**Status:** 🚨 OPEN
+**Priority:** CRITICAL
+**Detail:** Database has `admin@blossomjewellery.art` and `olha@blossomjewellery.art`. These are the pre-rebrand emails. The placeholder in the admin login page says `admin@blossombyolha.com` but that user doesn't exist.
+**Action:** Update user emails in DB OR re-seed with correct emails:
+```sql
+UPDATE "User" SET email = 'admin@blossombyolha.com' WHERE email = 'admin@blossomjewellery.art';
+UPDATE "User" SET email = 'olha@blossombyolha.com' WHERE email = 'olha@blossomjewellery.art';
+```
+
+#### BLOCK-003: Stripe in Test Mode — No Live Payments
+**Status:** 🚨 OPEN
+**Priority:** CRITICAL
+**Detail:** Stripe keys in `.env.local` and Railway are test keys (`sk_test_*`). No real money can be collected.
+**Action:**
+1. Switch to live Stripe keys in Railway environment variables
+2. Configure Stripe webhook in dashboard with `https://www.blossombyolha.com/api/webhook`
+3. Set `STRIPE_WEBHOOK_SECRET` with the live webhook signing secret
+4. Test with a real card in live mode before publicizing
+
+#### BLOCK-004: Stripe Webhook Secret Missing
+**Status:** 🚨 OPEN
+**Priority:** CRITICAL
+**Detail:** Server logs show `[env] Missing STRIPE_WEBHOOK_SECRET — using fallback`. Without a valid webhook secret, Stripe payment confirmations won't be processed: no orders created in DB, no inventory decremented, no confirmation emails sent.
+**Action:** Set `STRIPE_WEBHOOK_SECRET` in `.env.local` and Railway to the webhook signing secret from Stripe dashboard.
+
+#### BLOCK-005: Admin Password Is Default 'changeme-in-production'
+**Status:** 🚨 OPEN
+**Priority:** CRITICAL
+**Detail:** The seed ran with empty `ADMIN_SEED_PASSWORD`, defaulting to `'changeme-in-production'`. This is a known weak password exposed in the codebase.
+**Action:** Change admin and store owner passwords immediately via a migration or direct DB update:
+```sql
+-- Use bcrypt to hash a strong password first, then:
+UPDATE "User" SET "passwordHash" = '<bcrypt_hash>' WHERE role IN ('ADMIN', 'STORE_OWNER');
+```
+
+#### BLOCK-006: Collection Cover Images Missing
+**Status:** 🚨 OPEN
+**Priority:** HIGH
+**Detail:** All 9 collection cards on homepage and collections page show gray placeholder boxes. Images at `/public/images/collections/*.jpg` are either missing or not committed.
+**Action:** Add collection cover images to `/public/images/collections/` for all 9 collections, OR configure collection images via Sanity CMS.
+
+---
+
+### UX GAPS — Shopify-Level Expectations Not Met
+
+#### UX-001: No Quantity Selector on Product Detail Page
+**Status:** 🔴 OPEN
+**Priority:** HIGH
+**Detail:** Customer can only add 1 item at a time. No +/- quantity selector. Shoppers who want 2 earrings (gift + self) must add to cart and adjust in cart sidebar. This is a conversion killer for gifting purchases.
+**Action:** Add quantity selector to `ProductDetail` component before the "Add to Cart" button.
+
+#### UX-002: No Product Description Visible on Detail Page
+**Status:** 🔴 OPEN
+**Priority:** HIGH
+**Detail:** Product detail page shows Materials, Dimensions, Care Instructions — but no main product description paragraph. For handmade jewelry the story/narrative of each piece is a core conversion tool (it's what Shopify merchants A/B test constantly).
+**Action:** Add description field rendering to `ProductDetail`. The data may already exist in Sanity/hardcoded but isn't being displayed.
+
+#### UX-003: No Size Guide Link from Product Pages
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** `/es/size-guide` exists and is linked in the footer, but there's no contextual link on product detail pages or ring/bracelet products. Customers buying rings or bracelets need this.
+**Action:** Add "Ver guía de tallas →" link on product detail pages for rings, bracelets, and necklaces.
+
+#### UX-004: No Breadcrumb Navigation
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** No breadcrumb on product or collection detail pages. Shopify stores always have `Home > Collections > Ukrainian Heritage > Vyshyvanka Earrings`. Helps navigation and SEO (structured data).
+**Action:** Add breadcrumb component to product detail and collection detail pages with JSON-LD BreadcrumbList schema.
+
+#### UX-005: No Stock Status Badge on Product Detail
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** No "In Stock", "Low Stock (2 left!)" or "Out of Stock" indicator on product detail page. Scarcity messaging increases conversion on handmade/limited items.
+**Action:** Show stock status from inventory DB. "Only X left!" triggers urgency.
+
+#### UX-006: Blog Is Empty
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** `/es/blog` exists but shows empty state. A blog is critical for SEO long-tail keywords ("polymer clay earrings tutorial", "Ukrainian jewelry history") and building community around the brand.
+**Action:** Create at least 3-5 blog posts in Sanity CMS before launch.
+
+#### UX-007: No "You May Also Like" Section on Cart Page
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** Cart page has no cross-sell/upsell. Shopify merchants consistently see 5-15% AOV lift from "Complete the look" or related product suggestions in cart.
+**Action:** Add a "Complete Your Look" section to cart with 2-3 related products from the same collection.
+
+#### UX-008: No Free Shipping Progress Bar in Cart
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** Spain has free shipping over €60, EU over €100. Cart doesn't show "You're €X away from free shipping!". This is one of the highest-ROI UX features in e-commerce.
+**Action:** Add progress bar in CartDrawer and cart page based on zone's `freeShippingThreshold`.
+
+#### UX-009: Wishlist Requires Login But No Prompt
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** Clicking ♥ on a product while unauthenticated redirects to `/account/login` with no explanation. A better pattern: show a modal "Create an account to save your favorites" with sign-in/register buttons.
+**Action:** Replace hard redirect with a modal or slide-in prompt when unauthenticated.
+
+#### UX-010: No Trust Signals on Product/Cart Pages
+**Status:** 🟡 OPEN
+**Priority:** HIGH
+**Detail:** No trust badges (Secure Payment, Handmade, Free Returns for Spain, etc.) anywhere in the purchase funnel. These are critical for new brands without established reputation.
+**Action:** Add trust badge strip below Add to Cart button (🔒 Pago Seguro, ✋ Hecho a Mano, 🚚 Envío Gratis >€60, ↩️ Devoluciones 30 días).
+
+#### UX-011: Contact Form Subject "Mayorista" (Wholesale) Available to All
+**Status:** 🟡 OPEN
+**Priority:** LOW
+**Detail:** The contact form subject dropdown includes "Mayorista" (Wholesale). This is good, but there's no dedicated wholesale page with MOQ, pricing tiers, or lookbook. Boutiques that want to wholesale need more info before contacting.
+**Action:** Create a dedicated `/es/wholesale` page with wholesale terms. Link from contact form and footer.
+
+#### UX-012: Admin Sidebar Uses Mixed English/Ukrainian Labels
+**Status:** 🟡 OPEN
+**Priority:** LOW
+**Detail:** Sidebar shows "Orders / Замовлення", "Products / Товари", etc. The bilingual labels are inconsistent — some are bilingual, some are English-only (Dashboard, Marketing, Analytics, AI Studio).
+**Action:** Decide on one language for the admin UI. Since Olha is Ukrainian and the primary admin, Ukrainian makes sense as the primary with English secondary. Or just English consistently.
+
+---
+
+### TECHNICAL DEBT
+
+#### TECH-001: Seed Script Not Idempotent
+**Status:** 🔴 OPEN
+**Priority:** HIGH
+**Detail:** Running `prisma db seed` twice created duplicate shipping methods (confirmed). The seed uses `create` for ShippingZone/ShippingMethod instead of `upsert`.
+**Action:** Rewrite seed to use `upsert` for all entities with `skipDuplicates: true` where possible.
+
+#### TECH-002: Rate Limiting Uses In-Memory Store
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** `src/lib/rate-limit.ts` uses an in-memory Map. On Railway with multiple instances, each instance has its own counter — limits won't be enforced across the cluster.
+**Action:** Replace with Redis-based rate limiting (Upstash is free tier compatible) before scaling.
+
+#### TECH-003: Cart Save API Should Gracefully Degrade
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** `/api/cart/save` returning 500 doesn't break the shopping experience (cart is in localStorage), but it logs errors and prevents cart abandonment tracking. The DB error was fixed (SSL), but the API should handle errors gracefully with `try/catch` fallback instead of 500.
+**Action:** Verify cart save works post SSL fix. Add graceful fallback if DB unavailable.
+
+#### TECH-004: Input Fields Missing autocomplete Attributes
+**Status:** 🟡 OPEN
+**Priority:** LOW
+**Detail:** Playwright reports VERBOSE `[DOM] Input elements should have autocomplete attribute`. Login, register, and contact forms are missing `autocomplete` attributes. This triggers browser warnings and reduces UX (autofill doesn't work).
+**Action:** Add `autocomplete="email"`, `autocomplete="current-password"`, `autocomplete="new-password"`, `autocomplete="name"` to relevant form inputs.
+
+#### TECH-005: Google Fonts Failing to Decode in Tests
+**Status:** 🟡 OPEN
+**Priority:** LOW
+**Detail:** Console shows `Failed to decode downloaded font: OTS parsing error: invalid sfntVersion`. This is a network/sandbox issue in the test environment, but should be verified in production. Could indicate font loading issues with subsets.
+**Action:** Verify fonts load correctly in production deployment on Railway.
+
+#### TECH-006: Sanity Webhook Route Needs Secret Verification
+**Status:** 🟡 OPEN
+**Priority:** MEDIUM
+**Detail:** `/api/sanity/webhook` should verify the Sanity webhook signature to prevent unauthorized inventory updates.
+**Action:** Implement Sanity webhook signature verification using `SANITY_WEBHOOK_SECRET`.
+
+---
+
+### LAUNCH CHECKLIST (ordered by priority)
+
+**Pre-launch Must-Haves:**
+- [ ] BLOCK-001: Populate Sanity CMS with all 16 products + 9 collection covers
+- [ ] BLOCK-002: Update admin/Olha user emails to @blossombyolha.com domain
+- [ ] BLOCK-003: Switch to Stripe live keys in Railway
+- [ ] BLOCK-004: Set STRIPE_WEBHOOK_SECRET in Railway + configure webhook in Stripe dashboard
+- [ ] BLOCK-005: Change admin password from 'changeme-in-production' to a strong password
+- [ ] BLOCK-006: Add collection cover images
+- [ ] UX-001: Add quantity selector to product detail
+- [ ] UX-002: Show product description on detail page
+- [ ] UX-010: Add trust badges to product + cart pages
+
+**High Priority (Week 1 post-launch):**
+- [ ] UX-008: Free shipping progress bar in cart
+- [ ] UX-005: Stock status badges on product detail
+- [ ] UX-009: Wishlist auth prompt modal (replace hard redirect)
+- [ ] TECH-001: Make seed script idempotent
+- [ ] TECH-004: Fix autocomplete attributes on forms
+- [ ] Verify cart save API works post-SSL fix (should be fixed)
+- [ ] Add 3-5 blog posts in Sanity
+
+**Medium Priority (Week 2-4):**
+- [ ] UX-004: Breadcrumb navigation + JSON-LD
+- [ ] UX-003: Size guide contextual links
+- [ ] UX-007: Cross-sell section in cart
+- [ ] TECH-002: Redis-based rate limiting
+- [ ] UX-012: Consistent admin sidebar language
+- [ ] Final Playwright test run on production URL
+
+---
+
+*Last updated: 2026-03-09 — Autonomous production audit by Claude Code*
+
+---
+
 ## Project Integration
 
 ### Register in CodeLabs Hub

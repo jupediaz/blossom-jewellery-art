@@ -1,61 +1,69 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Cormorant Garamond";
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap");
-}
-
 :root {
-  /* Brand colors — Blossom palette: soft blush rose + warm gold */
-  --color-sage: #F0D0D0;        /* blush rose — primary brand color */
-  --color-sage-light: #FAF0F0;  /* near-white rose */
-  --color-sage-dark: #D4AAAA;   /* medium rose for hover states */
-  --color-dusty-rose: #B87070;  /* deep rose — CTAs, badges */
-  --color-dusty-rose-light: #F5DCDC;
-  --color-dusty-rose-dark: #9A5252;
-  --color-cream: #FAFAF8;       /* clean near-white */
-  --color-cream-dark: #F2EDE8;  /* subtle warm off-white */
-  --color-gold: #C4A060;        /* warm amber gold */
-  --color-gold-light: #D8BB8A;
-  --color-gold-dark: #9A7A40;
-  --color-charcoal: #1E1E1E;
-  --color-warm-gray: #6B6B6B;
+  /* === Bijoux exact palette === */
+  --color-cream:        #F6F4F2;  /* body background */
+  --color-cream-dark:   #EEE8E3;  /* watermark text "jewelry/selection", dividers */
+  --color-beige:        #E3DBD4;  /* light promo block, product bg */
+  --color-navy:         #051F34;  /* headings, nav, emphasis */
+  --color-body:         #30373E;  /* body/paragraph text */
+  --color-muted:        #69727D;  /* muted text, buttons, tags */
+  --color-terracotta:   #CB9274;  /* accent — CTAs, "collections" watermark tint */
+  --color-terracotta-light: #D6B59F; /* "collections" watermark exact */
+  --color-terracotta-dark:  #A87055;
+  --color-blue-soft:    #D6E8F0;  /* second promo block soft blue */
 
-  /* Semantic tokens */
-  --background: #FFFFFF;
-  --foreground: var(--color-charcoal);
-  --muted: var(--color-warm-gray);
-  --accent: var(--color-sage);
-  --accent-secondary: var(--color-dusty-rose);
-  --highlight: var(--color-gold);
+  /* Keep legacy names pointing to new values */
+  --color-sage:          var(--color-beige);
+  --color-sage-light:    var(--color-cream);
+  --color-sage-dark:     var(--color-terracotta);
+  --color-dusty-rose:    var(--color-terracotta);
+  --color-dusty-rose-light: var(--color-beige);
+  --color-dusty-rose-dark:  var(--color-terracotta-dark);
+  --color-gold:          var(--color-terracotta);
+  --color-gold-light:    var(--color-beige);
+  --color-gold-dark:     var(--color-terracotta-dark);
+  --color-charcoal:      var(--color-navy);
+  --color-warm-gray:     var(--color-muted);
+
+  /* Semantic */
+  --background: var(--color-cream);
+  --foreground: var(--color-body);
 }
 
 @theme inline {
-  /* Brand palette */
-  --color-sage: var(--color-sage);
-  --color-sage-light: var(--color-sage-light);
-  --color-sage-dark: var(--color-sage-dark);
-  --color-dusty-rose: var(--color-dusty-rose);
-  --color-dusty-rose-light: var(--color-dusty-rose-light);
-  --color-dusty-rose-dark: var(--color-dusty-rose-dark);
-  --color-cream: var(--color-cream);
-  --color-cream-dark: var(--color-cream-dark);
-  --color-gold: var(--color-gold);
-  --color-gold-light: var(--color-gold-light);
-  --color-gold-dark: var(--color-gold-dark);
-  --color-charcoal: var(--color-charcoal);
-  --color-warm-gray: var(--color-warm-gray);
+  /* === Brand tokens (Tailwind classes) === */
+  --color-cream:            var(--color-cream);
+  --color-cream-dark:       var(--color-cream-dark);
+  --color-beige:            var(--color-beige);
+  --color-navy:             var(--color-navy);
+  --color-body:             var(--color-body);
+  --color-muted:            var(--color-muted);
+  --color-terracotta:       var(--color-terracotta);
+  --color-terracotta-light: var(--color-terracotta-light);
+  --color-terracotta-dark:  var(--color-terracotta-dark);
+  --color-blue-soft:        var(--color-blue-soft);
+
+  /* Legacy aliases (components still use these names) */
+  --color-sage:             var(--color-beige);
+  --color-sage-light:       var(--color-cream);
+  --color-sage-dark:        var(--color-terracotta);
+  --color-dusty-rose:       var(--color-terracotta);
+  --color-dusty-rose-light: var(--color-beige);
+  --color-dusty-rose-dark:  var(--color-terracotta-dark);
+  --color-gold:             var(--color-terracotta);
+  --color-gold-light:       var(--color-beige);
+  --color-gold-dark:        var(--color-terracotta-dark);
+  --color-charcoal:         var(--color-navy);
+  --color-warm-gray:        var(--color-muted);
 
   /* Semantic */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
   /* Fonts */
-  --font-heading: "Cormorant Garamond", "Georgia", serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-heading: "Sorts Mill Goudy", "Georgia", serif;
+  --font-body: "Montserrat", system-ui, sans-serif;
 }
 
 body {
@@ -68,7 +76,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* Base font size: 18px for comfortable reading */
+/* Base font size — Bijoux uses 18px */
 html {
   font-size: 18px;
   scroll-behavior: smooth;

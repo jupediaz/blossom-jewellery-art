@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Heart } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
@@ -13,11 +14,13 @@ interface WishlistButtonProps {
 
 export function WishlistButton({ productId, variant, className }: WishlistButtonProps) {
   const t = useTranslations('Products')
+  const { status } = useSession()
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Check if product is already in user's wishlist
+    // Only check wishlist if user is authenticated
+    if (status !== 'authenticated') return
     fetch('/api/account/wishlist')
       .then((res) => {
         if (!res.ok) return [] // Not authenticated
@@ -35,7 +38,7 @@ export function WishlistButton({ productId, variant, className }: WishlistButton
         }
       })
       .catch(() => {})
-  }, [productId, variant])
+  }, [productId, variant, status])
 
   const toggle = async () => {
     setLoading(true)

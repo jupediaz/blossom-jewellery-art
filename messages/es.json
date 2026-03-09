@@ -37,7 +37,10 @@
     "submit": "Enviar",
     "send": "Enviar",
     "error": "Algo salió mal",
-    "noResults": "No se encontraron resultados"
+    "noResults": "No se encontraron resultados",
+    "home": "Inicio",
+    "products": "Productos",
+    "collections": "Colecciones"
   },
   "Home": {
     "heroTitle": "Joyería Artesanal de Arcilla Polimérica",
@@ -107,7 +110,11 @@
     "noProductsFound": "No se encontraron productos en esta colección.",
     "viewAllPieces": "Ver todas las piezas",
     "priceLow": "Precio bajo",
-    "priceHigh": "alto"
+    "priceHigh": "alto",
+    "securePayment": "Pago Seguro",
+    "freeShippingBadge": "Envío Gratis España >€60",
+    "returns": "Devoluciones 30 días",
+    "sizeGuideLink": "Ver guía de tallas"
   },
   "Collections": {
     "title": "Colecciones",
@@ -141,7 +148,10 @@
     "recoverLoading": "Restaurando tu cesta...",
     "recoverExpired": "Este enlace de recuperacion ha expirado o ya no es valido.",
     "recoverError": "No se pudo recuperar tu cesta.",
-    "browseProducts": "Ver Productos"
+    "browseProducts": "Ver Productos",
+    "freeShippingProgress": "Añade {amount} más para envío gratis",
+    "freeShippingUnlocked": "¡Envío gratis desbloqueado!",
+    "spainOnly": "Solo España"
   },
   "Checkout": {
     "title": "Pago",
@@ -252,16 +262,16 @@
     "cost": "Coste",
     "spain": "España",
     "spainDelivery": "2-4 días laborables",
-    "spainCost": "Gratis a partir de 50\u20ac",
+    "spainCost": "Gratis a partir de 50€",
     "euCountries": "Países UE",
     "euDelivery": "5-8 días laborables",
-    "euCost": "Gratis a partir de 75\u20ac",
+    "euCost": "Gratis a partir de 75€",
     "uk": "Reino Unido",
     "ukDelivery": "7-10 días laborables",
-    "ukCost": "8,00\u20ac",
+    "ukCost": "8,00€",
     "restOfWorld": "Resto del Mundo",
     "rowDelivery": "10-15 días laborables",
-    "rowCost": "12,00\u20ac",
+    "rowCost": "12,00€",
     "orderTracking": "Seguimiento del Pedido",
     "orderTrackingText": "Una vez que tu pedido haya sido enviado, recibirás un email con un número de seguimiento para seguir el recorrido de tu paquete.",
     "returns": "Devoluciones",

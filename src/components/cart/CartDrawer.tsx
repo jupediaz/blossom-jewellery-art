@@ -132,6 +132,32 @@ export function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="border-t border-cream-dark px-6 py-4 space-y-4">
+            {/* Free shipping progress bar — Spain threshold €60 */}
+            {(() => {
+              const FREE_SHIPPING_THRESHOLD = 60;
+              const subtotal = totalPrice();
+              const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+              const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
+              return (
+                <div>
+                  <div className="flex justify-between text-xs text-warm-gray mb-1.5">
+                    {remaining > 0 ? (
+                      <span>{t("freeShippingProgress", { amount: formatPrice(remaining) })}</span>
+                    ) : (
+                      <span className="text-emerald-600 font-medium">{t("freeShippingUnlocked")}</span>
+                    )}
+                    <span className="text-sage">{t("spainOnly")}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-cream-dark overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-sage transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="flex justify-between text-sm">
               <span>{tc("subtotal")}</span>
               <span className="font-medium">{formatPrice(totalPrice())}</span>

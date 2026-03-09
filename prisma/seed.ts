@@ -129,8 +129,16 @@ async function main() {
 
   for (const { zone, methods } of zones) {
     for (const method of methods) {
-      await prisma.shippingMethod.create({
-        data: {
+      const methodId = `method-${zone.id}-${method.name.toLowerCase()}`
+      await prisma.shippingMethod.upsert({
+        where: { id: methodId },
+        update: {
+          rate: method.rate,
+          estimatedDaysMin: method.min,
+          estimatedDaysMax: method.max,
+        },
+        create: {
+          id: methodId,
           zoneId: zone.id,
           name: method.name,
           rate: method.rate,

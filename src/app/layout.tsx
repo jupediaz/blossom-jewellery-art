@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Montserrat, Sorts_Mill_Goudy } from "next/font/google";
 import { siteConfig } from "@/lib/env";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import "./globals.css";
 
-const inter = Inter({
+const montserrat = Montserrat({
   variable: "--font-body",
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin"],
   display: "swap",
 });
 
-const cormorant = Cormorant_Garamond({
+const sortsMill = Sorts_Mill_Goudy({
   variable: "--font-heading",
-  subsets: ["latin", "cyrillic"],
-  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -74,7 +75,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${cormorant.variable} font-body bg-cream text-charcoal antialiased`}
+        className={`${montserrat.variable} ${sortsMill.variable} font-body bg-cream text-charcoal antialiased`}
       >
         <GoogleAnalytics />
         {children}

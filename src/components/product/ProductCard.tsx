@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
-import { formatPrice } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import type { Product } from "@/lib/types";
 
@@ -31,73 +30,71 @@ export function ProductCard({ product }: ProductCardProps) {
   const isOnSale = product.compareAtPrice && product.compareAtPrice > product.price;
 
   return (
-    <Link
-      href={`/products/${product.slug.current}`}
-      className="group block"
-    >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-cream-dark">
+    <Link href={`/products/${product.slug.current}`} className="group block">
+      {/* Image */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-beige/30 mb-5">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-warm-gray">
-            <ShoppingBag size={40} />
+          <div className="flex h-full items-center justify-center text-muted">
+            <ShoppingBag size={36} strokeWidth={1} />
           </div>
         )}
 
-        {/* Sale badge */}
+        {/* Badges */}
         {isOnSale && (
-          <span className="absolute top-3 left-3 bg-dusty-rose text-white text-xs px-2 py-1 rounded">
+          <span className="absolute top-3 left-3 text-[9px] font-semibold tracking-[0.12em] uppercase bg-terracotta text-cream px-2.5 py-1 font-body">
             {t("sale")}
           </span>
         )}
-
-        {/* Out of stock overlay */}
         {!product.inStock && (
-          <div className="absolute inset-0 bg-cream/60 flex items-center justify-center">
-            <span className="bg-charcoal text-cream text-xs px-3 py-1.5 rounded">
+          <div className="absolute inset-0 bg-cream/50 flex items-center justify-center">
+            <span className="text-[9px] font-semibold tracking-[0.12em] uppercase bg-navy text-cream px-4 py-1.5 font-body">
               {t("soldOut")}
             </span>
           </div>
         )}
 
-        {/* Quick add button */}
+        {/* Quick add — full-width bar on hover */}
         {product.inStock && (
           <button
             onClick={handleAddToCart}
-            className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-white"
+            className="absolute bottom-0 inset-x-0 bg-navy/90 text-cream text-[9px] font-semibold tracking-[0.18em] uppercase py-3 opacity-0 group-hover:opacity-100 transition-opacity font-body flex items-center justify-center gap-2"
             aria-label={`Add ${product.name} to cart`}
           >
-            <ShoppingBag size={16} className="text-charcoal" />
+            <ShoppingBag size={12} strokeWidth={1.5} />
+            Add to Cart
           </button>
         )}
       </div>
 
-      <div className="mt-3 space-y-1">
-        <h3 className="text-sm font-medium text-charcoal group-hover:text-dusty-rose transition-colors">
+      {/* Info */}
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-navy font-body leading-tight group-hover:text-terracotta transition-colors">
           {product.name}
-        </h3>
-        {(product.collection || product.category) && (
-          <p className="text-xs text-warm-gray">
-            {product.collection?.name || product.category?.name}
-          </p>
-        )}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {formatPrice(product.price)}
-          </span>
-          {isOnSale && (
-            <span className="text-xs text-warm-gray line-through">
-              {formatPrice(product.compareAtPrice!)}
-            </span>
-          )}
-        </div>
+        </p>
+        <p className="text-[10px] font-semibold text-navy font-body whitespace-nowrap flex-shrink-0">
+          ${product.price.toFixed(2)}
+        </p>
       </div>
+      {(product.collection || product.category) && (
+        <p className="text-[11px] text-muted font-body">
+          {product.collection?.name || product.category?.name || "handmade"}
+          {" · "}
+          <span>jewellery</span>
+        </p>
+      )}
+      {isOnSale && (
+        <p className="text-[10px] text-muted line-through font-body mt-0.5">
+          ${product.compareAtPrice!.toFixed(2)}
+        </p>
+      )}
     </Link>
   );
 }

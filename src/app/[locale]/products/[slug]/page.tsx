@@ -6,6 +6,7 @@ import { siteConfig } from "@/lib/env";
 import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import type { Product } from "@/lib/types";
 import { mockProducts } from "@/lib/mock-data";
 import { getTranslations } from "next-intl/server";
@@ -94,6 +95,8 @@ export default async function ProductPage({
     currentProduct.relatedProducts = [...sameCollection, ...otherProducts].slice(0, 4);
   }
 
+  const t = await getTranslations("Common");
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       <ProductJsonLd product={currentProduct} />
@@ -102,6 +105,16 @@ export default async function ProductPage({
           { name: "Home", url: siteConfig.url },
           { name: "Products", url: `${siteConfig.url}/products` },
           { name: currentProduct.name, url: `${siteConfig.url}/products/${currentProduct.slug?.current || slug}` },
+        ]}
+      />
+      <Breadcrumbs
+        items={[
+          { name: t("home"), href: "/" },
+          { name: t("products"), href: "/products" },
+          ...(currentProduct.collection
+            ? [{ name: currentProduct.collection.name, href: `/collections/${currentProduct.collection.slug.current}` }]
+            : []),
+          { name: currentProduct.name },
         ]}
       />
       <ProductDetail product={currentProduct} />

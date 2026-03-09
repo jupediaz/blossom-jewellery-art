@@ -37,7 +37,10 @@
     "submit": "Submit",
     "send": "Send",
     "error": "Something went wrong",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "home": "Home",
+    "products": "Products",
+    "collections": "Collections"
   },
   "Home": {
     "heroTitle": "Handcrafted Polymer Clay Jewelry",
@@ -141,7 +144,10 @@
     "recoverLoading": "Restoring your cart...",
     "recoverExpired": "This recovery link has expired or is no longer valid.",
     "recoverError": "Failed to recover your cart.",
-    "browseProducts": "Browse Products"
+    "browseProducts": "Browse Products",
+    "freeShippingProgress": "Add {amount} more for free shipping",
+    "freeShippingUnlocked": "Free shipping unlocked!",
+    "spainOnly": "Spain only"
   },
   "Checkout": {
     "title": "Checkout",
@@ -252,16 +258,16 @@
     "cost": "Cost",
     "spain": "Spain",
     "spainDelivery": "2-4 business days",
-    "spainCost": "Free over \u20ac50",
+    "spainCost": "Free over €50",
     "euCountries": "EU Countries",
     "euDelivery": "5-8 business days",
-    "euCost": "Free over \u20ac75",
+    "euCost": "Free over €75",
     "uk": "UK",
     "ukDelivery": "7-10 business days",
-    "ukCost": "\u20ac8.00",
+    "ukCost": "€8.00",
     "restOfWorld": "Rest of World",
     "rowDelivery": "10-15 business days",
-    "rowCost": "\u20ac12.00",
+    "rowCost": "€12.00",
     "orderTracking": "Order Tracking",
     "orderTrackingText": "Once your order has been shipped, you'll receive an email with a tracking number. You can use this to follow your package's journey.",
     "returns": "Returns",
