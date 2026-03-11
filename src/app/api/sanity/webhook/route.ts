@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Upsert base product inventory
+  // On update: only sync trackInventory — never reset quantityTotal (managed by admin)
   await db.inventory.upsert({
     where: {
       sanityProductId_sanityVariantKey: {
@@ -53,7 +54,6 @@ export async function POST(req: NextRequest) {
       },
     },
     update: {
-      quantityTotal: inStock ? Math.max(1, 0) : 0,
       trackInventory: true,
     },
     create: {
@@ -75,7 +75,6 @@ export async function POST(req: NextRequest) {
           },
         },
         update: {
-          quantityTotal: variant.inStock ? 1 : 0,
           trackInventory: true,
         },
         create: {
