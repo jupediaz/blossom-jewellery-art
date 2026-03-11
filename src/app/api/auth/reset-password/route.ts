@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
+import crypto, { timingSafeEqual } from 'crypto'
 import { hash } from 'bcryptjs'
 import { db } from '@/lib/db'
 import { z } from 'zod'
@@ -33,15 +33,25 @@ export async function POST(req: NextRequest) {
       .update(token)
       .digest('hex')
 
-    // Find the verification token
+    // Find the verification token by identifier only — compare hash in constant time
     const verificationToken = await db.verificationToken.findFirst({
-      where: {
-        identifier: email,
-        token: hashedToken,
-      },
+      where: { identifier: email },
     })
 
-    if (!verificationToken) {
+    // Timing-safe comparison to prevent token enumeration attacks
+    let tokenValid = false
+    if (verificationToken) {
+      try {
+        tokenValid = timingSafeEqual(
+          Buffer.from(verificationToken.token, 'hex'),
+          Buffer.from(hashedToken, 'hex')
+        )
+      } catch {
+        // Buffer length mismatch — invalid token
+      }
+    }
+
+    if (!verificationToken || !tokenValid) {
       return NextResponse.json(
         { error: 'This reset link is invalid or has expired.' },
         { status: 400 }
