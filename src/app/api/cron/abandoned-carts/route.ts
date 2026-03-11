@@ -162,12 +162,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Also detect newly abandoned carts (active carts with no activity for 1+ hour)
+  // Only flag carts belonging to customers with emails — guest carts can't be recovered
   const newlyAbandoned = await db.cartSession.updateMany({
     where: {
       abandonedAt: null,
       convertedOrderId: null,
       lastActivityAt: { lt: oneHourAgo },
-      customerId: { not: null },
+      customer: { email: { not: null } },
     },
     data: { abandonedAt: now },
   })

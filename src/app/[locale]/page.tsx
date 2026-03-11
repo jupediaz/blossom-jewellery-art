@@ -134,15 +134,13 @@ export default async function HomePage() {
         </div>
 
         {/* Right panel — photo */}
-        <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-          {/* Decorative circle */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-square rounded-full bg-beige/60 z-0" />
+        <div className="hidden lg:block lg:w-1/2 relative overflow-hidden bg-[#F8F0EB]">
           <Image
-            src="/images/hero-jewellery.jpg"
+            src="/images/hero-model.webp"
             alt="Blossom by Olha — Handcrafted Jewellery"
             fill
             sizes="50vw"
-            className="object-cover object-center z-10 relative"
+            className="object-contain object-bottom z-10 relative"
             priority
           />
         </div>
@@ -150,11 +148,11 @@ export default async function HomePage() {
         {/* Mobile: faint bg image */}
         <div className="absolute inset-0 lg:hidden z-0">
           <Image
-            src="/images/hero-jewellery.jpg"
+            src="/images/hero-model.webp"
             alt=""
             fill
             sizes="100vw"
-            className="object-cover object-center opacity-10"
+            className="object-contain object-center opacity-15"
             priority
           />
         </div>
