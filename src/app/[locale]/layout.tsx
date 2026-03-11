@@ -34,8 +34,14 @@ export default async function LocaleLayout({ children, params }: Props) {
       <Providers>
       <ToastProvider>
         <HtmlLangUpdater locale={locale} />
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-charcoal focus:text-cream focus:px-4 focus:py-2 focus:rounded"
+        >
+          Skip to main content
+        </a>
         <Header />
-        <main>{children}</main>
+        <main id="main-content">{children}</main>
         <Footer />
         <CartDrawer />
         <CartSyncInit />

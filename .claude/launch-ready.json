@@ -1,0 +1,62 @@
+{
+  "$schema": "launch-ready-config-v1",
+  "lastRun": "2026-03-11T12:00:00.000Z",
+  "version": 1,
+
+  "scope": {
+    "audits": true,
+    "codeQuality": true,
+    "i18n": true,
+    "orthography": true,
+    "responsive": true,
+    "e2eFlows": true,
+    "database": true,
+    "credentials": true,
+    "links": true,
+    "email": true,
+    "stripe": true,
+    "roleEmpathy": true
+  },
+
+  "testAccounts": {
+    "_comment": "1 account per role. Only visible in development.",
+    "enabled": true,
+    "roles": ["ADMIN", "STORE_OWNER", "CUSTOMER"],
+    "emailDomain": "blossombyolha.com",
+    "quickLoginInDev": true,
+    "quickLoginInProd": false
+  },
+
+  "demoAccounts": {
+    "_comment": "Visible in production with realistic seed data.",
+    "enabled": false,
+    "roles": ["STORE_OWNER", "CUSTOMER"],
+    "withSeedData": true,
+    "seedDataStrategy": "ai-generated",
+    "visibleInProd": true
+  },
+
+  "autoFix": {
+    "level": "aggressive",
+    "_options": ["report-only", "conservative", "aggressive"],
+    "commitPerPhase": true,
+    "commitPrefix": "launch-ready",
+    "cleanStaleBranches": true
+  },
+
+  "playwright": {
+    "breakpoints": {
+      "mobile": { "width": 375, "height": 812 },
+      "tablet": { "width": 768, "height": 1024 },
+      "desktop": { "width": 1440, "height": 900 }
+    },
+    "flows": ["registration", "login", "browse-products", "add-to-cart", "checkout", "admin-login"],
+    "screenshotDir": "docs/audits/launch-ready/screenshots",
+    "roles": ["ADMIN", "STORE_OWNER", "CUSTOMER"]
+  },
+
+  "notes": "",
+  "history": [
+    { "date": "2026-03-11", "score": 74, "fixed": 23, "remaining": 8 }
+  ]
+}

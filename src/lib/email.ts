@@ -33,13 +33,22 @@ export async function sendEmail({
     return null
   }
 
-  const result = await resend.emails.send({
-    from: FROM_EMAIL,
-    to,
-    subject,
-    html,
-    replyTo,
-  })
+  try {
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject,
+      html,
+      replyTo,
+    })
 
-  return result
+    if (result.error) {
+      console.error('[Email] Resend API error:', result.error)
+    }
+
+    return result
+  } catch (error) {
+    console.error('[Email] Failed to send:', error)
+    return { data: null, error }
+  }
 }

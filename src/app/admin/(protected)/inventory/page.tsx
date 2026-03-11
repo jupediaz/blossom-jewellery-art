@@ -11,6 +11,18 @@ export default async function InventoryPage() {
     },
   })
 
+  // Build a map of sanityProductId -> product name from order items
+  const productIds = inventory.map((i) => i.sanityProductId).filter(Boolean)
+  const orderItems = productIds.length > 0
+    ? await db.orderItem.findMany({
+        where: { sanityProductId: { in: productIds } },
+        select: { sanityProductId: true, productName: true },
+        distinct: ['sanityProductId'],
+        orderBy: { createdAt: 'desc' },
+      })
+    : []
+  const productNameMap = new Map(orderItems.map((oi) => [oi.sanityProductId, oi.productName]))
+
   return (
     <div className="space-y-6">
       <div>
@@ -67,7 +79,7 @@ export default async function InventoryPage() {
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-6 py-4">
                       <p className="text-sm font-medium text-gray-900">
-                        {item.sanityProductId}
+                        {productNameMap.get(item.sanityProductId) || item.sanityProductId}
                       </p>
                       {item.sanityVariantKey && (
                         <p className="text-xs text-gray-500">

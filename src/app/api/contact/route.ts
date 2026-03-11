@@ -9,6 +9,10 @@ const contactSchema = z.object({
   message: z.string().min(10).max(5000),
 });
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -22,16 +26,21 @@ export async function POST(req: Request) {
       other: "Other",
     };
 
+    const safeName = escapeHtml(data.name)
+    const safeEmail = escapeHtml(data.email)
+    const safeMessage = escapeHtml(data.message).replace(/\n/g, "<br>")
+    const safeSubject = subjectMap[data.subject] || escapeHtml(data.subject)
+
     await sendEmail({
       to: "hello@blossombyolha.com",
-      subject: `[${subjectMap[data.subject] || data.subject}] from ${data.name}`,
+      subject: `[${safeSubject}] from ${safeName}`,
       html: `
         <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Email:</strong> ${data.email}</p>
-        <p><strong>Subject:</strong> ${subjectMap[data.subject] || data.subject}</p>
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> ${safeEmail}</p>
+        <p><strong>Subject:</strong> ${safeSubject}</p>
         <p><strong>Message:</strong></p>
-        <p>${data.message.replace(/\n/g, "<br>")}</p>
+        <p>${safeMessage}</p>
       `,
     });
 

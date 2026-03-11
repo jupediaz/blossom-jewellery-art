@@ -14,11 +14,12 @@ interface SanityVariant {
 
 export async function POST(req: NextRequest) {
   const secret = process.env.SANITY_WEBHOOK_SECRET
-  if (secret) {
-    const headerSecret = req.headers.get('x-sanity-webhook-secret')
-    if (headerSecret !== secret) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!secret) {
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 503 })
+  }
+  const headerSecret = req.headers.get('x-sanity-webhook-secret')
+  if (headerSecret !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const body = await req.json()

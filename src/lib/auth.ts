@@ -96,7 +96,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       // Customer account routes - allow login/register without auth
-      if (pathWithoutLocale === '/account/login' || pathWithoutLocale === '/account/register') return true
+      if (
+        pathWithoutLocale === '/account/login' ||
+        pathWithoutLocale === '/account/register' ||
+        pathWithoutLocale === '/account/forgot-password' ||
+        pathWithoutLocale === '/account/reset-password'
+      ) return true
       if (pathWithoutLocale.startsWith('/account')) {
         if (!auth?.user) {
           const loginUrl = new URL('/account/login', request.url)

@@ -108,6 +108,15 @@ export default function CustomerLoginPage() {
             />
           </div>
 
+          <div className="text-right">
+            <Link
+              href="/account/forgot-password"
+              className="text-sm text-gray-500 hover:text-charcoal hover:underline"
+            >
+              {t('forgotPassword')}
+            </Link>
+          </div>
+
           <button
             type="submit"
             disabled={loading}

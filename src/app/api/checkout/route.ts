@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Reserve inventory for each item
-    const inventoryReservations: string[] = []
+    const inventoryReservations: Array<{ id: string; qty: number }> = []
     for (const item of items) {
       const inventory = await db.inventory.findFirst({
         where: { sanityProductId: item.id },
@@ -111,11 +111,11 @@ export async function POST(request: NextRequest) {
         const available =
           inventory.quantityTotal - inventory.quantityReserved - inventory.quantitySold
         if (available < item.quantity) {
-          // Release any reservations we already made
-          for (const resId of inventoryReservations) {
+          // Release any reservations we already made (using each reservation's own qty)
+          for (const res of inventoryReservations) {
             await db.inventory.update({
-              where: { id: resId },
-              data: { quantityReserved: { decrement: item.quantity } },
+              where: { id: res.id },
+              data: { quantityReserved: { decrement: res.qty } },
             })
           }
           return NextResponse.json(
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
           },
         })
 
-        inventoryReservations.push(inventory.id)
+        inventoryReservations.push({ id: inventory.id, qty: item.quantity })
       }
     }
 
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
         customer_note: customerNote || '',
         subtotal: String(subtotal),
         total: String(total),
-        inventory_reservations: JSON.stringify(inventoryReservations),
+        inventory_reservations: JSON.stringify(inventoryReservations.map(r => r.id)),
       },
     }
 

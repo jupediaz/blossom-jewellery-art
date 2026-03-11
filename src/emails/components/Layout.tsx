@@ -38,6 +38,13 @@ export function EmailLayout({ preview, children }: LayoutProps) {
             <Text style={footerText}>
               Handcrafted with love by Olha
             </Text>
+            <Text style={unsubscribeText}>
+              If you no longer wish to receive these emails, you can{' '}
+              <a href="https://www.blossombyolha.com/account" style={unsubscribeLink}>
+                manage your preferences
+              </a>{' '}
+              in your account settings.
+            </Text>
           </Section>
         </Container>
       </Body>
@@ -92,4 +99,16 @@ const footerText: React.CSSProperties = {
   fontSize: '12px',
   color: '#999',
   margin: '2px 0',
+}
+
+const unsubscribeText: React.CSSProperties = {
+  fontSize: '11px',
+  color: '#bbb',
+  margin: '12px 0 0',
+  lineHeight: '1.5',
+}
+
+const unsubscribeLink: React.CSSProperties = {
+  color: '#999',
+  textDecoration: 'underline',
 }

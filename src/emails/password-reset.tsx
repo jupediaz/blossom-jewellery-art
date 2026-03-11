@@ -6,36 +6,38 @@ import {
 import * as React from 'react'
 import { EmailLayout } from './components/Layout'
 
-interface WelcomeProps {
-  name: string
+interface PasswordResetProps {
+  resetUrl: string
 }
 
-export default function Welcome({ name = 'there' }: WelcomeProps) {
+export default function PasswordReset({
+  resetUrl = 'https://www.blossombyolha.com/account/reset-password',
+}: PasswordResetProps) {
   return (
-    <EmailLayout preview="Welcome to Blossom by Olha">
+    <EmailLayout preview="Reset your password — Blossom by Olha">
       <Section style={content}>
-        <Text style={heading}>Welcome, {name}</Text>
+        <Text style={heading}>Reset Your Password</Text>
         <Text style={body}>
-          Thank you for creating an account with Blossom by Olha. Each
-          piece in our collection is handcrafted from polymer clay, inspired by
-          the organic beauty of botanical forms.
+          We received a request to reset the password for your Blossom by Olha
+          account. Click the button below to choose a new password.
         </Text>
         <Text style={body}>
-          As a member, you can track your orders, save your favorite pieces to
-          your wishlist, and enjoy a seamless checkout experience.
+          If you did not request a password reset, you can safely ignore this
+          email. Your password will not be changed.
         </Text>
       </Section>
 
       <Section style={ctaSection}>
-        <Button
-          style={button}
-          href="https://www.blossombyolha.com/products"
-        >
-          Explore the Collection
+        <Button style={button} href={resetUrl}>
+          Reset Password
         </Button>
       </Section>
 
       <Section style={content}>
+        <Text style={note}>
+          This link will expire in 1 hour. If it has expired, you can request a
+          new one from the login page.
+        </Text>
         <Text style={signature}>
           With love,
           <br />
@@ -78,6 +80,13 @@ const button: React.CSSProperties = {
   fontSize: '14px',
   fontWeight: 'bold',
   textDecoration: 'none',
+}
+
+const note: React.CSSProperties = {
+  fontSize: '12px',
+  color: '#999',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
 }
 
 const signature: React.CSSProperties = {

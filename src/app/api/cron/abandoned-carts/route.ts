@@ -12,7 +12,10 @@ export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 503 })
+  }
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     const items = cart.items as Array<{ name: string; price: number; image?: string }>
     const subtotal = Number(cart.subtotal)
-    const recoveryUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://blossombyolha.com'}/cart/recover/${cart.sessionToken}`
+    const recoveryUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'}/cart/recover/${cart.sessionToken}`
 
     try {
       // Determine which stage of recovery email to send

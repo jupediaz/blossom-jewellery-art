@@ -4,22 +4,6 @@ import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
 import Stripe from 'stripe'
 
-// Generate order number: BLM-2026-0001
-async function generateOrderNumber(): Promise<string> {
-  const year = new Date().getFullYear()
-  const prefix = `BLM-${year}-`
-
-  const lastOrder = await db.order.findFirst({
-    where: { orderNumber: { startsWith: prefix } },
-    orderBy: { orderNumber: 'desc' },
-  })
-
-  if (!lastOrder) return `${prefix}0001`
-
-  const lastNum = parseInt(lastOrder.orderNumber.replace(prefix, ''), 10)
-  return `${prefix}${String(lastNum + 1).padStart(4, '0')}`
-}
-
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')
@@ -32,13 +16,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 503 })
+  }
+
   let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -61,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     case 'payment_intent.payment_failed': {
       const paymentIntent = event.data.object as Stripe.PaymentIntent
-      console.log(`Payment failed for intent ${paymentIntent.id}`)
+      console.error(`Payment failed for intent ${paymentIntent.id}`)
       break
     }
   }
@@ -70,6 +59,12 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+  // Idempotency: skip if order already exists for this session
+  const existingOrder = await db.order.findUnique({
+    where: { stripeSessionId: session.id },
+  })
+  if (existingOrder) return
+
   const meta = session.metadata || {}
 
   // Parse order items from metadata
@@ -114,81 +109,95 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       }
     : {}
 
-  const orderNumber = await generateOrderNumber()
+  // Wrap order creation, inventory updates, and coupon usage in a transaction
+  const { order, orderNumber } = await db.$transaction(async (tx) => {
+    // Generate order number: BLM-2026-0001
+    const year = new Date().getFullYear()
+    const prefix = `BLM-${year}-`
+    const lastOrder = await tx.order.findFirst({
+      where: { orderNumber: { startsWith: prefix } },
+      orderBy: { orderNumber: 'desc' },
+    })
+    const orderNumber = lastOrder
+      ? `${prefix}${String(parseInt(lastOrder.orderNumber.replace(prefix, ''), 10) + 1).padStart(4, '0')}`
+      : `${prefix}0001`
 
-  // Create order with items in a single transaction
-  const order = await db.order.create({
-    data: {
-      orderNumber,
-      customerId: customerId || undefined,
-      guestEmail: customerId ? undefined : session.customer_details?.email || undefined,
-      guestName: customerId ? undefined : session.customer_details?.name || undefined,
-      status: 'CONFIRMED',
-      paymentStatus: 'PAID',
-      stripeSessionId: session.id,
-      stripePaymentIntent: session.payment_intent as string,
-      subtotal,
-      shippingCost,
-      discountAmount,
-      total,
-      couponId: couponId || undefined,
-      shippingAddress,
-      shippingMethodId: shippingMethodId || undefined,
-      customerNote,
-      items: {
-        create: items.map((item) => ({
-          sanityProductId: item.id,
-          variantName: item.variant || null,
-          productName: item.name,
-          productImage: item.image || null,
-          unitPrice: item.price,
-          quantity: item.qty,
-          totalPrice: item.price * item.qty,
-        })),
+    // Create order with items
+    const order = await tx.order.create({
+      data: {
+        orderNumber,
+        customerId: customerId || undefined,
+        guestEmail: customerId ? undefined : session.customer_details?.email || undefined,
+        guestName: customerId ? undefined : session.customer_details?.name || undefined,
+        status: 'CONFIRMED',
+        paymentStatus: 'PAID',
+        stripeSessionId: session.id,
+        stripePaymentIntent: session.payment_intent as string,
+        subtotal,
+        shippingCost,
+        discountAmount,
+        total,
+        couponId: couponId || undefined,
+        shippingAddress,
+        shippingMethodId: shippingMethodId || undefined,
+        customerNote,
+        items: {
+          create: items.map((item) => ({
+            sanityProductId: item.id,
+            variantName: item.variant || null,
+            productName: item.name,
+            productImage: item.image || null,
+            unitPrice: item.price,
+            quantity: item.qty,
+            totalPrice: item.price * item.qty,
+          })),
+        },
+        statusHistory: {
+          create: [
+            { status: 'PENDING', note: 'Order placed' },
+            { status: 'CONFIRMED', note: 'Payment confirmed via Stripe' },
+          ],
+        },
       },
-      statusHistory: {
-        create: [
-          { status: 'PENDING', note: 'Order placed' },
-          { status: 'CONFIRMED', note: 'Payment confirmed via Stripe' },
-        ],
-      },
-    },
-  })
-
-  // Convert reservations to sales
-  for (const item of items) {
-    const inventory = await db.inventory.findFirst({
-      where: { sanityProductId: item.id },
     })
 
-    if (inventory && inventory.trackInventory) {
-      await db.inventory.update({
-        where: { id: inventory.id },
-        data: {
-          quantityReserved: { decrement: item.qty },
-          quantitySold: { increment: item.qty },
-        },
+    // Convert reservations to sales
+    for (const item of items) {
+      const inventory = await tx.inventory.findFirst({
+        where: { sanityProductId: item.id },
       })
 
-      await db.stockMovement.create({
-        data: {
-          inventoryId: inventory.id,
-          type: 'SALE',
-          quantity: item.qty,
-          reason: `Order ${orderNumber}`,
-          orderId: order.id,
-        },
+      if (inventory && inventory.trackInventory) {
+        await tx.inventory.update({
+          where: { id: inventory.id },
+          data: {
+            quantityReserved: { decrement: item.qty },
+            quantitySold: { increment: item.qty },
+          },
+        })
+
+        await tx.stockMovement.create({
+          data: {
+            inventoryId: inventory.id,
+            type: 'SALE',
+            quantity: item.qty,
+            reason: `Order ${orderNumber}`,
+            orderId: order.id,
+          },
+        })
+      }
+    }
+
+    // Increment coupon usage
+    if (couponId) {
+      await tx.coupon.update({
+        where: { id: couponId },
+        data: { currentUses: { increment: 1 } },
       })
     }
-  }
 
-  // Increment coupon usage
-  if (couponId) {
-    await db.coupon.update({
-      where: { id: couponId },
-      data: { currentUses: { increment: 1 } },
-    })
-  }
+    return { order, orderNumber }
+  })
 
   // Send confirmation email
   const customerEmail =
@@ -198,16 +207,20 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       : null)
 
   if (customerEmail) {
-    await sendEmail({
-      to: customerEmail,
-      subject: `Order Confirmed - ${orderNumber}`,
-      html: buildOrderConfirmationEmail(order.orderNumber, items, {
-        subtotal,
-        shippingCost,
-        discountAmount,
-        total,
-      }),
-    })
+    try {
+      await sendEmail({
+        to: customerEmail,
+        subject: `Order Confirmed - ${orderNumber}`,
+        html: buildOrderConfirmationEmail(order.orderNumber, items, {
+          subtotal,
+          shippingCost,
+          discountAmount,
+          total,
+        }),
+      })
+    } catch (emailError) {
+      console.error(`Failed to send order confirmation email for ${orderNumber}:`, emailError)
+    }
 
     await db.emailLog.create({
       data: {
@@ -219,7 +232,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     })
   }
 
-  console.log(`Order ${orderNumber} created successfully for session ${session.id}`)
+  // Order created successfully
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
@@ -262,7 +275,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
     }
   }
 
-  console.log(`Released inventory for expired session ${session.id}`)
+  // Inventory released for expired session
 }
 
 function buildOrderConfirmationEmail(

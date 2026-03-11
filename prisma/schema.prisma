@@ -105,6 +105,9 @@ model StockMovement {
   inventory   Inventory    @relation(fields: [inventoryId], references: [id])
 
   createdAt DateTime @default(now())
+
+  @@index([inventoryId])
+  @@index([orderId])
 }
 
 enum MovementType {
@@ -165,6 +168,7 @@ model Order {
   @@index([customerId])
   @@index([status])
   @@index([createdAt])
+  @@index([guestEmail])
 }
 
 enum OrderStatus {
@@ -200,6 +204,9 @@ model OrderItem {
   totalPrice   Decimal @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([sanityProductId])
 }
 
 model OrderStatusHistory {
@@ -210,6 +217,8 @@ model OrderStatusHistory {
   note    String?
 
   createdAt DateTime @default(now())
+
+  @@index([orderId])
 }
 
 // ─── COUPONS ────────────────────────────────────
@@ -369,6 +378,8 @@ model Address {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 // ─── NEWSLETTER ─────────────────────────────────
@@ -395,6 +406,9 @@ model EmailLog {
   metadata Json?
 
   createdAt DateTime @default(now())
+
+  @@index([to])
+  @@index([type])
 }
 
 enum EmailType {

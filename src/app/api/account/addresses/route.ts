@@ -59,10 +59,17 @@ export async function PATCH(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { id, ...data } = body
+  const { id } = body
 
   if (!id) {
     return NextResponse.json({ error: 'Address ID required' }, { status: 400 })
+  }
+
+  // Whitelist allowed fields to prevent mass-assignment
+  const data: Record<string, unknown> = {}
+  const allowedFields = ['label', 'firstName', 'lastName', 'line1', 'line2', 'city', 'state', 'postalCode', 'country', 'phone', 'isDefault'] as const
+  for (const field of allowedFields) {
+    if (body[field] !== undefined) data[field] = body[field]
   }
 
   // Verify ownership

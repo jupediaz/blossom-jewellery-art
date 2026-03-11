@@ -1,0 +1,29 @@
+{
+  "date": "2026-03-11",
+  "project": "blossom-jewellery-art",
+  "overallScore": 74,
+  "domains": {
+    "security": { "score": 82, "p0": 2, "p1": 3, "p2": 2, "fixed": 7 },
+    "performance": { "score": 88, "p0": 0, "p1": 2, "p2": 2, "fixed": 0 },
+    "seo": { "score": 92, "p0": 0, "p1": 1, "p2": 1, "fixed": 0 },
+    "accessibility": { "score": 72, "p0": 1, "p1": 3, "p2": 2, "fixed": 2 },
+    "dependencies": { "score": 72, "p0": 1, "p1": 2, "p2": 2, "fixed": 0 },
+    "email": { "score": 72, "p0": 4, "p1": 3, "p2": 4, "fixed": 3 },
+    "codeQuality": { "score": 75, "p0": 3, "p1": 5, "p2": 7, "fixed": 5 },
+    "i18n": { "score": 82, "p0": 0, "p1": 2, "p2": 1, "fixed": 0 },
+    "orthography": { "score": 95, "p0": 1, "p1": 0, "p2": 0, "fixed": 4 },
+    "database": { "score": 72, "p0": 2, "p1": 1, "p2": 2, "fixed": 0 },
+    "stripe": { "score": 82, "p0": 2, "p1": 2, "p2": 2, "fixed": 1 },
+    "credentials": { "score": 95, "p0": 0, "p1": 1, "p2": 0, "fixed": 0 },
+    "links": { "score": 85, "p0": 1, "p1": 1, "p2": 2, "fixed": 1 },
+    "roleEmpathy": { "score": 75, "p0": 3, "p1": 0, "p2": 1, "fixed": 1 }
+  },
+  "autoFixed": 23,
+  "remainingP0": 8,
+  "remainingP1": 12,
+  "testAccounts": [
+    { "role": "admin", "email": "admin@blossomjewellery.art" },
+    { "role": "store_owner", "email": "olha@blossomjewellery.art" }
+  ],
+  "demoAccounts": []
+}

@@ -235,6 +235,12 @@
       "CANCELLED": "Cancelled",
       "REFUNDED": "Refunded"
     },
+    "resetPassword": "Reset Password",
+    "newPassword": "New Password",
+    "resetEmailSent": "If an account exists with that email, we've sent a password reset link.",
+    "passwordResetSuccess": "Password reset successfully. You can now sign in.",
+    "resetExpired": "This reset link has expired or is invalid.",
+    "sendResetLink": "Send Reset Link",
     "paymentStatusLabels": {
       "PENDING": "Pending",
       "PAID": "Paid",
