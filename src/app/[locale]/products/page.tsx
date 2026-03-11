@@ -129,7 +129,39 @@ export default async function ProductsPage({
   const collections = mockCollections;
   const activeCollection = params.collection;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'
+  // Build JSON-LD CollectionPage schema for SEO rich results
+  // Escape < > & to prevent </script> injection (JSON.stringify doesn't escape these by default)
+  const jsonLdString = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: t('title'),
+    description: t('metaDescription'),
+    url: `${siteUrl}/products`,
+    numberOfItems: products.length,
+    itemListElement: products.slice(0, 50).map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Product',
+        name: p.name,
+        url: `${siteUrl}/products/${p.slug.current}`,
+        image: p.imageUrl || undefined,
+        offers: {
+          '@type': 'Offer',
+          price: p.price,
+          priceCurrency: 'EUR',
+          availability: p.inStock
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+        },
+      },
+    })),
+  }).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026')
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString }} />
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
         <h1 className="font-heading text-4xl font-light mb-2">{t("title")}</h1>
@@ -226,5 +258,6 @@ export default async function ProductsPage({
         </div>
       )}
     </div>
+    </>
   );
 }
