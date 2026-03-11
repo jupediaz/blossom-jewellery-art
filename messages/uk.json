@@ -226,6 +226,7 @@
     "saveFavoritesLater": "Збережіть улюблені прикраси на потім.",
     "tracking": "Відстеження",
     "qty": "К-ть: {count}",
+    "itemCount": "{count, plural, one {# товар} few {# товари} many {# товарів} other {# товари}}",
     "totalLabel": "Разом",
     "viewOrder": "Переглянути",
     "orderDetails": "Деталі Замовлення",

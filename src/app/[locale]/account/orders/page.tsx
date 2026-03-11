@@ -113,7 +113,7 @@ export default async function AccountOrdersPage() {
 
             <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
               <span className="text-sm text-gray-500">
-                {order.items.length} {order.items.length !== 1 ? 'items' : 'item'}
+                {t('itemCount', { count: order.items.length })}
               </span>
               <span className="text-sm font-semibold">
                 {t('totalLabel')}: &euro;{Number(order.total).toFixed(2)}

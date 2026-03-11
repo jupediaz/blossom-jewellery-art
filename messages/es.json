@@ -230,6 +230,7 @@
     "saveFavoritesLater": "Guarda tus piezas favoritas para después.",
     "tracking": "Seguimiento",
     "qty": "Cant: {count}",
+    "itemCount": "{count, plural, one {# artículo} other {# artículos}}",
     "totalLabel": "Total",
     "viewOrder": "Ver Detalles",
     "orderDetails": "Detalles del Pedido",

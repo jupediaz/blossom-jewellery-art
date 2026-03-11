@@ -226,6 +226,7 @@
     "saveFavoritesLater": "Save your favorite pieces for later.",
     "tracking": "Tracking",
     "qty": "Qty: {count}",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
     "totalLabel": "Total",
     "viewOrder": "View Details",
     "orderDetails": "Order Details",
