@@ -1,8 +1,10 @@
-import { Button, Section, Text } from "@react-email/components";
+import { Button, Link, Section, Text } from "@react-email/components";
 import * as React from "react";
 import { EmailLayout } from "./components/Layout";
+import { createHmac } from "crypto";
 
 interface NewsletterWelcomeProps {
+  email?: string;
   locale?: string;
 }
 
@@ -36,8 +38,17 @@ const copy: Record<string, { subject: string; preview: string; heading: string; 
   },
 };
 
-export default function NewsletterWelcome({ locale = "en" }: NewsletterWelcomeProps) {
+const BASE_URL = "https://www.blossombyolha.com";
+
+function buildUnsubscribeUrl(email: string, locale: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || "fallback-secret";
+  const token = createHmac("sha256", secret).update(email.toLowerCase()).digest("hex");
+  return `${BASE_URL}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}&token=${token}&locale=${locale}`;
+}
+
+export default function NewsletterWelcome({ email = "", locale = "en" }: NewsletterWelcomeProps) {
   const t = copy[locale] || copy.en;
+  const unsubscribeUrl = email ? buildUnsubscribeUrl(email, locale) : `${BASE_URL}/api/newsletter/unsubscribe`;
 
   return (
     <EmailLayout preview={t.preview}>
@@ -48,7 +59,7 @@ export default function NewsletterWelcome({ locale = "en" }: NewsletterWelcomePr
       </Section>
 
       <Section style={ctaSection}>
-        <Button style={button} href="https://www.blossombyolha.com/products">
+        <Button style={button} href={`${BASE_URL}/products`}>
           {t.cta}
         </Button>
       </Section>
@@ -61,6 +72,11 @@ export default function NewsletterWelcome({ locale = "en" }: NewsletterWelcomePr
               {i === 2 ? <span style={{ fontSize: "12px", color: "#999" }}>{line}</span> : line}
             </React.Fragment>
           ))}
+        </Text>
+        <Text style={unsubFooter}>
+          <Link href={unsubscribeUrl} style={{ color: "#aaa" }}>
+            Unsubscribe
+          </Link>
         </Text>
       </Section>
     </EmailLayout>
@@ -102,4 +118,11 @@ const signature: React.CSSProperties = {
   color: "#333",
   lineHeight: "1.6",
   fontStyle: "italic",
+};
+
+const unsubFooter: React.CSSProperties = {
+  fontSize: "11px",
+  color: "#aaa",
+  marginTop: "16px",
+  textAlign: "center" as const,
 };

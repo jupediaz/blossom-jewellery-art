@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     // Send welcome email to new subscribers only
     if (isNew) {
       try {
-        const html = await render(NewsletterWelcome({ locale: locale || "en" }));
+        const html = await render(NewsletterWelcome({ email, locale: locale || "en" }));
         await sendEmail({
           to: email,
           subject: "Welcome to Blossom by Olha 🌸",
