@@ -29,36 +29,34 @@ export default async function ProductsPage({
   let products: Product[] = mockProducts;
   let categories: Category[] = [];
 
-  try {
-    // Use the newest-first query when sort=new, otherwise use default ordering
-    const productQuery = params.sort === "new" ? newProductsQuery : allProductsQuery;
-    const [sanityProducts, sanityCategories] = await Promise.all([
-      sanityFetch<Product[]>(productQuery),
-      sanityFetch<Category[]>(allCategoriesQuery),
-    ]);
+  const now = new Date();
+  // Fetch Sanity data + active offers in parallel
+  const [sanityResult, dbOffers] = await Promise.all([
+    (async () => {
+      try {
+        const productQuery = params.sort === "new" ? newProductsQuery : allProductsQuery;
+        const [sanityProducts, sanityCategories] = await Promise.all([
+          sanityFetch<Product[]>(productQuery),
+          sanityFetch<Category[]>(allCategoriesQuery),
+        ]);
+        return { products: sanityProducts, categories: sanityCategories };
+      } catch {
+        return { products: [] as Product[], categories: [] as Category[] };
+      }
+    })(),
+    db.offer.findMany({
+      where: { isActive: true, validFrom: { lte: now }, validUntil: { gte: now } },
+      orderBy: { discountValue: "desc" },
+    }).catch(() => []),
+  ]);
 
-    if (sanityProducts.length > 0) {
-      products = sanityProducts;
-    }
-    if (sanityCategories.length > 0) {
-      categories = sanityCategories;
-    }
-  } catch {
-    // Sanity not configured - using mock data
-  }
+  if (sanityResult.products.length > 0) products = sanityResult.products;
+  if (sanityResult.categories.length > 0) categories = sanityResult.categories;
 
-  // Fetch active offers and build a map: productId -> best offer
+  // Build productId -> best offer map
   let offersByProductId: Record<string, ActiveOffer> = {};
   try {
-    const now = new Date();
-    const activeOffers = await db.offer.findMany({
-      where: {
-        isActive: true,
-        validFrom: { lte: now },
-        validUntil: { gte: now },
-      },
-      orderBy: { discountValue: "desc" },
-    });
+    const activeOffers = dbOffers;
 
     for (const dbOffer of activeOffers) {
       const offer: ActiveOffer = {
@@ -96,7 +94,7 @@ export default async function ProductsPage({
       }
     }
   } catch {
-    // DB not available - no offers shown
+    // offers matching failed — continue without
   }
 
   // Filter by category (Sanity)

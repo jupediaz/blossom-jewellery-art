@@ -4,6 +4,8 @@ import { stripe } from '@/lib/stripe'
 import { db } from '@/lib/db'
 import { auth } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
+import { sanityFetch } from '@/lib/sanity/client'
+import { mockProducts } from '@/lib/mock-data'
 
 interface CheckoutItem {
   id: string
@@ -38,6 +40,38 @@ export async function POST(request: NextRequest) {
     if (!stripe) {
       return NextResponse.json({ error: 'Stripe is not configured' }, { status: 503 })
     }
+
+    // Validate prices server-side — never trust client-supplied prices
+    const productIds = items.map((i) => i.id)
+    let serverPrices: Record<string, { price: number; name: string; inStock: boolean }> = {}
+
+    try {
+      type PriceResult = { _id: string; name: string; price: number; inStock: boolean }
+      const sanityPrices = await sanityFetch<PriceResult[]>(
+        `*[_type == "product" && _id in $ids]{ _id, name, price, inStock }`,
+        { ids: productIds }
+      )
+      for (const p of sanityPrices) {
+        serverPrices[p._id] = { price: p.price, name: p.name, inStock: p.inStock }
+      }
+    } catch {
+      // Sanity unavailable — fall back to mock prices
+      for (const mock of mockProducts) {
+        if (productIds.includes(mock._id)) {
+          serverPrices[mock._id] = { price: mock.price, name: mock.name, inStock: mock.inStock ?? true }
+        }
+      }
+    }
+
+    // Override client prices with verified server prices
+    const validatedItems = items.map((item) => {
+      const server = serverPrices[item.id]
+      if (!server) {
+        // Product doesn't exist — reject checkout
+        throw Object.assign(new Error(`Product not found: ${item.name}`), { status: 400 })
+      }
+      return { ...item, name: server.name, price: server.price }
+    })
 
     // Get authenticated user if available
     const session = await auth()
@@ -89,7 +123,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Apply offer discounts to item prices before calculating subtotal
-    const itemsWithOffers = items.map((item) => {
+    const itemsWithOffers = validatedItems.map((item) => {
       const offer = getOfferForItem(item.id)
       if (!offer) return { ...item, offerDiscountedPrice: null }
       const discounted =
@@ -161,7 +195,7 @@ export async function POST(request: NextRequest) {
 
     // Reserve inventory for each item
     const inventoryReservations: Array<{ id: string; qty: number }> = []
-    for (const item of items) {
+    for (const item of validatedItems) {
       const inventory = await db.inventory.findFirst({
         where: { sanityProductId: item.id },
       })
@@ -318,6 +352,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: stripeSession.url })
   } catch (error) {
+    const status = (error as { status?: number }).status
+    if (status === 400) {
+      return NextResponse.json(
+        { error: (error as Error).message },
+        { status: 400 }
+      )
+    }
     console.error('Checkout error:', error)
     return NextResponse.json(
       { error: 'Failed to create checkout session' },

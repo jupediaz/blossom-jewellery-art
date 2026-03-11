@@ -50,9 +50,18 @@ export async function POST(request: NextRequest) {
       break
     }
 
+    case 'charge.failed': {
+      // charge.failed can fire after session creation — release any inventory reservations
+      const charge = event.data.object as Stripe.Charge
+      if (charge.payment_intent) {
+        await handleChargeFailed(String(charge.payment_intent))
+      }
+      break
+    }
+
     case 'payment_intent.payment_failed': {
       const paymentIntent = event.data.object as Stripe.PaymentIntent
-      console.error(`Payment failed for intent ${paymentIntent.id}`)
+      await handleChargeFailed(paymentIntent.id)
       break
     }
   }
@@ -254,6 +263,34 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   }
 
   // Order created successfully
+}
+
+async function handleChargeFailed(paymentIntentId: string) {
+  // Find any pending order for this payment intent and release its inventory reservations
+  // (Orders are only created on checkout.session.completed, so this handles the rare case
+  // where a charge fails before order creation or after a retry)
+  const order = await db.order.findFirst({
+    where: { stripePaymentIntent: paymentIntentId },
+    include: { items: true },
+  })
+
+  if (order && order.paymentStatus === 'PENDING') {
+    for (const item of order.items) {
+      const inventory = await db.inventory.findFirst({
+        where: { sanityProductId: item.sanityProductId },
+      })
+      if (inventory) {
+        await db.inventory.update({
+          where: { id: inventory.id },
+          data: { quantityReserved: { decrement: item.quantity } },
+        }).catch(() => {/* best-effort */})
+      }
+    }
+    await db.order.update({
+      where: { id: order.id },
+      data: { paymentStatus: 'FAILED' },
+    }).catch(() => {/* best-effort */})
+  }
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {

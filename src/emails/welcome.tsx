@@ -29,7 +29,7 @@ export default function Welcome({ name = 'there' }: WelcomeProps) {
       <Section style={ctaSection}>
         <Button
           style={button}
-          href="https://www.blossombyolha.com/products"
+          href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'}/products`}
         >
           Explore the Collection
         </Button>

@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next'
 import { sanityFetch } from '@/lib/sanity/client'
 import { routing } from '@/i18n/routing'
 
+export const revalidate = 3600 // Regenerate sitemap at most once per hour
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blossombyolha.com'
 
 function localePrefix(locale: string) {

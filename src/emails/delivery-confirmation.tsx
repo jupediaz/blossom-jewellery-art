@@ -52,7 +52,7 @@ export default function DeliveryConfirmation({
       </Section>
 
       <Section style={{ padding: '0 24px 24px', textAlign: 'center' as const }}>
-        <Button style={button} href="https://www.blossombyolha.com/products">
+        <Button style={button} href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'}/products`}>
           Explore More Pieces
         </Button>
       </Section>
