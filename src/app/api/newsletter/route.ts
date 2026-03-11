@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { createHmac } from "crypto";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email";
 import { render } from "@react-email/render";
 import NewsletterWelcome from "@/emails/newsletter-welcome";
+
+function buildUnsubToken(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || "fallback-secret";
+  return createHmac("sha256", secret).update(email.toLowerCase()).digest("hex");
+}
 
 const subscribeSchema = z.object({
   email: z.string().email(),
@@ -44,6 +50,7 @@ export async function POST(req: NextRequest) {
           to: email,
           subject: "Welcome to Blossom by Olha 🌸",
           html,
+          unsubscribeToken: buildUnsubToken(email),
         });
       } catch (err) {
         console.error("[Newsletter] Failed to send welcome email:", err);

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
 import { render } from '@react-email/render'
 import CartRecovery from '@/emails/cart-recovery'
+
+function buildUnsubToken(email: string): string {
+  const secret = process.env.NEXTAUTH_SECRET || 'fallback-secret'
+  return createHmac('sha256', secret).update(email.toLowerCase()).digest('hex')
+}
 
 // This endpoint should be called by a cron job (e.g., Vercel Cron, Railway Cron)
 // every 15 minutes to check for abandoned carts.
@@ -117,6 +123,7 @@ export async function POST(req: NextRequest) {
         to: email,
         subject: subjects[stage],
         html,
+        unsubscribeToken: buildUnsubToken(email),
       })
 
       const emailType = stage === '1h'
