@@ -17,25 +17,62 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [
+    const commonHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-XSS-Protection", value: "1; mode=block" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       {
-        source: "/(.*)",
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+    ]
+
+    return [
+      // Sanity Studio: permissive CSP — studio needs unsafe-eval for schema compilation
+      // and wss/https to all *.sanity.io domains for real-time collaboration
+      {
+        source: "/studio(.*)",
         headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
+          ...commonHeaders,
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://www.google-analytics.com; connect-src 'self' https://*.sanity.io https://*.stripe.com https://*.sentry.io https://www.google-analytics.com https://region1.google-analytics.com; frame-src https://js.stripe.com; object-src 'none'; base-uri 'self'",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sanity.io",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.sanity.io",
+              "font-src 'self' https://fonts.gstatic.com https://*.sanity.io",
+              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://*.sanity.io",
+              "connect-src 'self' https://*.sanity.io wss://*.sanity.io https://*.sentry.io",
+              "frame-src https://*.sanity.io",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join("; "),
+          },
+        ],
+      },
+      // Storefront: stricter CSP — no unsafe-eval
+      {
+        source: "/((?!studio).*)",
+        headers: [
+          ...commonHeaders,
+          { key: "X-Frame-Options", value: "DENY" },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://www.google-analytics.com",
+              "connect-src 'self' https://*.sanity.io https://*.stripe.com https://*.sentry.io https://www.google-analytics.com https://region1.google-analytics.com",
+              "frame-src https://js.stripe.com",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join("; "),
           },
         ],
       },

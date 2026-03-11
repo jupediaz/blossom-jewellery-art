@@ -109,6 +109,23 @@ export async function POST(req: NextRequest) {
         '48h': 'A little gift for you — 10% off your cart',
       }
 
+      const emailType = stage === '1h'
+        ? 'CART_RECOVERY_1H' as const
+        : stage === '24h'
+          ? 'CART_RECOVERY_24H' as const
+          : 'CART_RECOVERY_48H' as const
+
+      // Write log BEFORE sending — concurrent cron run will find this record and skip
+      const logEntry = await db.emailLog.create({
+        data: {
+          to: email,
+          type: emailType,
+          subject: subjects[stage],
+          status: 'pending',
+          metadata: { cartSessionId: cart.id, stage },
+        },
+      })
+
       const html = await render(
         CartRecovery({
           stage,
@@ -126,19 +143,10 @@ export async function POST(req: NextRequest) {
         unsubscribeToken: buildUnsubToken(email),
       })
 
-      const emailType = stage === '1h'
-        ? 'CART_RECOVERY_1H' as const
-        : stage === '24h'
-          ? 'CART_RECOVERY_24H' as const
-          : 'CART_RECOVERY_48H' as const
-
-      await db.emailLog.create({
-        data: {
-          to: email,
-          type: emailType,
-          subject: subjects[stage],
-          metadata: { cartSessionId: cart.id, stage },
-        },
+      // Mark log as sent after successful delivery
+      await db.emailLog.update({
+        where: { id: logEntry.id },
+        data: { status: 'sent' },
       })
 
       await db.cartSession.update({

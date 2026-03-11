@@ -202,12 +202,18 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       }
     }
 
-    // Increment coupon usage
+    // Increment coupon usage — only if maxUses not yet reached (race condition guard)
     if (couponId) {
-      await tx.coupon.update({
+      const coupon = await tx.coupon.findUnique({
         where: { id: couponId },
-        data: { currentUses: { increment: 1 } },
+        select: { maxUses: true, currentUses: true },
       })
+      if (coupon && (coupon.maxUses === null || coupon.currentUses < coupon.maxUses)) {
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { currentUses: { increment: 1 } },
+        })
+      }
     }
 
       return { order, orderNumber }
