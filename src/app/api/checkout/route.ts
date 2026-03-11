@@ -298,7 +298,23 @@ export async function POST(request: NextRequest) {
       stripeSessionParams.customer_email = session?.user?.email || undefined
     }
 
-    const stripeSession = await stripe.checkout.sessions.create(stripeSessionParams)
+    let stripeSession: Stripe.Checkout.Session
+    try {
+      stripeSession = await stripe.checkout.sessions.create(stripeSessionParams)
+    } catch (stripeError) {
+      // Stripe failed — release all inventory reservations to avoid deadlock
+      for (const res of inventoryReservations) {
+        await db.inventory.update({
+          where: { id: res.id },
+          data: { quantityReserved: { decrement: res.qty } },
+        }).catch(() => {/* best-effort release */})
+      }
+      console.error('Stripe session creation failed:', stripeError)
+      return NextResponse.json(
+        { error: 'Failed to create checkout session' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ url: stripeSession.url })
   } catch (error) {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
+import { render } from '@react-email/render'
+import OrderConfirmation from '@/emails/order-confirmation'
 import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
@@ -208,15 +210,34 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 
   if (customerEmail) {
     try {
-      await sendEmail({
-        to: customerEmail,
-        subject: `Order Confirmed - ${orderNumber}`,
-        html: buildOrderConfirmationEmail(order.orderNumber, items, {
+      const emailHtml = await render(
+        OrderConfirmation({
+          orderNumber,
+          items: items.map((i) => ({
+            name: i.name,
+            quantity: i.qty,
+            unitPrice: i.price,
+            totalPrice: i.price * i.qty,
+            image: i.image,
+            variant: i.variant,
+          })),
           subtotal,
           shippingCost,
           discountAmount,
           total,
-        }),
+          shippingAddress: {
+            name: shippingAddress.name || '',
+            line1: shippingAddress.line1 || '',
+            city: shippingAddress.city || '',
+            postalCode: shippingAddress.postalCode || '',
+            country: shippingAddress.country || '',
+          },
+        })
+      )
+      await sendEmail({
+        to: customerEmail,
+        subject: `Order Confirmed — ${orderNumber}`,
+        html: emailHtml,
       })
     } catch (emailError) {
       console.error(`Failed to send order confirmation email for ${orderNumber}:`, emailError)
@@ -278,51 +299,3 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   // Inventory released for expired session
 }
 
-function buildOrderConfirmationEmail(
-  orderNumber: string,
-  items: Array<{ name: string; qty: number; price: number }>,
-  totals: { subtotal: number; shippingCost: number; discountAmount: number; total: number }
-) {
-  const itemRows = items
-    .map(
-      (item) =>
-        `<tr>
-          <td style="padding:8px 0;border-bottom:1px solid #eee">${item.name}</td>
-          <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:center">${item.qty}</td>
-          <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">&euro;${(item.price * item.qty).toFixed(2)}</td>
-        </tr>`
-    )
-    .join('')
-
-  return `
-    <div style="max-width:600px;margin:0 auto;font-family:Georgia,serif;color:#1a1a1a">
-      <div style="text-align:center;padding:32px 0;border-bottom:2px solid #1a1a1a">
-        <h1 style="font-size:24px;margin:0">Blossom by Olha</h1>
-        <p style="color:#666;margin:8px 0 0">Thank you for your order</p>
-      </div>
-      <div style="padding:24px 0">
-        <p style="font-size:16px">Order <strong>${orderNumber}</strong> has been confirmed.</p>
-        <table style="width:100%;border-collapse:collapse;margin:24px 0">
-          <thead>
-            <tr style="border-bottom:2px solid #1a1a1a">
-              <th style="text-align:left;padding:8px 0">Item</th>
-              <th style="text-align:center;padding:8px 0">Qty</th>
-              <th style="text-align:right;padding:8px 0">Total</th>
-            </tr>
-          </thead>
-          <tbody>${itemRows}</tbody>
-        </table>
-        <div style="text-align:right;padding:16px 0">
-          <p style="margin:4px 0;color:#666">Subtotal: &euro;${totals.subtotal.toFixed(2)}</p>
-          ${totals.discountAmount > 0 ? `<p style="margin:4px 0;color:#059669">Discount: -&euro;${totals.discountAmount.toFixed(2)}</p>` : ''}
-          <p style="margin:4px 0;color:#666">Shipping: ${totals.shippingCost > 0 ? `&euro;${totals.shippingCost.toFixed(2)}` : 'Free'}</p>
-          <p style="margin:8px 0 0;font-size:18px;font-weight:bold">Total: &euro;${totals.total.toFixed(2)}</p>
-        </div>
-      </div>
-      <div style="text-align:center;padding:24px 0;border-top:1px solid #eee;color:#999;font-size:12px">
-        <p>Blossom by Olha &mdash; Handcrafted polymer clay jewelry</p>
-        <p>Marbella, Spain</p>
-      </div>
-    </div>
-  `
-}
