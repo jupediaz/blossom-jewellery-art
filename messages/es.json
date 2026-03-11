@@ -436,5 +436,25 @@
     "noPosts": "Aún no hay publicaciones. Vuelve pronto para historias del estudio.",
     "backToBlog": "Volver al Diario",
     "byAuthor": "Por {author}"
+  },
+  "FAQ": {
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Todo lo que necesitas saber sobre nuestras piezas artesanales",
+    "materialsQ": "¿De qué materiales están hechas las piezas?",
+    "materialsA": "Todas nuestras joyas están hechas a mano con arcilla polimérica de alta calidad, curada y terminada con herrajes hipoalergénicos — postes de acero inoxidable y cierres bañados en oro o plata. Son ligeras, duraderas y seguras para pieles sensibles.",
+    "careQ": "¿Cómo cuido mis joyas?",
+    "careA": "Evita el contacto con agua, perfumes y lociones. Guárdalas en la bolsita que se incluye o en un lugar seco y fresco. Limpia suavemente con un paño suave y seco. Evita la exposición prolongada a la luz solar directa.",
+    "shippingQ": "¿Cuánto tarda el envío?",
+    "shippingA": "España: 2–4 días hábiles. Países de la UE: 5–10 días hábiles. Internacional: 10–20 días hábiles. Todos los pedidos se envían desde Marbella, España, e incluyen número de seguimiento.",
+    "customQ": "¿Hacéis piezas personalizadas?",
+    "customA": "¡Sí! Nos encanta crear piezas personalizadas para ocasiones especiales. Contáctanos a través del formulario o por correo electrónico para hablar sobre tu idea. Los pedidos personalizados suelen tardar 2–3 semanas.",
+    "returnsQ": "¿Cuál es vuestra política de devoluciones?",
+    "returnsA": "Aceptamos devoluciones en los 30 días siguientes a la entrega. Los artículos deben estar sin usar y en su estado original. Las piezas personalizadas no son reembolsables. Para iniciar una devolución, contáctanos en hello@blossombyolha.com.",
+    "wholesaleQ": "¿Ofrecéis venta al por mayor o consignación?",
+    "wholesaleA": "Trabajamos selectivamente con boutiques y tiendas de concepto que comparten nuestros valores. Por favor, contáctanos con información sobre tu tienda.",
+    "allergiesQ": "¿Son seguras las piezas para personas con alergia a los metales?",
+    "allergiesA": "Sí. Usamos postes de acero inoxidable hipoalergénico y herrajes sin níquel. Si tienes sensibilidades específicas, indícalo en las notas del pedido y haremos todo lo posible para adaptarnos.",
+    "stillHaveQuestions": "¿Tienes más preguntas?",
+    "contactUs": "Contáctanos"
   }
 }

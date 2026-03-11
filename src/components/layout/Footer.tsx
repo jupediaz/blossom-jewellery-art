@@ -57,6 +57,7 @@ export function Footer() {
             <ul className="space-y-3 text-[13px] text-muted font-body">
               <li><Link href="/shipping" className="hover:text-navy transition-colors">{t("shippingReturns")}</Link></li>
               <li><Link href="/size-guide" className="hover:text-navy transition-colors">{t("sizeGuide")}</Link></li>
+              <li><Link href="/faq" className="hover:text-navy transition-colors">{t("faq")}</Link></li>
               <li><Link href="/privacy" className="hover:text-navy transition-colors">{t("privacyPolicy")}</Link></li>
               <li><Link href="/terms" className="hover:text-navy transition-colors">{t("termsOfService")}</Link></li>
             </ul>

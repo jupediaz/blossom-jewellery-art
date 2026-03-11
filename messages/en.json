@@ -388,7 +388,7 @@
     "contactUs": "Contact Us",
     "allPieces": "All Pieces",
     "newArrivals": "New Arrivals",
-    "shippingInfo": "Shipping Info",
+    "shippingInfo": "Shipping Info"
   },
   "SizeGuide": {
     "title": "Size Guide",
@@ -431,5 +431,25 @@
     "noPosts": "No posts yet. Check back soon for stories from the studio.",
     "backToBlog": "Back to Blog",
     "byAuthor": "By {author}"
+  },
+  "FAQ": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about our handcrafted pieces",
+    "materialsQ": "What materials are your pieces made from?",
+    "materialsA": "All our jewelry is handcrafted from high-quality polymer clay, carefully cured and finished with hypoallergenic hardware — stainless steel posts, gold-filled or silver-plated findings. They are lightweight, durable, and safe for sensitive skin.",
+    "careQ": "How do I care for my jewelry?",
+    "careA": "Keep your pieces away from water, perfumes, and lotions. Store them in the pouch provided or a dry, cool place. Gently wipe with a soft dry cloth to restore shine. Avoid prolonged exposure to direct sunlight.",
+    "shippingQ": "How long does shipping take?",
+    "shippingA": "Spain: 2–4 business days. EU countries: 5–10 business days. International: 10–20 business days. All orders are shipped from Marbella, Spain, and include a tracking number.",
+    "customQ": "Do you make custom or bespoke pieces?",
+    "customA": "Yes! We love creating personalised pieces for special occasions. Contact us through the contact form or by email to discuss your vision. Custom orders typically take 2–3 weeks.",
+    "returnsQ": "What is your return policy?",
+    "returnsA": "We accept returns within 30 days of delivery. Items must be unworn and in original condition. Custom or personalised pieces are non-refundable. To start a return, contact us at hello@blossombyolha.com.",
+    "wholesaleQ": "Do you offer wholesale or consignment?",
+    "wholesaleA": "We selectively work with boutiques and concept stores that align with our values. Please reach out via the contact form with details about your store.",
+    "allergiesQ": "Are your pieces safe for people with metal allergies?",
+    "allergiesA": "Yes. We use hypoallergenic stainless steel posts and nickel-free findings. If you have specific sensitivities, please mention them in your order notes and we will do our best to accommodate.",
+    "stillHaveQuestions": "Still have questions?",
+    "contactUs": "Contact us"
   }
 }
