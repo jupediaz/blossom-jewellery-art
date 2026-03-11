@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
+
+const addressSchema = z.object({
+  label:      z.string().max(50).optional(),
+  firstName:  z.string().min(1).max(50),
+  lastName:   z.string().min(1).max(50),
+  line1:      z.string().min(1).max(100),
+  line2:      z.string().max(100).optional(),
+  city:       z.string().min(1).max(50),
+  state:      z.string().max(50).optional(),
+  postalCode: z.string().min(1).max(20),
+  country:    z.string().length(2, 'Must be a 2-letter ISO country code'),
+  phone:      z.string().max(20).optional(),
+  isDefault:  z.boolean().optional(),
+})
 
 export async function GET() {
   const session = await auth()
@@ -22,7 +37,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json()
+  let body: z.infer<typeof addressSchema>
+  try {
+    body = addressSchema.parse(await req.json())
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.issues[0].message }, { status: 400 })
+    }
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
+
+  // Limit to 10 addresses per user
+  const count = await db.address.count({ where: { userId: session.user.id } })
+  if (count >= 10) {
+    return NextResponse.json({ error: 'Maximum of 10 addresses allowed' }, { status: 422 })
+  }
 
   // If setting as default, unset any existing default
   if (body.isDefault) {
@@ -33,20 +62,7 @@ export async function POST(req: NextRequest) {
   }
 
   const address = await db.address.create({
-    data: {
-      userId: session.user.id,
-      label: body.label,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      line1: body.line1,
-      line2: body.line2,
-      city: body.city,
-      state: body.state,
-      postalCode: body.postalCode,
-      country: body.country,
-      phone: body.phone,
-      isDefault: body.isDefault || false,
-    },
+    data: { userId: session.user.id, ...body, isDefault: body.isDefault || false },
   })
 
   return NextResponse.json(address, { status: 201 })
