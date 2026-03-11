@@ -7,27 +7,62 @@ import { useCartStore } from "@/lib/store/cart";
 import { useTranslations } from "next-intl";
 import type { Product } from "@/lib/types";
 
-interface ProductCardProps {
-  product: Product;
+export interface ActiveOffer {
+  id: string;
+  discountType: string;
+  discountValue: number;
+  badgeText?: string | null;
+  validUntil: string;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+interface ProductCardProps {
+  product: Product;
+  offer?: ActiveOffer;
+}
+
+export function ProductCard({ product, offer }: ProductCardProps) {
   const t = useTranslations("Products");
   const { addItem, openCart } = useCartStore();
+
+  // Compute offer-based discounted price
+  const offerDiscountedPrice = offer
+    ? offer.discountType === "PERCENTAGE"
+      ? product.price * (1 - offer.discountValue / 100)
+      : Math.max(0, product.price - offer.discountValue)
+    : null;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     addItem({
       id: product._id,
       name: product.name,
-      price: product.price,
+      price: offerDiscountedPrice ?? product.price,
       image: product.imageUrl || "",
       slug: product.slug.current,
     });
     openCart();
   };
 
-  const isOnSale = product.compareAtPrice && product.compareAtPrice > product.price;
+  const isOnSale =
+    (product.compareAtPrice && product.compareAtPrice > product.price) ||
+    !!offer;
+
+  // Badge label: prefer offer.badgeText, then discount string, then generic "Sale"
+  const saleBadgeLabel = offer
+    ? offer.badgeText ||
+      (offer.discountType === "PERCENTAGE"
+        ? `-${offer.discountValue}%`
+        : `-€${offer.discountValue}`)
+    : t("sale");
+
+  // Display price: offer discounted > product price
+  const displayPrice = offerDiscountedPrice ?? product.price;
+  // Strike-through price when an offer is active (use product.price as original)
+  const strikethroughPrice = offer
+    ? product.price
+    : product.compareAtPrice && product.compareAtPrice > product.price
+    ? product.compareAtPrice
+    : null;
 
   return (
     <Link href={`/products/${product.slug.current}`} className="group block">
@@ -50,7 +85,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         {isOnSale && (
           <span className="absolute top-3 left-3 text-[9px] font-semibold tracking-[0.12em] uppercase bg-terracotta text-cream px-2.5 py-1 font-body">
-            {t("sale")}
+            {saleBadgeLabel}
           </span>
         )}
         {!product.inStock && (
@@ -79,9 +114,20 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-navy font-body leading-tight group-hover:text-terracotta transition-colors">
           {product.name}
         </p>
-        <p className="text-[10px] font-semibold text-navy font-body whitespace-nowrap flex-shrink-0">
-          ${product.price.toFixed(2)}
-        </p>
+        <div className="flex flex-col items-end flex-shrink-0">
+          <p
+            className={`text-[10px] font-semibold font-body whitespace-nowrap ${
+              offer ? "text-terracotta" : "text-navy"
+            }`}
+          >
+            €{displayPrice.toFixed(2)}
+          </p>
+          {strikethroughPrice && (
+            <p className="text-[9px] text-muted line-through font-body whitespace-nowrap">
+              €{strikethroughPrice.toFixed(2)}
+            </p>
+          )}
+        </div>
       </div>
       {(product.collection || product.category) && (
         <p className="text-[11px] text-muted font-body">
@@ -90,9 +136,14 @@ export function ProductCard({ product }: ProductCardProps) {
           <span>jewellery</span>
         </p>
       )}
-      {isOnSale && (
-        <p className="text-[10px] text-muted line-through font-body mt-0.5">
-          ${product.compareAtPrice!.toFixed(2)}
+      {offer && (
+        <p className="text-[9px] text-terracotta font-body mt-0.5">
+          {t("saleEnds", {
+            date: new Date(offer.validUntil).toLocaleDateString(undefined, {
+              day: "numeric",
+              month: "short",
+            }),
+          })}
         </p>
       )}
     </Link>

@@ -6,6 +6,8 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import { getTranslations } from "next-intl/server";
 import type { Product, Category } from "@/lib/types";
 import { mockProducts, mockCollections } from "@/lib/mock-data";
+import { db } from "@/lib/db";
+import type { ActiveOffer } from "@/components/product/ProductCard";
 
 export const revalidate = 60;
 
@@ -41,6 +43,58 @@ export default async function ProductsPage({
     }
   } catch {
     // Sanity not configured - using mock data
+  }
+
+  // Fetch active offers and build a map: productId -> best offer
+  let offersByProductId: Record<string, ActiveOffer> = {};
+  try {
+    const now = new Date();
+    const activeOffers = await db.offer.findMany({
+      where: {
+        isActive: true,
+        validFrom: { lte: now },
+        validUntil: { gte: now },
+      },
+      orderBy: { discountValue: "desc" },
+    });
+
+    for (const dbOffer of activeOffers) {
+      const offer: ActiveOffer = {
+        id: dbOffer.id,
+        discountType: dbOffer.discountType,
+        discountValue: Number(dbOffer.discountValue),
+        badgeText: dbOffer.badgeText,
+        validUntil: dbOffer.validUntil.toISOString(),
+      };
+
+      for (const product of products) {
+        // Skip if product already has a higher-value offer assigned
+        if (offersByProductId[product._id]) continue;
+
+        // Apply to all products
+        if (dbOffer.applyToAll) {
+          offersByProductId[product._id] = offer;
+          continue;
+        }
+
+        // Apply by product ID
+        if (dbOffer.applicableProducts.includes(product._id)) {
+          offersByProductId[product._id] = offer;
+          continue;
+        }
+
+        // Apply by collection slug
+        const productCollectionSlug = product.collection?.slug.current;
+        if (
+          productCollectionSlug &&
+          dbOffer.applicableCollections.includes(productCollectionSlug)
+        ) {
+          offersByProductId[product._id] = offer;
+        }
+      }
+    }
+  } catch {
+    // DB not available - no offers shown
   }
 
   // Filter by category (Sanity)
@@ -148,7 +202,7 @@ export default async function ProductsPage({
       </div>
 
       {products.length > 0 ? (
-        <ProductGrid products={products} />
+        <ProductGrid products={products} offersByProductId={offersByProductId} />
       ) : (
         <div className="text-center py-16">
           <p className="text-warm-gray">

@@ -1,12 +1,18 @@
 import { ProductCard } from "./ProductCard";
+import type { ActiveOffer } from "./ProductCard";
 import type { Product } from "@/lib/types";
 
 interface ProductGridProps {
   products: Product[];
   columns?: 2 | 3 | 4;
+  offersByProductId?: Record<string, ActiveOffer>;
 }
 
-export function ProductGrid({ products, columns = 4 }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  columns = 4,
+  offersByProductId,
+}: ProductGridProps) {
   const gridCols = {
     2: "grid-cols-2",
     3: "grid-cols-2 lg:grid-cols-3",
@@ -16,7 +22,11 @@ export function ProductGrid({ products, columns = 4 }: ProductGridProps) {
   return (
     <div className={`grid ${gridCols[columns]} gap-4 sm:gap-6`}>
       {products.map((product) => (
-        <ProductCard key={product._id} product={product} />
+        <ProductCard
+          key={product._id}
+          product={product}
+          offer={offersByProductId?.[product._id]}
+        />
       ))}
     </div>
   );

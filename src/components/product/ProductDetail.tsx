@@ -15,9 +15,10 @@ import type { Product } from "@/lib/types";
 
 interface ProductDetailProps {
   product: Product;
+  maxQuantity?: number;
 }
 
-export function ProductDetail({ product }: ProductDetailProps) {
+export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps) {
   const t = useTranslations("Products");
   const tc = useTranslations("Common");
   const [selectedImage, setSelectedImage] = useState(0);
@@ -236,7 +237,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </button>
             <span className="w-10 text-center text-sm font-medium">{quantity}</span>
             <button
-              onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+              onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
               className="p-2.5 text-warm-gray hover:text-charcoal transition-colors disabled:opacity-40"
               disabled={quantity >= 10}
               aria-label="Increase quantity"

@@ -110,7 +110,9 @@
     "noProductsFound": "No products found in this collection.",
     "viewAllPieces": "View all pieces",
     "priceLow": "Price low",
-    "priceHigh": "high"
+    "priceHigh": "high",
+    "originalPrice": "Original price",
+    "saleEnds": "Sale ends {date}"
   },
   "Collections": {
     "title": "Collections",

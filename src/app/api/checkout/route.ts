@@ -43,8 +43,67 @@ export async function POST(request: NextRequest) {
     const session = await auth()
     const customerId = session?.user?.id
 
+    // Fetch active offers for potential item-level discounts
+    const now = new Date()
+    let activeOffers: Array<{
+      id: string
+      discountType: string
+      discountValue: number
+      applyToAll: boolean
+      applicableProducts: string[]
+      applicableCollections: string[]
+    }> = []
+    try {
+      activeOffers = await db.offer.findMany({
+        where: {
+          isActive: true,
+          validFrom: { lte: now },
+          validUntil: { gte: now },
+        },
+        orderBy: { discountValue: 'desc' },
+      }).then((rows) =>
+        rows.map((r) => ({
+          id: r.id,
+          discountType: r.discountType,
+          discountValue: Number(r.discountValue),
+          applyToAll: r.applyToAll,
+          applicableProducts: r.applicableProducts,
+          applicableCollections: r.applicableCollections,
+        }))
+      )
+    } catch {
+      // DB unavailable — proceed without offer discounts
+    }
+
+    // Helper: find best active offer for an item id
+    function getOfferForItem(itemId: string): (typeof activeOffers)[number] | null {
+      for (const offer of activeOffers) {
+        if (
+          offer.applyToAll ||
+          offer.applicableProducts.includes(itemId)
+        ) {
+          return offer
+        }
+      }
+      return null
+    }
+
+    // Apply offer discounts to item prices before calculating subtotal
+    const itemsWithOffers = items.map((item) => {
+      const offer = getOfferForItem(item.id)
+      if (!offer) return { ...item, offerDiscountedPrice: null }
+      const discounted =
+        offer.discountType === 'PERCENTAGE'
+          ? item.price * (1 - offer.discountValue / 100)
+          : Math.max(0, item.price - offer.discountValue)
+      return { ...item, offerDiscountedPrice: discounted }
+    })
+
     // Calculate subtotal
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const subtotal = itemsWithOffers.reduce(
+      (sum, item) => sum + (item.offerDiscountedPrice ?? item.price) * item.quantity,
+      0
+    )
 
     // Validate and apply coupon
     let couponId: string | null = null
@@ -142,16 +201,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Build Stripe line items
+    // Build Stripe line items (use offer-discounted price when available)
     const total = subtotal - discountAmount + shippingCost
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => ({
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = itemsWithOffers.map((item) => ({
       price_data: {
         currency: 'eur',
         product_data: {
           name: item.variant ? `${item.name} — ${item.variant}` : item.name,
           images: item.image ? [item.image] : [],
         },
-        unit_amount: Math.round(item.price * 100),
+        unit_amount: Math.round((item.offerDiscountedPrice ?? item.price) * 100),
       },
       quantity: item.quantity,
     }))
@@ -175,14 +234,17 @@ export async function POST(request: NextRequest) {
       cancel_url: `${siteUrl}${localePrefix}/cart`,
       metadata: {
         order_items: JSON.stringify(
-          items.map((i) => ({
+          itemsWithOffers.map((i) => ({
             id: i.id,
             name: i.name,
-            price: i.price,
+            price: i.offerDiscountedPrice ?? i.price,
             qty: i.quantity,
             variant: i.variant,
             image: i.image,
           }))
+        ),
+        offer_ids: JSON.stringify(
+          itemsWithOffers.map((i) => getOfferForItem(i.id)?.id ?? null)
         ),
         coupon_id: couponId || '',
         coupon_code: couponCode?.toUpperCase() || '',

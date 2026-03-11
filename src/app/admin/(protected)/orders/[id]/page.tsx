@@ -159,7 +159,12 @@ export default async function OrderDetailPage({ params }: Props) {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Actions */}
-          <OrderActions orderId={order.id} currentStatus={order.status} />
+          <OrderActions
+            orderId={order.id}
+            currentStatus={order.status}
+            orderTotal={Number(order.total)}
+            currency={order.currency}
+          />
 
           {/* Customer */}
           <div className="rounded-xl border border-gray-200 bg-white">

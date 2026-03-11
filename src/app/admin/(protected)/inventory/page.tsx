@@ -1,15 +1,33 @@
+import Link from 'next/link'
 import { db } from '@/lib/db'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Package, AlertTriangle } from 'lucide-react'
 import { InventoryActions } from './InventoryActions'
+import { InventorySyncButton } from './InventorySyncButton'
 
-export default async function InventoryPage() {
-  const inventory = await db.inventory.findMany({
-    orderBy: [{ quantityTotal: 'asc' }],
-    include: {
-      _count: { select: { stockMovements: true } },
-    },
-  })
+const ITEMS_PER_PAGE = 25
+
+interface Props {
+  searchParams: Promise<{ page?: string }>
+}
+
+export default async function InventoryPage({ searchParams }: Props) {
+  const params = await searchParams
+  const page = Math.max(1, Number(params.page ?? 1))
+
+  const [inventory, total] = await Promise.all([
+    db.inventory.findMany({
+      orderBy: [{ quantityTotal: 'asc' }],
+      include: {
+        _count: { select: { stockMovements: true } },
+      },
+      take: ITEMS_PER_PAGE,
+      skip: (page - 1) * ITEMS_PER_PAGE,
+    }),
+    db.inventory.count(),
+  ])
+
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
 
   // Build a map of sanityProductId -> product name from order items
   const productIds = inventory.map((i) => i.sanityProductId).filter(Boolean)
@@ -25,11 +43,14 @@ export default async function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-gray-900">Inventory</h2>
-        <p className="text-sm text-gray-500">
-          {inventory.length} products tracked
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">Inventory</h2>
+          <p className="text-sm text-gray-500">
+            {total} products tracked
+          </p>
+        </div>
+        <InventorySyncButton />
       </div>
 
       {inventory.length === 0 ? (
@@ -139,6 +160,31 @@ export default async function InventoryPage() {
               })}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-200 px-6 py-3">
+              <p className="text-sm text-gray-500">
+                Page {page} of {totalPages}
+              </p>
+              <div className="flex gap-2">
+                {page > 1 && (
+                  <Link
+                    href={`/admin/inventory?page=${page - 1}`}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50"
+                  >
+                    Previous
+                  </Link>
+                )}
+                {page < totalPages && (
+                  <Link
+                    href={`/admin/inventory?page=${page + 1}`}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50"
+                  >
+                    Next
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

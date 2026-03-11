@@ -110,7 +110,9 @@
     "noProductsFound": "У цій колекції не знайдено прикрас.",
     "viewAllPieces": "Переглянути усі прикраси",
     "priceLow": "Ціна нижча",
-    "priceHigh": "вища"
+    "priceHigh": "вища",
+    "originalPrice": "Початкова ціна",
+    "saleEnds": "Знижка діє до {date}"
   },
   "Collections": {
     "title": "Колекції",

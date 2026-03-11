@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { sanityFetch } from "@/lib/sanity/client";
 import { productBySlugQuery, allProductsQuery } from "@/lib/sanity/queries";
 import { siteConfig } from "@/lib/env";
+import { db } from "@/lib/db";
 import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
@@ -84,6 +85,20 @@ export default async function ProductPage({
   // TypeScript now knows product is not null and has slug
   const currentProduct: Product = product;
 
+  // Fetch available stock from Postgres inventory (best-effort, no error if missing)
+  let maxQuantity = 10
+  try {
+    const inventory = await db.inventory.findFirst({
+      where: { sanityProductId: currentProduct._id, sanityVariantKey: null },
+    })
+    if (inventory) {
+      const available = inventory.quantityTotal - inventory.quantityReserved - inventory.quantitySold
+      maxQuantity = Math.max(0, available)
+    }
+  } catch {
+    // Inventory not tracked — use default cap
+  }
+
   // Add related products: prefer same collection, then fill with other products
   if (!currentProduct.relatedProducts || currentProduct.relatedProducts.length === 0) {
     const sameCollection = mockProducts.filter(
@@ -117,7 +132,7 @@ export default async function ProductPage({
           { name: currentProduct.name },
         ]}
       />
-      <ProductDetail product={currentProduct} />
+      <ProductDetail product={currentProduct} maxQuantity={maxQuantity} />
 
       {/* Related Products */}
       {currentProduct.relatedProducts && currentProduct.relatedProducts.length > 0 && (

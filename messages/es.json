@@ -111,6 +111,8 @@
     "viewAllPieces": "Ver todas las piezas",
     "priceLow": "Precio bajo",
     "priceHigh": "alto",
+    "originalPrice": "Precio original",
+    "saleEnds": "Oferta termina el {date}",
     "securePayment": "Pago Seguro",
     "freeShippingBadge": "Envío Gratis España >€60",
     "returns": "Devoluciones 30 días",

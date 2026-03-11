@@ -161,6 +161,7 @@ model Order {
 
   items         OrderItem[]
   statusHistory OrderStatusHistory[]
+  refunds       Refund[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -217,6 +218,19 @@ model OrderStatusHistory {
   note    String?
 
   createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Refund {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id])
+  stripeRefundId String   @unique
+  amount         Int      // in cents
+  reason         String
+  status         String   @default("succeeded")
+  createdAt      DateTime @default(now())
 
   @@index([orderId])
 }
