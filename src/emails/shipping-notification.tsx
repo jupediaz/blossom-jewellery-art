@@ -41,7 +41,7 @@ export default function ShippingNotification({
         <Text style={value}>{carrier}</Text>
 
         <Text style={label}>Tracking Number</Text>
-        <Text style={value}>{trackingNumber}</Text>
+        <Text style={value}>{trackingNumber || 'Will be updated within 24 hours'}</Text>
 
         <Text style={label}>Estimated Delivery</Text>
         <Text style={value}>{estimatedDelivery}</Text>
