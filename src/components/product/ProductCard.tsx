@@ -18,9 +18,10 @@ export interface ActiveOffer {
 interface ProductCardProps {
   product: Product;
   offer?: ActiveOffer;
+  isNew?: boolean;
 }
 
-export function ProductCard({ product, offer }: ProductCardProps) {
+export function ProductCard({ product, offer, isNew }: ProductCardProps) {
   const t = useTranslations("Products");
   const { addItem, openCart } = useCartStore();
 
@@ -86,6 +87,11 @@ export function ProductCard({ product, offer }: ProductCardProps) {
         {isOnSale && (
           <span className="absolute top-3 left-3 text-[9px] font-semibold tracking-[0.12em] uppercase bg-terracotta text-cream px-2.5 py-1 font-body">
             {saleBadgeLabel}
+          </span>
+        )}
+        {isNew && !isOnSale && (
+          <span className="absolute top-3 right-3 text-[9px] font-semibold tracking-[0.12em] uppercase bg-navy text-cream px-2.5 py-1 font-body">
+            {t("newBadge")}
           </span>
         )}
         {!product.inStock && (

@@ -4,6 +4,25 @@ import { groq } from "next-sanity";
 export const allProductsQuery = groq`
   *[_type == "product" && !(_id in path("drafts.**"))] | order(orderRank) {
     _id,
+    _createdAt,
+    name,
+    slug,
+    price,
+    compareAtPrice,
+    images,
+    category->{_id, name, slug},
+    collection->{_id, name, slug},
+    materials,
+    inStock,
+    featured,
+    "imageUrl": images[0].asset->url
+  }
+`;
+
+export const newProductsQuery = groq`
+  *[_type == "product" && !(_id in path("drafts.**"))] | order(_createdAt desc) {
+    _id,
+    _createdAt,
     name,
     slug,
     price,

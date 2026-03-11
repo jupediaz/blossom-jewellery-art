@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import type { Collection } from "@/lib/types";
 import { mockCollections, mockProducts } from "@/lib/mock-data";
 import { getTranslations } from "next-intl/server";
+import { db } from "@/lib/db";
 
 const collectionImages: Record<string, string> = {
   "ukrainian-heritage": "/images/collections/ukrainian-heritage-cover.jpg",
@@ -96,6 +97,30 @@ export default async function CollectionPage({
 
   const coverImage = collectionImages[collection.slug.current];
 
+  // Fetch active offers to show sale badges on collection products
+  const now = new Date()
+  let offersByProductId: Record<string, import('@/components/product/ProductCard').ActiveOffer> = {}
+  try {
+    const activeOffers = await db.offer.findMany({
+      where: { isActive: true, validFrom: { lte: now }, validUntil: { gte: now } },
+      orderBy: { discountValue: 'desc' },
+    })
+    for (const offer of activeOffers) {
+      const offerData = { id: offer.id, discountType: offer.discountType, discountValue: Number(offer.discountValue), badgeText: offer.badgeText, validUntil: offer.validUntil.toISOString() }
+      if (offer.applyToAll) {
+        for (const product of collection.products || []) {
+          if (!offersByProductId[product._id]) offersByProductId[product._id] = offerData
+        }
+      } else {
+        for (const productId of offer.applicableProducts) {
+          if (!offersByProductId[productId]) offersByProductId[productId] = offerData
+        }
+      }
+    }
+  } catch {
+    // Offers unavailable — continue without
+  }
+
   return (
     <div>
       {/* Collection Hero */}
@@ -149,7 +174,7 @@ export default async function CollectionPage({
         </p>
 
         {collection.products && collection.products.length > 0 ? (
-          <ProductGrid products={collection.products} />
+          <ProductGrid products={collection.products} offersByProductId={offersByProductId} />
         ) : (
           <div className="text-center py-16">
             <p className="text-warm-gray">

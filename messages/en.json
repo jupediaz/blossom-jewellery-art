@@ -112,7 +112,12 @@
     "priceLow": "Price low",
     "priceHigh": "high",
     "originalPrice": "Original price",
-    "saleEnds": "Sale ends {date}"
+    "saleEnds": "Sale ends {date}",
+    "sortDefault": "Default",
+    "sortNew": "New Arrivals",
+    "sortPriceLow": "Price: Low to High",
+    "sortPriceHigh": "Price: High to Low",
+    "newBadge": "New"
   },
   "Collections": {
     "title": "Collections",
@@ -149,7 +154,8 @@
     "browseProducts": "Browse Products",
     "freeShippingProgress": "Add {amount} more for free shipping",
     "freeShippingUnlocked": "Free shipping unlocked!",
-    "spainOnly": "Spain only"
+    "spainOnly": "Spain only",
+    "clearCart": "Clear cart"
   },
   "Checkout": {
     "title": "Checkout",
@@ -372,7 +378,17 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "rights": "All rights reserved",
-    "madeWith": "Handcrafted with love in Marbella, Spain"
+    "madeWith": "Handcrafted with love in Marbella, Spain",
+    "sectionAbout": "About",
+    "sectionStore": "Store",
+    "sectionCare": "Care",
+    "ourStory": "Our Story",
+    "journal": "Journal",
+    "ourMaterials": "Our Materials",
+    "contactUs": "Contact Us",
+    "allPieces": "All Pieces",
+    "newArrivals": "New Arrivals",
+    "shippingInfo": "Shipping Info",
   },
   "SizeGuide": {
     "title": "Size Guide",

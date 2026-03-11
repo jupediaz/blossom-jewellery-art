@@ -116,7 +116,12 @@
     "securePayment": "Pago Seguro",
     "freeShippingBadge": "Envío Gratis España >€60",
     "returns": "Devoluciones 30 días",
-    "sizeGuideLink": "Ver guía de tallas"
+    "sizeGuideLink": "Ver guía de tallas",
+    "sortDefault": "Por defecto",
+    "sortNew": "Novedades",
+    "sortPriceLow": "Precio: menor a mayor",
+    "sortPriceHigh": "Precio: mayor a menor",
+    "newBadge": "Nuevo"
   },
   "Collections": {
     "title": "Colecciones",
@@ -153,7 +158,8 @@
     "browseProducts": "Ver Productos",
     "freeShippingProgress": "Añade {amount} más para envío gratis",
     "freeShippingUnlocked": "¡Envío gratis desbloqueado!",
-    "spainOnly": "Solo España"
+    "spainOnly": "Solo España",
+    "clearCart": "Vaciar cesta"
   },
   "Checkout": {
     "title": "Pago",
@@ -376,7 +382,18 @@
     "privacyPolicy": "Política de Privacidad",
     "termsOfService": "Términos de Servicio",
     "rights": "Todos los derechos reservados",
-    "madeWith": "Hecho a mano con amor en Marbella, España"
+    "madeWith": "Hecho a mano con amor en Marbella, España",
+    "sectionAbout": "Sobre Nosotros",
+    "sectionStore": "Tienda",
+    "sectionCare": "Cuidados",
+    "ourStory": "Nuestra Historia",
+    "journal": "Diario",
+    "ourMaterials": "Nuestros Materiales",
+    "contactUs": "Contáctanos",
+    "allPieces": "Todas las Piezas",
+    "newArrivals": "Novedades",
+    "shippingInfo": "Información de Envío",
+    "clearCart": "Vaciar cesta"
   },
   "SizeGuide": {
     "title": "Guía de Tallas",

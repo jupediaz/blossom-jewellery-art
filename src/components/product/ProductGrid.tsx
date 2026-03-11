@@ -6,12 +6,14 @@ interface ProductGridProps {
   products: Product[];
   columns?: 2 | 3 | 4;
   offersByProductId?: Record<string, ActiveOffer>;
+  newProductIds?: Set<string>;
 }
 
 export function ProductGrid({
   products,
   columns = 4,
   offersByProductId,
+  newProductIds,
 }: ProductGridProps) {
   const gridCols = {
     2: "grid-cols-2",
@@ -26,6 +28,7 @@ export function ProductGrid({
           key={product._id}
           product={product}
           offer={offersByProductId?.[product._id]}
+          isNew={newProductIds?.has(product._id)}
         />
       ))}
     </div>

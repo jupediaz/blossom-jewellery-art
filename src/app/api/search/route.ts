@@ -6,9 +6,11 @@ import type { Product } from "@/lib/types";
 
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get("q")?.toLowerCase().trim();
+  const limit = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get("limit") ?? 20)));
+  const offset = Math.max(0, Number(req.nextUrl.searchParams.get("offset") ?? 0));
 
   if (!query || query.length < 2) {
-    return NextResponse.json({ results: [] });
+    return NextResponse.json({ results: [], total: 0 });
   }
 
   let products: Product[] = mockProducts;
@@ -22,20 +24,21 @@ export async function GET(req: NextRequest) {
     // Sanity not configured — using mock data
   }
 
-  const results = products
-    .filter((p) => {
-      const searchable = [
-        p.name,
-        p.collection?.name,
-        p.category?.name,
-        ...(p.materials || []),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return searchable.includes(query);
-    })
-    .slice(0, 8)
+  const matched = products.filter((p) => {
+    const searchable = [
+      p.name,
+      p.collection?.name,
+      p.category?.name,
+      ...(p.materials || []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return searchable.includes(query);
+  });
+
+  const results = matched
+    .slice(offset, offset + limit)
     .map((p) => ({
       _id: p._id,
       name: p.name,
@@ -45,5 +48,5 @@ export async function GET(req: NextRequest) {
       collection: p.collection?.name || null,
     }));
 
-  return NextResponse.json({ results });
+  return NextResponse.json({ results, total: matched.length });
 }

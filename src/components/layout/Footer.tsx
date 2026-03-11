@@ -26,33 +26,33 @@ export function Footer() {
           {/* About */}
           <div>
             <h4 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-navy font-body mb-5">
-              About
+              {t("sectionAbout")}
             </h4>
             <ul className="space-y-3 text-[13px] text-muted font-body">
-              <li><Link href="/about" className="hover:text-navy transition-colors">Our Story</Link></li>
-              <li><Link href="/blog" className="hover:text-navy transition-colors">Journal</Link></li>
-              <li><Link href="/about" className="hover:text-navy transition-colors">Our Materials</Link></li>
-              <li><Link href="/contact" className="hover:text-navy transition-colors">Contact Us</Link></li>
+              <li><Link href="/about" className="hover:text-navy transition-colors">{t("ourStory")}</Link></li>
+              <li><Link href="/blog" className="hover:text-navy transition-colors">{t("journal")}</Link></li>
+              <li><Link href="/about" className="hover:text-navy transition-colors">{t("ourMaterials")}</Link></li>
+              <li><Link href="/contact" className="hover:text-navy transition-colors">{t("contactUs")}</Link></li>
             </ul>
           </div>
 
           {/* Store */}
           <div>
             <h4 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-navy font-body mb-5">
-              Store
+              {t("sectionStore")}
             </h4>
             <ul className="space-y-3 text-[13px] text-muted font-body">
-              <li><Link href="/collections" className="hover:text-navy transition-colors">Collections</Link></li>
-              <li><Link href="/products" className="hover:text-navy transition-colors">All Pieces</Link></li>
-              <li><Link href="/products" className="hover:text-navy transition-colors">New Arrivals</Link></li>
-              <li><Link href="/shipping" className="hover:text-navy transition-colors">Shipping Info</Link></li>
+              <li><Link href="/collections" className="hover:text-navy transition-colors">{t("collections")}</Link></li>
+              <li><Link href="/products" className="hover:text-navy transition-colors">{t("allPieces")}</Link></li>
+              <li><Link href="/products?sort=new" className="hover:text-navy transition-colors">{t("newArrivals")}</Link></li>
+              <li><Link href="/shipping" className="hover:text-navy transition-colors">{t("shippingInfo")}</Link></li>
             </ul>
           </div>
 
           {/* Care */}
           <div>
             <h4 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-navy font-body mb-5">
-              Care
+              {t("sectionCare")}
             </h4>
             <ul className="space-y-3 text-[13px] text-muted font-body">
               <li><Link href="/shipping" className="hover:text-navy transition-colors">{t("shippingReturns")}</Link></li>

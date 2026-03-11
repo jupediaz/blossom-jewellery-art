@@ -112,7 +112,12 @@
     "priceLow": "Ціна нижча",
     "priceHigh": "вища",
     "originalPrice": "Початкова ціна",
-    "saleEnds": "Знижка діє до {date}"
+    "saleEnds": "Знижка діє до {date}",
+    "sortDefault": "За замовчуванням",
+    "sortNew": "Новинки",
+    "sortPriceLow": "Ціна: від низької",
+    "sortPriceHigh": "Ціна: від високої",
+    "newBadge": "Новинка"
   },
   "Collections": {
     "title": "Колекції",
@@ -149,7 +154,8 @@
     "browseProducts": "Переглянути Товари",
     "freeShippingProgress": "Додайте {amount} ще для безкоштовної доставки",
     "freeShippingUnlocked": "Безкоштовна доставка розблокована!",
-    "spainOnly": "Тільки Іспанія"
+    "spainOnly": "Тільки Іспанія",
+    "clearCart": "Очистити кошик"
   },
   "Checkout": {
     "title": "Оформлення",
@@ -372,7 +378,18 @@
     "privacyPolicy": "Політика Конфіденційності",
     "termsOfService": "Умови Використання",
     "rights": "Усі права захищені",
-    "madeWith": "Зроблено з любов'ю вручну в Марбельї, Іспанія"
+    "madeWith": "Зроблено з любов'ю вручну в Марбельї, Іспанія",
+    "sectionAbout": "Про Нас",
+    "sectionStore": "Магазин",
+    "sectionCare": "Догляд",
+    "ourStory": "Наша Історія",
+    "journal": "Журнал",
+    "ourMaterials": "Наші Матеріали",
+    "contactUs": "Зв'яжіться з Нами",
+    "allPieces": "Всі Вироби",
+    "newArrivals": "Новинки",
+    "shippingInfo": "Інформація про Доставку",
+    "clearCart": "Очистити кошик"
   },
   "SizeGuide": {
     "title": "Гід з Розмірів",

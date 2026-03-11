@@ -14,6 +14,7 @@ export interface SanityImage {
 
 export interface Product {
   _id: string;
+  _createdAt?: string;
   name: string;
   slug: { current: string };
   description?: unknown[];

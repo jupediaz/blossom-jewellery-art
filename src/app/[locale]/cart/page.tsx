@@ -271,7 +271,7 @@ export default function CartPage() {
             onClick={clearCart}
             className="text-xs text-warm-gray hover:text-dusty-rose-dark underline"
           >
-            {t("remove")}
+            {t("clearCart")}
           </button>
         </div>
 

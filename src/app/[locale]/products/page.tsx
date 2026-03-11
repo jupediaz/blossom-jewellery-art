@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from '@/i18n/navigation';
 import { sanityFetch } from "@/lib/sanity/client";
-import { allProductsQuery, allCategoriesQuery } from "@/lib/sanity/queries";
+import { allProductsQuery, newProductsQuery, allCategoriesQuery } from "@/lib/sanity/queries";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { getTranslations } from "next-intl/server";
 import type { Product, Category } from "@/lib/types";
@@ -30,8 +30,10 @@ export default async function ProductsPage({
   let categories: Category[] = [];
 
   try {
+    // Use the newest-first query when sort=new, otherwise use default ordering
+    const productQuery = params.sort === "new" ? newProductsQuery : allProductsQuery;
     const [sanityProducts, sanityCategories] = await Promise.all([
-      sanityFetch<Product[]>(allProductsQuery),
+      sanityFetch<Product[]>(productQuery),
       sanityFetch<Category[]>(allCategoriesQuery),
     ]);
 
@@ -118,7 +120,21 @@ export default async function ProductsPage({
     products.sort((a, b) => b.price - a.price);
   } else if (params.sort === "name") {
     products.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (params.sort === "new") {
+    // For mock data (no _createdAt), sort by _id descending as a proxy for "newer"
+    products.sort((a, b) => {
+      if (a._createdAt && b._createdAt) {
+        return new Date(b._createdAt).getTime() - new Date(a._createdAt).getTime();
+      }
+      return b._id.localeCompare(a._id);
+    });
   }
+
+  // Mark the first 6 products as "new" when sort=new
+  const newProductIds: Set<string> =
+    params.sort === "new"
+      ? new Set(products.slice(0, 6).map((p) => p._id))
+      : new Set();
 
   // Derive collection filters from mock data when no Sanity categories
   const collections = mockCollections;
@@ -179,30 +195,37 @@ export default async function ProductsPage({
         <div className="flex items-center gap-2 text-xs text-warm-gray">
           <span>{t("sortBy")}:</span>
           <Link
-            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}sort=price-asc`}
+            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}${params.category ? `category=${params.category}&` : ""}`}
+            className={`hover:text-charcoal transition-colors ${!params.sort ? "text-charcoal font-medium" : ""}`}
+          >
+            {t("sortDefault")}
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}${params.category ? `category=${params.category}&` : ""}sort=new`}
+            className={`hover:text-charcoal transition-colors ${params.sort === "new" ? "text-charcoal font-medium" : ""}`}
+          >
+            {t("sortNew")}
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}${params.category ? `category=${params.category}&` : ""}sort=price-asc`}
             className={`hover:text-charcoal transition-colors ${params.sort === "price-asc" ? "text-charcoal font-medium" : ""}`}
           >
-            {t("priceLow")}
+            {t("sortPriceLow")}
           </Link>
           <span>/</span>
           <Link
-            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}sort=price-desc`}
+            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}${params.category ? `category=${params.category}&` : ""}sort=price-desc`}
             className={`hover:text-charcoal transition-colors ${params.sort === "price-desc" ? "text-charcoal font-medium" : ""}`}
           >
-            {t("priceHigh")}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}sort=name`}
-            className={`hover:text-charcoal transition-colors ${params.sort === "name" ? "text-charcoal font-medium" : ""}`}
-          >
-            {t("sortName")}
+            {t("sortPriceHigh")}
           </Link>
         </div>
       </div>
 
       {products.length > 0 ? (
-        <ProductGrid products={products} offersByProductId={offersByProductId} />
+        <ProductGrid products={products} offersByProductId={offersByProductId} newProductIds={newProductIds} />
       ) : (
         <div className="text-center py-16">
           <p className="text-warm-gray">
