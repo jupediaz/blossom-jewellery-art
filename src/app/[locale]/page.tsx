@@ -107,7 +107,7 @@ export default async function HomePage() {
       {/* ─── 1. HERO — Split 50/50 ─────────────────────────────── */}
       <section className="relative flex min-h-screen">
         {/* Left panel — text */}
-        <div className="relative z-10 flex w-full lg:w-1/2 flex-col justify-center px-10 sm:px-16 lg:px-20 pt-[78px] bg-cream">
+        <div className="relative z-10 flex w-full lg:w-1/2 flex-col justify-center px-10 sm:px-16 lg:px-20 bg-cream">
           <p className="text-[10px] font-semibold tracking-[0.35em] uppercase text-muted font-body mb-8">
             Handcrafted Polymer Clay
           </p>

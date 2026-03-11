@@ -10,7 +10,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SearchDialog } from "@/components/SearchDialog";
 import { useSession } from "next-auth/react";
 
-function AccountButton({ scrolled }: { scrolled: boolean }) {
+function AccountButton() {
   const { data: session, status } = useSession();
   const role = session?.user?.role;
   const href =
@@ -21,10 +21,7 @@ function AccountButton({ scrolled }: { scrolled: boolean }) {
   return (
     <Link
       href={href}
-      className={cn(
-        "p-2 transition-colors",
-        scrolled ? "text-muted hover:text-navy" : "text-navy/70 hover:text-navy"
-      )}
+      className="p-2 text-muted hover:text-navy transition-colors"
       aria-label="My account"
     >
       <User size={18} strokeWidth={1.5} />
@@ -32,33 +29,24 @@ function AccountButton({ scrolled }: { scrolled: boolean }) {
   );
 }
 
-/* Nav link with Bijoux-style "—" prefix for non-home items */
 function NavLink({
   href,
   children,
   showDash,
-  scrolled,
   onClick,
 }: {
   href: string;
   children: React.ReactNode;
   showDash?: boolean;
-  scrolled: boolean;
   onClick?: () => void;
 }) {
   return (
     <Link
       href={href as "/"}
       onClick={onClick}
-      className={cn(
-        "relative flex items-center gap-2 text-[11px] font-semibold tracking-[0.1em] uppercase transition-colors font-body",
-        "after:absolute after:bottom-[-3px] after:left-0 after:h-px after:w-0 after:bg-terracotta after:transition-all after:duration-300 hover:after:w-full",
-        scrolled ? "text-navy hover:text-terracotta" : "text-navy/80 hover:text-navy"
-      )}
+      className="relative flex items-center gap-2 text-[11px] font-semibold tracking-[0.1em] uppercase text-navy hover:text-terracotta transition-colors font-body after:absolute after:bottom-[-3px] after:left-0 after:h-px after:w-0 after:bg-terracotta after:transition-all after:duration-300 hover:after:w-full"
     >
-      {showDash && (
-        <span className="block w-4 h-px bg-current flex-shrink-0" />
-      )}
+      {showDash && <span className="block w-4 h-px bg-current flex-shrink-0" />}
       {children}
     </Link>
   );
@@ -67,18 +55,10 @@ function NavLink({
 export function Header() {
   const t = useTranslations("Nav");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { openCart, totalItems } = useCartStore();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    const handler = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", handler, { passive: true });
-    handler();
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
-
+  useEffect(() => setMounted(true), []);
   const itemCount = mounted ? totalItems() : 0;
 
   const navLeft = [
@@ -92,14 +72,7 @@ export function Header() {
   ];
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-        scrolled
-          ? "bg-cream/96 backdrop-blur-sm border-b border-cream-dark/60"
-          : "bg-transparent"
-      )}
-    >
+    <header className="sticky top-0 z-50 bg-cream/96 backdrop-blur-sm border-b border-cream-dark/60">
       <nav className="mx-auto max-w-[1260px] px-6 lg:px-10">
         <div className="flex h-[78px] items-center justify-between">
 
@@ -115,7 +88,7 @@ export function Header() {
           {/* Desktop left nav */}
           <div className="hidden lg:flex lg:items-center lg:gap-x-8">
             {navLeft.map((item) => (
-              <NavLink key={item.href} href={item.href} showDash={item.dash} scrolled={scrolled}>
+              <NavLink key={item.href} href={item.href} showDash={item.dash}>
                 {item.name}
               </NavLink>
             ))}
@@ -138,7 +111,7 @@ export function Header() {
           <div className="flex items-center gap-x-6">
             <div className="hidden lg:flex lg:items-center lg:gap-x-8">
               {navRight.map((item) => (
-                <NavLink key={item.href} href={item.href} showDash={item.dash} scrolled={scrolled}>
+                <NavLink key={item.href} href={item.href} showDash={item.dash}>
                   {item.name}
                 </NavLink>
               ))}
@@ -147,13 +120,10 @@ export function Header() {
             <div className="flex items-center gap-x-1">
               <LanguageSwitcher />
               <SearchDialog />
-              <AccountButton scrolled={scrolled} />
+              <AccountButton />
               <button
                 onClick={openCart}
-                className={cn(
-                  "relative p-2 transition-colors",
-                  scrolled ? "text-muted hover:text-navy" : "text-navy/70 hover:text-navy"
-                )}
+                className="relative p-2 text-muted hover:text-navy transition-colors"
                 aria-label={t("cart")}
               >
                 <ShoppingBag size={18} strokeWidth={1.5} />
@@ -180,13 +150,12 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 showDash={item.dash}
-                scrolled={true}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
               </NavLink>
             ))}
-            <NavLink href="/account" showDash={false} scrolled={true} onClick={() => setMobileMenuOpen(false)}>
+            <NavLink href="/account" onClick={() => setMobileMenuOpen(false)}>
               My Account
             </NavLink>
           </div>
