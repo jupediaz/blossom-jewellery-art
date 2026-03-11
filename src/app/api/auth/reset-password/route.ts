@@ -5,9 +5,9 @@ import { db } from '@/lib/db'
 import { z } from 'zod'
 
 const schema = z.object({
-  email: z.string().email('Invalid email address'),
-  token: z.string().min(1, 'Token is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().email('Invalid email address').max(254),
+  token: z.string().min(1, 'Token is required').max(256),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(72),
 })
 
 export async function POST(req: NextRequest) {

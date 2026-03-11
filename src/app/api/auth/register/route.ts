@@ -9,8 +9,8 @@ import { z } from 'zod'
 
 const registerSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().email('Invalid email address').max(254),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(72),
 })
 
 export async function POST(req: NextRequest) {
