@@ -121,7 +121,10 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
     : {}
 
   // Wrap order creation, inventory updates, and coupon usage in a transaction
-  const { order, orderNumber } = await db.$transaction(async (tx) => {
+  // P2002 = unique constraint violation: concurrent webhook retry for same session — safe to ignore
+  let txResult: { order: Awaited<ReturnType<typeof db.order.create>>; orderNumber: string }
+  try {
+    txResult = await db.$transaction(async (tx) => {
     // Generate order number: BLM-2026-0001
     const year = new Date().getFullYear()
     const prefix = `BLM-${year}-`
@@ -207,8 +210,13 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       })
     }
 
-    return { order, orderNumber }
-  })
+      return { order, orderNumber }
+    })
+  } catch (txError) {
+    if ((txError as { code?: string }).code === 'P2002') return // race condition — already processed
+    throw txError
+  }
+  const { order, orderNumber } = txResult
 
   // Send confirmation email
   const customerEmail =
@@ -248,21 +256,18 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
         subject: `Order Confirmed — ${orderNumber}`,
         html: emailHtml,
       })
+      await db.emailLog.create({
+        data: {
+          to: customerEmail,
+          type: 'ORDER_CONFIRMATION',
+          subject: `Order Confirmed - ${orderNumber}`,
+          metadata: { orderId: order.id },
+        },
+      })
     } catch (emailError) {
-      console.error(`Failed to send order confirmation email for ${orderNumber}:`, emailError)
+      console.error(`Failed to send/log order confirmation email for ${orderNumber}:`, emailError)
     }
-
-    await db.emailLog.create({
-      data: {
-        to: customerEmail,
-        type: 'ORDER_CONFIRMATION',
-        subject: `Order Confirmed - ${orderNumber}`,
-        metadata: { orderId: order.id },
-      },
-    })
   }
-
-  // Order created successfully
 }
 
 async function handleChargeFailed(paymentIntentId: string) {

@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanityFetch } from "@/lib/sanity/client";
 import { allProductsQuery } from "@/lib/sanity/queries";
 import { mockProducts } from "@/lib/mock-data";
+import { rateLimit } from "@/lib/rate-limit";
 import type { Product } from "@/lib/types";
 
 export async function GET(req: NextRequest) {
+  const limited = rateLimit(req, { limit: 60, windowSeconds: 60 })
+  if (limited) return limited
+
   const query = req.nextUrl.searchParams.get("q")?.toLowerCase().trim();
   const limit = Math.min(50, Math.max(1, Number(req.nextUrl.searchParams.get("limit") ?? 20)));
   const offset = Math.max(0, Number(req.nextUrl.searchParams.get("offset") ?? 0));
 
-  if (!query || query.length < 2) {
+  if (!query || query.length < 2 || query.length > 100) {
     return NextResponse.json({ results: [], total: 0 });
   }
 

@@ -37,6 +37,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No items provided' }, { status: 400 })
     }
 
+    if (items.length > 20) {
+      return NextResponse.json({ error: 'Too many items in cart' }, { status: 400 })
+    }
+
+    for (const item of items) {
+      if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 99) {
+        return NextResponse.json(
+          { error: `Invalid quantity for "${item.name}". Must be between 1 and 99.` },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Reject duplicate product IDs — cart should merge quantities before checkout
+    const seen = new Set<string>()
+    for (const item of items) {
+      if (seen.has(item.id)) {
+        return NextResponse.json(
+          { error: `Duplicate product in cart: "${item.name}"` },
+          { status: 400 }
+        )
+      }
+      seen.add(item.id)
+    }
+
     if (!stripe) {
       return NextResponse.json({ error: 'Stripe is not configured' }, { status: 503 })
     }
