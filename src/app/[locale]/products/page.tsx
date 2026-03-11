@@ -53,41 +53,32 @@ export default async function ProductsPage({
   if (sanityResult.products.length > 0) products = sanityResult.products;
   if (sanityResult.categories.length > 0) categories = sanityResult.categories;
 
-  // Build productId -> best offer map
+  // Build productId -> best offer map — O(offers + products) via pre-indexed sets
   let offersByProductId: Record<string, ActiveOffer> = {};
   try {
-    const activeOffers = dbOffers;
-
-    for (const dbOffer of activeOffers) {
-      const offer: ActiveOffer = {
+    // Pre-index each offer's applicable IDs/slugs into Sets for O(1) lookups
+    const indexedOffers = dbOffers.map((dbOffer) => ({
+      offer: {
         id: dbOffer.id,
         discountType: dbOffer.discountType,
         discountValue: Number(dbOffer.discountValue),
         badgeText: dbOffer.badgeText,
         validUntil: dbOffer.validUntil.toISOString(),
-      };
+      } as ActiveOffer,
+      applyToAll: dbOffer.applyToAll,
+      productIds: new Set(dbOffer.applicableProducts),
+      collectionSlugs: new Set(dbOffer.applicableCollections),
+    }));
 
-      for (const product of products) {
-        // Skip if product already has a higher-value offer assigned
-        if (offersByProductId[product._id]) continue;
-
-        // Apply to all products
-        if (dbOffer.applyToAll) {
-          offersByProductId[product._id] = offer;
-          continue;
-        }
-
-        // Apply by product ID
-        if (dbOffer.applicableProducts.includes(product._id)) {
-          offersByProductId[product._id] = offer;
-          continue;
-        }
-
-        // Apply by collection slug
-        const productCollectionSlug = product.collection?.slug.current;
+    // Single pass over products; offers already sorted by discountValue desc
+    for (const product of products) {
+      for (const { offer, applyToAll, productIds, collectionSlugs } of indexedOffers) {
+        if (offersByProductId[product._id]) break; // already has a (higher-value) offer
+        const collectionSlug = product.collection?.slug.current;
         if (
-          productCollectionSlug &&
-          dbOffer.applicableCollections.includes(productCollectionSlug)
+          applyToAll ||
+          productIds.has(product._id) ||
+          (collectionSlug && collectionSlugs.has(collectionSlug))
         ) {
           offersByProductId[product._id] = offer;
         }

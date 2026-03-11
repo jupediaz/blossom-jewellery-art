@@ -7,6 +7,16 @@ import ShippingNotification from '@/emails/shipping-notification'
 import DeliveryConfirmation from '@/emails/delivery-confirmation'
 import type { OrderStatus } from '@/generated/prisma/client'
 
+const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  PENDING:    ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED:  ['PROCESSING', 'SHIPPED', 'CANCELLED'],
+  PROCESSING: ['SHIPPED', 'CANCELLED'],
+  SHIPPED:    ['DELIVERED'],
+  DELIVERED:  [],
+  CANCELLED:  ['REFUNDED'],
+  REFUNDED:   [],
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,6 +46,14 @@ export async function PATCH(
 
   if (!order) {
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+  }
+
+  const allowed = VALID_TRANSITIONS[order.status] ?? []
+  if (!allowed.includes(status)) {
+    return NextResponse.json(
+      { error: `Cannot transition order from ${order.status} to ${status}` },
+      { status: 422 }
+    )
   }
 
   const updateData: Record<string, unknown> = { status }
