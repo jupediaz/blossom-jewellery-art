@@ -6,16 +6,7 @@ import { render } from '@react-email/render'
 import ShippingNotification from '@/emails/shipping-notification'
 import DeliveryConfirmation from '@/emails/delivery-confirmation'
 import type { OrderStatus } from '@/generated/prisma/client'
-
-const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  PENDING:    ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED:  ['PROCESSING', 'SHIPPED', 'CANCELLED'],
-  PROCESSING: ['SHIPPED', 'CANCELLED'],
-  SHIPPED:    ['DELIVERED'],
-  DELIVERED:  [],
-  CANCELLED:  ['REFUNDED'],
-  REFUNDED:   [],
-}
+import { VALID_TRANSITIONS } from '@/lib/order-transitions'
 
 export async function PATCH(
   req: NextRequest,
@@ -54,6 +45,10 @@ export async function PATCH(
       { error: `Cannot transition order from ${order.status} to ${status}` },
       { status: 422 }
     )
+  }
+
+  if (note && note.length > 500) {
+    return NextResponse.json({ error: 'Note must be 500 characters or less' }, { status: 400 })
   }
 
   const updateData: Record<string, unknown> = { status }

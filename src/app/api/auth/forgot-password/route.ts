@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { email } = body
+  // Normalize email to avoid case-sensitivity issues
+  const email = body.email.toLowerCase()
 
   // Always return success to avoid leaking whether the email exists
   const successResponse = NextResponse.json({ success: true })

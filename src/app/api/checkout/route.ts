@@ -148,6 +148,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Apply offer discounts to item prices before calculating subtotal
+    // (subtotal checked against max cart value after offer calculation)
     const itemsWithOffers = validatedItems.map((item) => {
       const offer = getOfferForItem(item.id)
       if (!offer) return { ...item, offerDiscountedPrice: null }
@@ -163,6 +164,13 @@ export async function POST(request: NextRequest) {
       (sum, item) => sum + (item.offerDiscountedPrice ?? item.price) * item.quantity,
       0
     )
+
+    if (subtotal > 10_000) {
+      return NextResponse.json(
+        { error: 'Cart total exceeds maximum allowed (€10,000). Please contact us for large orders.' },
+        { status: 400 }
+      )
+    }
 
     // Validate and apply coupon
     let couponId: string | null = null

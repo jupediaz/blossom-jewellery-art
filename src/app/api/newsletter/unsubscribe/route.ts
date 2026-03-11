@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 
 function computeToken(email: string): string {
@@ -20,7 +20,14 @@ export async function GET(req: NextRequest) {
   }
 
   const expected = computeToken(email);
-  if (token !== expected) {
+  // Use timing-safe comparison to prevent timing attacks
+  let valid = false
+  try {
+    valid = timingSafeEqual(Buffer.from(token, 'hex'), Buffer.from(expected, 'hex'))
+  } catch {
+    // Buffer lengths differ — invalid token
+  }
+  if (!valid) {
     return NextResponse.json({ error: "Invalid or expired unsubscribe link" }, { status: 400 });
   }
 

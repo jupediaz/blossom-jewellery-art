@@ -3,17 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { OrderStatus } from '@/generated/prisma/client'
+import { VALID_TRANSITIONS } from '@/lib/order-transitions'
 import { Loader2, RotateCcw, X, CheckCircle2, AlertCircle } from 'lucide-react'
-
-const statusTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['PROCESSING', 'CANCELLED'],
-  PROCESSING: ['SHIPPED', 'CANCELLED'],
-  SHIPPED: ['DELIVERED'],
-  DELIVERED: [],
-  CANCELLED: [],
-  REFUNDED: [],
-}
 
 const statusLabels: Partial<Record<OrderStatus, string>> = {
   PENDING: 'Pending',
@@ -55,6 +46,7 @@ export function OrderActions({ orderId, currentStatus, orderTotal, currency }: O
 
   // Status transition state
   const [loading, setLoading] = useState(false)
+  const [statusError, setStatusError] = useState('')
   const [trackingNumber, setTrackingNumber] = useState('')
   const [carrier, setCarrier] = useState('')
   const [note, setNote] = useState('')
@@ -67,7 +59,7 @@ export function OrderActions({ orderId, currentStatus, orderTotal, currency }: O
   const [refundError, setRefundError] = useState('')
   const [refundResult, setRefundResult] = useState<RefundResult | null>(null)
 
-  const nextStatuses = statusTransitions[currentStatus] ?? []
+  const nextStatuses = VALID_TRANSITIONS[currentStatus] ?? []
   const canRefund = REFUNDABLE_STATUSES.includes(currentStatus)
 
   const hasAnyAction = nextStatuses.length > 0 || canRefund
@@ -75,6 +67,7 @@ export function OrderActions({ orderId, currentStatus, orderTotal, currency }: O
 
   async function updateStatus(newStatus: OrderStatus) {
     setLoading(true)
+    setStatusError('')
     try {
       const body: Record<string, string> = { status: newStatus }
       if (note) body.note = note
@@ -89,12 +82,13 @@ export function OrderActions({ orderId, currentStatus, orderTotal, currency }: O
         body: JSON.stringify(body),
       })
 
-      if (!res.ok) throw new Error('Failed to update status')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to update status')
 
       router.refresh()
       setNote('')
     } catch (err) {
-      console.error(err)
+      setStatusError(err instanceof Error ? err.message : 'Failed to update status')
     } finally {
       setLoading(false)
     }
@@ -164,6 +158,13 @@ export function OrderActions({ orderId, currentStatus, orderTotal, currency }: O
     <>
       <div className="rounded-xl border border-gray-200 bg-white px-6 py-4 space-y-4">
         <h3 className="font-medium text-gray-900">Actions</h3>
+
+        {statusError && (
+          <div className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2.5">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+            <p className="text-sm text-red-700">{statusError}</p>
+          </div>
+        )}
 
         {showShippingFields && (
           <div className="space-y-3">

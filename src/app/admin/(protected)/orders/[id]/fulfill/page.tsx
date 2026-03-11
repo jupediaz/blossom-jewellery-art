@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Package, Truck, FileText } from 'lucide-react'
+import { VALID_TRANSITIONS } from '@/lib/order-transitions'
+import type { OrderStatus } from '@/generated/prisma/client'
+import { ArrowLeft, Loader2, Package, Truck, FileText, AlertCircle } from 'lucide-react'
 
 interface OrderDetail {
   id: string
@@ -71,15 +73,19 @@ export default function FulfillOrderPage() {
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to update order')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to update order')
 
       router.push(`/admin/orders/${orderId}`)
       router.refresh()
-    } catch {
-      setError('Failed to fulfill order')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fulfill order')
       setSubmitting(false)
     }
   }
+
+  // Check if this order can be shipped (prevents confusing UI for already-shipped orders)
+  const canShip = order ? (VALID_TRANSITIONS[order.status as OrderStatus] ?? []).includes('SHIPPED') : false
 
   if (loading) {
     return (
@@ -204,6 +210,16 @@ export default function FulfillOrderPage() {
           <h3 className="font-medium text-gray-900">Shipping Details</h3>
         </div>
 
+        {!canShip && (
+          <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <p className="text-sm text-amber-800">
+              Order is currently <strong>{order?.status}</strong> and cannot be marked as shipped.{' '}
+              <Link href={`/admin/orders/${orderId}`} className="underline">Return to order</Link>
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
         )}
@@ -241,7 +257,7 @@ export default function FulfillOrderPage() {
         <div className="flex items-center gap-3 pt-2">
           <button
             onClick={handleFulfill}
-            disabled={submitting}
+            disabled={submitting || !canShip}
             className="flex items-center gap-2 rounded-lg bg-charcoal px-6 py-2 text-sm font-medium text-white hover:bg-charcoal/90 disabled:opacity-50"
           >
             {submitting ? (
