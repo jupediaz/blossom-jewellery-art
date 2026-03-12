@@ -23,6 +23,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, offer, isNew }: ProductCardProps) {
   const t = useTranslations("Products");
+  const tc = useTranslations("Common");
   const { addItem, openCart } = useCartStore();
 
   // Compute offer-based discounted price
@@ -107,10 +108,10 @@ export function ProductCard({ product, offer, isNew }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             className="absolute bottom-0 inset-x-0 bg-navy/90 text-cream text-[9px] font-semibold tracking-[0.18em] uppercase py-3 opacity-0 group-hover:opacity-100 transition-opacity font-body flex items-center justify-center gap-2"
-            aria-label={`Add ${product.name} to cart`}
+            aria-label={`${tc("addToCart")} ${product.name}`}
           >
             <ShoppingBag size={12} strokeWidth={1.5} />
-            Add to Cart
+            {tc("addToCart")}
           </button>
         )}
       </div>

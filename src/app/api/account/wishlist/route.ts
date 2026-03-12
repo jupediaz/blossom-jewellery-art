@@ -11,6 +11,7 @@ export async function GET() {
   const items = await db.wishlist.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: 'desc' },
+    take: 100,
   })
 
   return NextResponse.json(items)

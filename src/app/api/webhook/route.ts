@@ -91,8 +91,8 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   try {
     items = JSON.parse(meta.order_items || '[]')
   } catch {
-    console.error('Failed to parse order items from metadata')
-    return
+    // Throw so the outer try/catch returns 400, causing Stripe to retry
+    throw new Error(`Failed to parse order_items metadata for session ${session.id}`)
   }
 
   const subtotal = parseFloat(meta.subtotal || '0')
@@ -202,18 +202,15 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       }
     }
 
-    // Increment coupon usage — only if maxUses not yet reached (race condition guard)
+    // Increment coupon usage atomically — single SQL prevents race condition where two
+    // concurrent checkouts both pass maxUses check and double-count the same coupon.
     if (couponId) {
-      const coupon = await tx.coupon.findUnique({
-        where: { id: couponId },
-        select: { maxUses: true, currentUses: true },
-      })
-      if (coupon && (coupon.maxUses === null || coupon.currentUses < coupon.maxUses)) {
-        await tx.coupon.update({
-          where: { id: couponId },
-          data: { currentUses: { increment: 1 } },
-        })
-      }
+      await tx.$executeRaw`
+        UPDATE "Coupon"
+        SET "currentUses" = "currentUses" + 1
+        WHERE "id" = ${couponId}
+          AND ("maxUses" IS NULL OR "currentUses" < "maxUses")
+      `
     }
 
       return { order, orderNumber }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -97,14 +98,24 @@ export function Header() {
           {/* Logo — center */}
           <Link
             href="/"
-            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 leading-none"
           >
-            <span className="font-heading text-[1.55rem] tracking-[0.22em] text-navy leading-none">
-              BLOSSOM
-            </span>
-            <span className="text-[8px] font-body font-semibold tracking-[0.4em] uppercase text-terracotta mt-[3px]">
-              by Olha
-            </span>
+            <Image
+              src="/logo_blossom.webp"
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 flex-shrink-0"
+              priority
+            />
+            <div className="flex flex-col items-center">
+              <span className="font-heading text-[1.55rem] tracking-[0.22em] text-navy leading-none">
+                BLOSSOM
+              </span>
+              <span className="text-[14px] font-body font-semibold tracking-[0.3em] uppercase text-terracotta mt-[1px]">
+                by Olha
+              </span>
+            </div>
           </Link>
 
           {/* Desktop right nav + icons */}
@@ -156,7 +167,7 @@ export function Header() {
               </NavLink>
             ))}
             <NavLink href="/account" onClick={() => setMobileMenuOpen(false)}>
-              My Account
+              {t("account")}
             </NavLink>
           </div>
         </div>

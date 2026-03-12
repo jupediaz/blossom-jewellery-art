@@ -27,6 +27,7 @@ interface OrderConfirmationProps {
   shippingAddress: {
     name: string
     line1: string
+    line2?: string
     city: string
     postalCode: string
     country: string
@@ -139,6 +140,9 @@ export default function OrderConfirmation({
         <Text style={sectionTitle}>Shipping To</Text>
         <Text style={addressText}>{shippingAddress.name}</Text>
         <Text style={addressText}>{shippingAddress.line1}</Text>
+        {shippingAddress.line2 && (
+          <Text style={addressText}>{shippingAddress.line2}</Text>
+        )}
         <Text style={addressText}>
           {shippingAddress.city}, {shippingAddress.postalCode}
         </Text>

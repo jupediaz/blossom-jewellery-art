@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto, { timingSafeEqual } from 'crypto'
 import { hash } from 'bcryptjs'
 import { db } from '@/lib/db'
+import { rateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -11,6 +12,9 @@ const schema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, { limit: 5, windowSeconds: 300 })
+  if (limited) return limited
+
   let body: z.infer<typeof schema>
   try {
     body = schema.parse(await req.json())

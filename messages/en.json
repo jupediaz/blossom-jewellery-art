@@ -43,6 +43,9 @@
     "collections": "Collections"
   },
   "Home": {
+    "heroH1Line1": "finest",
+    "heroH1Line2": "jewellery,",
+    "heroDisplaySubtitle": "inspired by our life.",
     "heroTitle": "Handcrafted Polymer Clay Jewelry",
     "heroSubtitle": "Each piece is a tiny botanical garden, shaped by hand in the sun-drenched coast of Marbella",
     "shopNow": "Shop the Collection",
@@ -70,7 +73,13 @@
     "subscribeError": "Something went wrong. Please try again.",
     "comingSoon": "Coming Soon",
     "comingSoonText": "Our collection is being curated. Check back soon.",
-    "allCollections": "All Collections"
+    "allCollections": "All Collections",
+    "heroMission": "It has always been to produce beautiful pieces for the modern woman who loves handmade art.",
+    "ourStore": "OUR STORE",
+    "selectedWorks": "Selected works:",
+    "watermarkLine1": "jewellery",
+    "watermarkLine2": "selection",
+    "collectionsLabel": "collections"
   },
   "Search": {
     "title": "Search",
@@ -142,6 +151,7 @@
     "couponApplied": "Coupon applied",
     "couponInvalid": "Invalid coupon code",
     "shippingNote": "Shipping calculated at checkout",
+    "shippingError": "Could not load shipping options. Please try again.",
     "shippingCountry": "Ship to",
     "selectCountry": "Select country",
     "shippingMethod": "Shipping method",
@@ -390,7 +400,9 @@
     "contactUs": "Contact Us",
     "allPieces": "All Pieces",
     "newArrivals": "New Arrivals",
-    "shippingInfo": "Shipping Info"
+    "shippingInfo": "Shipping Info",
+    "watermarkTagline1": "Anything less is",
+    "watermarkTagline2": "simply unacceptable."
   },
   "SizeGuide": {
     "title": "Size Guide",

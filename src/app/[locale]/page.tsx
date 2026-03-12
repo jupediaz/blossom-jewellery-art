@@ -104,57 +104,59 @@ export default async function HomePage() {
     <>
       <LocalBusinessJsonLd />
 
-      {/* ─── 1. HERO — Split 50/50 ─────────────────────────────── */}
-      <section className="relative flex min-h-screen">
-        {/* Left panel — text */}
-        <div className="relative z-10 flex w-full lg:w-1/2 flex-col justify-center px-10 sm:px-16 lg:px-20 bg-cream">
-          <p className="text-[10px] font-semibold tracking-[0.35em] uppercase text-muted font-body mb-8">
-            Handcrafted Polymer Clay
-          </p>
+      {/* ─── 1. HERO ────────────────────────────────────────────── */}
+      {/* Section bg = cream. Left panel: text. Right panel: circle (behind) + model image (on top).
+          Image has transparent bg. As viewport narrows, the right edge of the image clips. */}
+      <section className="bg-cream min-h-screen flex flex-col lg:flex-row">
+
+        {/* Left panel — text content */}
+        <div className="relative z-10 flex w-full lg:w-[42%] flex-col justify-center px-10 sm:px-16 lg:px-20 py-24 lg:py-0">
           <h1
-            className="font-heading text-[clamp(4rem,8vw,8.5rem)] text-navy leading-[0.92] tracking-[-0.03em] mb-5"
+            className="font-heading text-navy mb-6"
+            style={{ fontSize: "clamp(3.5rem,9vw,130px)", lineHeight: "0.923", letterSpacing: "-0.033em" }}
           >
-            finest<br />
-            jewellery,
+            {t('heroH1Line1')}<br />
+            {t('heroH1Line2')}
           </h1>
-          <p className="font-heading italic text-[clamp(1.3rem,2.5vw,2.2rem)] text-muted leading-snug mb-10">
-            inspired by our life.
+          <p
+            className="font-heading italic text-muted mb-10"
+            style={{ fontSize: "clamp(1.4rem,2.5vw,36px)", lineHeight: "1.17", letterSpacing: "0.083em" }}
+          >
+            {t('heroDisplaySubtitle')}
           </p>
           <div>
-            <DashButton href="/products" variant="outline">
+            <DashButton href="/products" variant="ghost">
               {t('shopNowShort')}
             </DashButton>
           </div>
 
           {/* Scroll indicator */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-10 flex flex-col items-center gap-1.5 opacity-40">
+          <div className="hidden lg:flex absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-1.5 opacity-40">
             <span className="block w-px h-8 bg-navy" />
             <span className="block w-1.5 h-1.5 border-r border-b border-navy rotate-45" />
           </div>
         </div>
 
-        {/* Right panel — photo */}
-        <div className="hidden lg:block lg:w-1/2 relative overflow-hidden bg-[#F8F0EB]">
-          <Image
-            src="/images/hero-model.webp"
-            alt="Blossom by Olha — Handcrafted Jewellery"
-            fill
-            sizes="50vw"
-            className="object-contain object-bottom z-10 relative"
-            priority
-          />
-        </div>
-
-        {/* Mobile: faint bg image */}
-        <div className="absolute inset-0 lg:hidden z-0">
-          <Image
-            src="/images/hero-model.webp"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-contain object-center opacity-15"
-            priority
-          />
+        {/* Right panel — clips image on the right as viewport narrows */}
+        <div className="relative flex-1 min-h-[60vh] lg:min-h-0 overflow-hidden">
+          {/* Shared container: exact image aspect ratio × full panel height.
+              Circle and image are siblings inside — they always move and scale together. */}
+          <div
+            className="absolute top-0 left-0 h-full"
+            style={{ aspectRatio: "1781 / 1792" }}
+          >
+            {/* Circle: decorative backdrop, BEHIND the image */}
+            <div className="absolute top-[3%] left-[40%] w-[60%] aspect-square rounded-full bg-[#E8E2DC] z-[0]" />
+            {/* Model image: transparent bg, on top of circle */}
+            <Image
+              src="/images/hero-model.webp"
+              alt=""
+              aria-hidden="true"
+              fill
+              className="object-contain z-[1]"
+              priority
+            />
+          </div>
         </div>
       </section>
 
@@ -166,27 +168,26 @@ export default async function HomePage() {
           className="absolute top-0 left-0 font-heading leading-none select-none pointer-events-none whitespace-nowrap"
           style={{ fontSize: "clamp(120px,17vw,240px)", color: "#EEE8E3", lineHeight: 1 }}
         >
-          jewellery
+          {t('watermarkLine1')}
         </div>
         <div
           aria-hidden="true"
           className="absolute bottom-0 right-0 font-heading leading-none select-none pointer-events-none whitespace-nowrap"
           style={{ fontSize: "clamp(120px,17vw,240px)", color: "#EEE8E3", lineHeight: 1 }}
         >
-          selection
+          {t('watermarkLine2')}
         </div>
 
         {/* Centered content */}
         <div className="relative z-10 flex flex-col items-center text-center px-6 py-10">
           <p className="font-heading italic text-[clamp(1rem,2vw,1.4rem)] text-muted max-w-lg leading-relaxed mb-8">
-            It has always been to produce beautiful pieces<br className="hidden sm:block" />
-            for the modern woman who loves handmade art.
+            {t("heroMission")}
           </p>
           <Link
             href="/products"
             className="inline-flex flex-col items-center gap-1 w-[72px] h-[72px] justify-center border border-muted/50 rounded-full text-[9px] font-semibold tracking-[0.18em] uppercase text-muted hover:border-navy hover:text-navy transition-colors font-body"
           >
-            OUR<br />STORE
+            {t("ourStore")}
           </Link>
         </div>
       </section>
@@ -196,7 +197,7 @@ export default async function HomePage() {
         <section className="bg-cream py-0">
           <div className="mx-auto max-w-[1260px] px-6 lg:px-10 pb-20">
             <h2 className="font-heading text-[clamp(1.8rem,3vw,2.5rem)] text-navy mb-10 pt-2">
-              Selected works:
+              {t("selectedWorks")}
             </h2>
             {/* 4-col grid with dividers */}
             <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-cream-dark">
@@ -307,19 +308,19 @@ export default async function HomePage() {
           className="font-heading leading-none select-none pointer-events-none text-center w-full mb-6"
           style={{ fontSize: "clamp(80px,18vw,260px)", color: "#D6B59F", lineHeight: 0.9 }}
         >
-          collections
+          {t('collectionsLabel')}
         </div>
 
-        {/* 3-col collection grid */}
+        {/* 3-col collection grid — bijoux initial-letter style */}
         <div className="mx-auto max-w-[1260px] px-6 lg:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {collections.slice(0, 3).map((collection, idx) => (
               <Link
                 key={collection._id}
                 href={`/collections/${collection.slug.current}`}
-                className="group relative overflow-hidden"
+                className="group block"
               >
-                <div className="aspect-square relative overflow-hidden">
+                <div className="aspect-square relative overflow-hidden bg-beige/30 mb-4">
                   <Image
                     src={collectionImages[collection.slug.current] || fallbackImages[idx] || fallbackImages[0]}
                     alt={collection.name}
@@ -327,62 +328,52 @@ export default async function HomePage() {
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-navy/20 group-hover:bg-navy/30 transition-colors" />
-                  <div className="absolute inset-0 flex items-end p-6">
-                    <h3 className="font-heading text-cream text-[1.8rem] leading-tight">
-                      {collection.name}
-                    </h3>
-                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-heading text-[1.8rem] text-terracotta-light leading-none">
+                    {collection.name.charAt(0)}
+                  </span>
+                  <h3 className="text-[11px] font-semibold tracking-[0.15em] uppercase text-navy font-body">
+                    {collection.name}
+                  </h3>
                 </div>
               </Link>
             ))}
           </div>
-
-          {/* Explore button */}
-          <div className="flex justify-center mt-10">
-            <Link
-              href="/collections"
-              className="inline-flex flex-col items-center justify-center w-[100px] h-[100px] border border-muted/40 rounded-full text-[9px] font-semibold tracking-[0.15em] uppercase text-muted hover:border-navy hover:text-navy transition-colors font-body text-center"
-            >
-              EXPLORE<br />COLLECTIONS
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* ─── 7. ARTIST FEATURE SECTION ────────────────────────────── */}
-      <section className="bg-cream">
-        <div className="mx-auto max-w-[1260px] px-6 lg:px-10">
-          <div className="flex flex-col lg:flex-row items-stretch gap-0 min-h-[480px]">
-            {/* Image */}
-            <div className="relative w-full lg:w-[38%] min-h-[360px]">
+      {/* ─── 7. ARTIST FEATURE SECTION — bijoux editorial style ──── */}
+      <section className="bg-beige/30">
+        <div className="mx-auto max-w-[1260px] px-6 lg:px-10 py-20 lg:py-28">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+            {/* Image — circular crop */}
+            <div className="relative w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden flex-shrink-0">
               <Image
                 src="/images/about/olha-portrait.jpg"
                 alt={t('artistName')}
                 fill
-                sizes="40vw"
+                sizes="260px"
                 className="object-cover object-top"
               />
             </div>
-            {/* Beige spacer */}
-            <div className="hidden lg:block w-[8%] bg-beige/40" />
             {/* Text */}
-            <div className="flex-1 flex flex-col justify-center py-14 lg:pl-6">
+            <div className="flex-1 text-center lg:text-left">
               <h2
                 className="font-heading text-[clamp(2rem,3.5vw,3rem)] text-navy leading-tight mb-3"
                 style={{ letterSpacing: "-1px" }}
               >
                 {t('artistName')} Collection
               </h2>
-              <p className="font-heading italic text-muted text-[1.1rem] mb-2">
+              <p className="font-heading italic text-muted text-[1.1rem] mb-6">
                 {t('artistRole')}
               </p>
-              <ul className="text-[12px] font-body text-muted tracking-wide space-y-1 mb-8">
+              <ul className="text-[12px] font-body text-muted tracking-wide space-y-1.5 mb-8 lg:list-none">
                 <li>— {t('handmadeIn')} Europe</li>
                 <li>— Polymer clay art jewellery</li>
                 <li>— Limited edition pieces</li>
               </ul>
-              <DashButton href="/about" variant="outline">
+              <DashButton href="/about" variant="ghost">
                 {t('readFullStory')}
               </DashButton>
             </div>
@@ -390,13 +381,14 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── 8. NEWSLETTER ──────────────────────────────────────────── */}
-      <section className="bg-cream py-20 text-center">
-        <div className="mx-auto max-w-md px-6">
+      {/* ─── 8. NEWSLETTER — minimal bijoux style ─────────────────── */}
+      <section className="bg-cream py-20 lg:py-28">
+        <div className="mx-auto max-w-[560px] px-6 text-center">
+          <div className="w-px h-10 bg-cream-dark mx-auto mb-8" />
           <h2 className="font-heading text-[clamp(1.8rem,3vw,2.5rem)] text-navy mb-3">
             {t('newsletterTitle')}
           </h2>
-          <p className="font-heading italic text-muted text-[1rem] mb-8">
+          <p className="font-heading italic text-muted text-[1rem] mb-10">
             {t('newsletterText')}
           </p>
           <NewsletterForm variant="light" />

@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
             {t('resetExpired')}
           </div>
           <Link
-            href="/account/login"
+            href="/login"
             className="text-sm font-medium text-charcoal hover:underline"
           >
             {t('signIn')}
@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
             {t('passwordResetSuccess')}
           </div>
           <Link
-            href="/account/login"
+            href="/login"
             className="inline-block rounded-lg bg-charcoal px-6 py-2.5 text-sm font-medium text-white hover:bg-charcoal/90"
           >
             {t('signIn')}
@@ -152,7 +152,7 @@ export default function ResetPasswordPage() {
 
         <p className="text-center text-sm text-gray-500">
           <Link
-            href="/account/login"
+            href="/login"
             className="font-medium text-charcoal hover:underline"
           >
             {t('signIn')}

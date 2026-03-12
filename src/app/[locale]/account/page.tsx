@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { Package, MapPin, Heart } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Account')
@@ -13,10 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AccountPage() {
   const session = await auth()
-  if (!session?.user) redirect('/account/login')
+  if (!session?.user) redirect('/login')
 
   const t = await getTranslations('Account')
   const tc = await getTranslations('Common')
+  const locale = await getLocale()
 
   const [orderCount, addressCount, wishlistCount, recentOrders] = await Promise.all([
     db.order.count({ where: { customerId: session.user.id } }),
@@ -79,7 +80,7 @@ export default async function AccountPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-900">{order.orderNumber}</p>
                   <p className="text-xs text-gray-500">
-                    {order.createdAt.toLocaleDateString('en-GB', {
+                    {order.createdAt.toLocaleDateString(locale, {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',

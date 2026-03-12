@@ -7,7 +7,8 @@ import { render } from "@react-email/render";
 import NewsletterWelcome from "@/emails/newsletter-welcome";
 
 function buildUnsubToken(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET || "fallback-secret";
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("NEXTAUTH_SECRET is not configured");
   return createHmac("sha256", secret).update(email.toLowerCase()).digest("hex");
 }
 
@@ -38,8 +39,7 @@ export async function POST(req: NextRequest) {
       // If updatedAt is very close to createdAt, it's a new subscriber
       isNew = Math.abs(result.updatedAt - result.createdAt) < 1000;
     } catch {
-      // Database not available yet — log subscription
-      console.log(`[Newsletter] New subscriber: ${email} (locale: ${locale || "en"})`);
+      // Database not available yet — subscription acknowledged without persistence
     }
 
     // Send welcome email to new subscribers only

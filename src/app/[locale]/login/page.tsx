@@ -129,7 +129,7 @@ export default function CustomerLoginPage() {
 
         <p className="text-center text-sm text-gray-500">
           {t('noAccount')}{' '}
-          <Link href="/account/register" className="font-medium text-charcoal hover:underline">
+          <Link href="/register" className="font-medium text-charcoal hover:underline">
             {t('createOne')}
           </Link>
         </p>

@@ -212,10 +212,17 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
         {/* Stock status */}
         <div className="mb-4">
           {isInStock ? (
-            <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {t("inStock")}
-            </span>
+            maxQuantity > 0 && maxQuantity <= 5 ? (
+              <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                {t("lowStock", { count: maxQuantity })}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                {t("inStock")}
+              </span>
+            )
           ) : (
             <span className="inline-flex items-center gap-1.5 text-xs text-warm-gray font-medium">
               <span className="h-1.5 w-1.5 rounded-full bg-warm-gray/50" />
@@ -239,7 +246,7 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
             <button
               onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
               className="p-2.5 text-warm-gray hover:text-charcoal transition-colors disabled:opacity-40"
-              disabled={quantity >= 10}
+              disabled={quantity >= maxQuantity}
               aria-label="Increase quantity"
             >
               <Plus size={14} />

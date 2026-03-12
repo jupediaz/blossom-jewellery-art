@@ -43,6 +43,9 @@
     "collections": "Colecciones"
   },
   "Home": {
+    "heroH1Line1": "la joyería",
+    "heroH1Line2": "más fina,",
+    "heroDisplaySubtitle": "inspirada en nuestra vida.",
     "heroTitle": "Joyería Artesanal de Arcilla Polimérica",
     "heroSubtitle": "Cada pieza es un pequeño jardín botánico, moldeado a mano en la soleada costa de Marbella",
     "shopNow": "Descubrir la Colección",
@@ -70,7 +73,13 @@
     "subscribeError": "Algo salió mal. Inténtalo de nuevo.",
     "comingSoon": "Próximamente",
     "comingSoonText": "Nuestra colección se está preparando. Vuelve pronto.",
-    "allCollections": "Todas las Colecciones"
+    "allCollections": "Todas las Colecciones",
+    "heroMission": "Siempre ha sido crear piezas hermosas para la mujer moderna que ama el arte hecho a mano.",
+    "ourStore": "NUESTRA TIENDA",
+    "selectedWorks": "Trabajos seleccionados:",
+    "watermarkLine1": "joyería",
+    "watermarkLine2": "selección",
+    "collectionsLabel": "colecciones"
   },
   "Search": {
     "title": "Buscar",
@@ -142,6 +151,7 @@
     "couponApplied": "Cupón aplicado",
     "couponInvalid": "Código de cupón no válido",
     "shippingNote": "Envío calculado en el pago",
+    "shippingError": "No se pudieron cargar las opciones de envío. Inténtalo de nuevo.",
     "shippingCountry": "Enviar a",
     "selectCountry": "Seleccionar país",
     "shippingMethod": "Método de envío",
@@ -391,7 +401,8 @@
     "allPieces": "Todas las Piezas",
     "newArrivals": "Novedades",
     "shippingInfo": "Información de Envío",
-    "clearCart": "Vaciar cesta"
+    "watermarkTagline1": "La mediocridad",
+    "watermarkTagline2": "sencillamente no existe."
   },
   "SizeGuide": {
     "title": "Guía de Tallas",

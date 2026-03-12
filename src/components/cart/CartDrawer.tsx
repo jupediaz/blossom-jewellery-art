@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, ShieldCheck, RefreshCw, Gem } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -13,6 +13,7 @@ export function CartDrawer() {
     useCartStore();
   const t = useTranslations("Cart");
   const tc = useTranslations("Common");
+  const tp = useTranslations("Products");
 
   if (!isOpen) return null;
 
@@ -172,6 +173,22 @@ export function CartDrawer() {
             >
               {t("checkout")}
             </Link>
+
+            {/* Trust badges */}
+            <div className="flex items-center justify-around pt-3 border-t border-cream-dark">
+              <div className="flex flex-col items-center gap-1 text-warm-gray">
+                <ShieldCheck size={16} className="text-sage" />
+                <span className="text-[10px] tracking-wide">{t("secureCheckout")}</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-warm-gray">
+                <Gem size={16} className="text-sage" />
+                <span className="text-[10px] tracking-wide">{tp("handmade")}</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-warm-gray">
+                <RefreshCw size={16} className="text-sage" />
+                <span className="text-[10px] tracking-wide">{tp("returns")}</span>
+              </div>
+            </div>
           </div>
         )}
       </div>

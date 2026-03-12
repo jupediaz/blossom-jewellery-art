@@ -104,6 +104,18 @@ export async function POST(
     ? `Partial refund of ${order.currency} ${amount.toFixed(2)} processed. Stripe refund ID: ${stripeRefund.id}`
     : `Full refund of ${order.currency} ${amount.toFixed(2)} processed. Stripe refund ID: ${stripeRefund.id}`
 
+  // Validate that all provided item IDs belong to this order
+  if (items && items.length > 0) {
+    const orderItemIds = new Set(order.items.map((i) => i.id))
+    const invalidIds = items.filter((itemId) => !orderItemIds.has(itemId))
+    if (invalidIds.length > 0) {
+      return NextResponse.json(
+        { error: `Item IDs do not belong to this order: ${invalidIds.join(', ')}` },
+        { status: 400 }
+      )
+    }
+  }
+
   // Determine which items to release inventory for
   const itemsToRelease = items && items.length > 0
     ? order.items.filter((item) => items.includes(item.id))

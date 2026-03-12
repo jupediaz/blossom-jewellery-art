@@ -95,16 +95,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return role === 'ADMIN' || role === 'STORE_OWNER'
       }
 
-      // Customer account routes - allow login/register without auth
+      // Auth pages — accessible without login
       if (
-        pathWithoutLocale === '/account/login' ||
-        pathWithoutLocale === '/account/register' ||
+        pathWithoutLocale === '/login' ||
+        pathWithoutLocale === '/register' ||
         pathWithoutLocale === '/account/forgot-password' ||
         pathWithoutLocale === '/account/reset-password'
       ) return true
       if (pathWithoutLocale.startsWith('/account')) {
         if (!auth?.user) {
-          const loginUrl = new URL('/account/login', request.url)
+          const loginUrl = new URL('/login', request.url)
           return Response.redirect(loginUrl)
         }
         return true

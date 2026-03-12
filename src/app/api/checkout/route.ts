@@ -68,22 +68,22 @@ export async function POST(request: NextRequest) {
 
     // Validate prices server-side — never trust client-supplied prices
     const productIds = items.map((i) => i.id)
-    let serverPrices: Record<string, { price: number; name: string; inStock: boolean }> = {}
+    let serverPrices: Record<string, { price: number; name: string; inStock: boolean; collectionId?: string }> = {}
 
     try {
-      type PriceResult = { _id: string; name: string; price: number; inStock: boolean }
+      type PriceResult = { _id: string; name: string; price: number; inStock: boolean; collection?: { slug: { current: string } } }
       const sanityPrices = await sanityFetch<PriceResult[]>(
-        `*[_type == "product" && _id in $ids]{ _id, name, price, inStock }`,
+        `*[_type == "product" && _id in $ids]{ _id, name, price, inStock, collection->{ slug } }`,
         { ids: productIds }
       )
       for (const p of sanityPrices) {
-        serverPrices[p._id] = { price: p.price, name: p.name, inStock: p.inStock }
+        serverPrices[p._id] = { price: p.price, name: p.name, inStock: p.inStock, collectionId: p.collection?.slug.current }
       }
     } catch {
       // Sanity unavailable — fall back to mock prices
       for (const mock of mockProducts) {
         if (productIds.includes(mock._id)) {
-          serverPrices[mock._id] = { price: mock.price, name: mock.name, inStock: mock.inStock ?? true }
+          serverPrices[mock._id] = { price: mock.price, name: mock.name, inStock: mock.inStock ?? true, collectionId: mock.collection?.slug.current }
         }
       }
     }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         // Product doesn't exist — reject checkout
         throw Object.assign(new Error(`Product not found: ${item.name}`), { status: 400 })
       }
-      return { ...item, name: server.name, price: server.price }
+      return { ...item, name: server.name, price: server.price, collectionId: server.collectionId }
     })
 
     // Get authenticated user if available
@@ -134,12 +134,13 @@ export async function POST(request: NextRequest) {
       // DB unavailable — proceed without offer discounts
     }
 
-    // Helper: find best active offer for an item id
-    function getOfferForItem(itemId: string): (typeof activeOffers)[number] | null {
+    // Helper: find best active offer for an item (checks product, collection, and global)
+    function getOfferForItem(itemId: string, collectionId?: string): (typeof activeOffers)[number] | null {
       for (const offer of activeOffers) {
         if (
           offer.applyToAll ||
-          offer.applicableProducts.includes(itemId)
+          offer.applicableProducts.includes(itemId) ||
+          (collectionId && offer.applicableCollections.includes(collectionId))
         ) {
           return offer
         }
@@ -150,7 +151,7 @@ export async function POST(request: NextRequest) {
     // Apply offer discounts to item prices before calculating subtotal
     // (subtotal checked against max cart value after offer calculation)
     const itemsWithOffers = validatedItems.map((item) => {
-      const offer = getOfferForItem(item.id)
+      const offer = getOfferForItem(item.id, item.collectionId)
       if (!offer) return { ...item, offerDiscountedPrice: null }
       const discounted =
         offer.discountType === 'PERCENTAGE'
@@ -182,10 +183,24 @@ export async function POST(request: NextRequest) {
 
       if (coupon && coupon.isActive) {
         const now = new Date()
-        const isValid =
+        let isValid =
           coupon.validFrom <= now &&
           (!coupon.validUntil || coupon.validUntil >= now) &&
           (!coupon.maxUses || coupon.currentUses < coupon.maxUses)
+
+        // Enforce per-customer usage limit
+        if (isValid && customerId && coupon.maxUsesPerCustomer > 0) {
+          const customerUses = await db.order.count({
+            where: {
+              customerId,
+              couponId: coupon.id,
+              paymentStatus: { in: ['PAID', 'PARTIALLY_REFUNDED'] },
+            },
+          })
+          if (customerUses >= coupon.maxUsesPerCustomer) {
+            isValid = false
+          }
+        }
 
         if (isValid) {
           couponId = coupon.id
@@ -213,17 +228,22 @@ export async function POST(request: NextRequest) {
         include: { zone: true },
       })
 
-      if (method && method.isActive) {
-        // Check free shipping from zone threshold
-        const qualifiesForZoneFreeShipping =
-          method.zone.freeShippingThreshold &&
-          subtotal >= Number(method.zone.freeShippingThreshold)
-
-        shippingCost = freeShipping || qualifiesForZoneFreeShipping
-          ? 0
-          : Number(method.rate)
-        shippingMethodName = method.name
+      if (!method || !method.isActive) {
+        return NextResponse.json(
+          { error: 'Selected shipping method is unavailable. Please refresh and try again.' },
+          { status: 400 }
+        )
       }
+
+      // Check free shipping from zone threshold
+      const qualifiesForZoneFreeShipping =
+        method.zone.freeShippingThreshold &&
+        subtotal >= Number(method.zone.freeShippingThreshold)
+
+      shippingCost = freeShipping || qualifiesForZoneFreeShipping
+        ? 0
+        : Number(method.rate)
+      shippingMethodName = method.name
     }
 
     // Reserve inventory for each item
@@ -311,7 +331,7 @@ export async function POST(request: NextRequest) {
           }))
         ),
         offer_ids: JSON.stringify(
-          itemsWithOffers.map((i) => getOfferForItem(i.id)?.id ?? null)
+          itemsWithOffers.map((i) => getOfferForItem(i.id, i.collectionId)?.id ?? null)
         ),
         coupon_id: couponId || '',
         coupon_code: couponCode?.toUpperCase() || '',

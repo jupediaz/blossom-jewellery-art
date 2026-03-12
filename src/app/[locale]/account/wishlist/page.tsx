@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function WishlistPage() {
   const session = await auth()
-  if (!session?.user) redirect('/account/login')
+  if (!session?.user) redirect('/login')
 
   const t = await getTranslations('Account')
   const tc = await getTranslations('Common')

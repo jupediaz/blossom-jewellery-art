@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { db } from '@/lib/db'
 
 // Sanity webhook: sync product inventory records when products are created/updated/deleted
@@ -17,8 +18,14 @@ export async function POST(req: NextRequest) {
   if (!secret) {
     return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 503 })
   }
-  const headerSecret = req.headers.get('x-sanity-webhook-secret')
-  if (headerSecret !== secret) {
+  const headerSecret = req.headers.get('x-sanity-webhook-secret') ?? ''
+  let valid = false
+  try {
+    valid = timingSafeEqual(Buffer.from(headerSecret), Buffer.from(secret))
+  } catch {
+    // Buffers differ in length — invalid secret
+  }
+  if (!valid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

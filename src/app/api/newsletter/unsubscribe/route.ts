@@ -3,7 +3,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 
 function computeToken(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET || "fallback-secret";
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("NEXTAUTH_SECRET is not configured");
   return createHmac("sha256", secret).update(email.toLowerCase()).digest("hex");
 }
 
@@ -38,8 +39,7 @@ export async function GET(req: NextRequest) {
       data: { isActive: false },
     });
   } catch {
-    // DB unavailable — log and continue
-    console.log(`[Newsletter] Unsubscribe requested for: ${email}`);
+    // DB unavailable — unsubscribe acknowledged without persistence
   }
 
   // Redirect to confirmation page

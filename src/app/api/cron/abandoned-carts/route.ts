@@ -6,7 +6,8 @@ import { render } from '@react-email/render'
 import CartRecovery from '@/emails/cart-recovery'
 
 function buildUnsubToken(email: string): string {
-  const secret = process.env.NEXTAUTH_SECRET || 'fallback-secret'
+  const secret = process.env.NEXTAUTH_SECRET
+  if (!secret) throw new Error('NEXTAUTH_SECRET is not configured')
   return createHmac('sha256', secret).update(email.toLowerCase()).digest('hex')
 }
 
@@ -62,22 +63,23 @@ export async function POST(req: NextRequest) {
 
       let stage: '1h' | '24h' | '48h' | null = null
 
-      if (hoursSinceAbandonment >= 1 && hoursSinceAbandonment < 2) {
-        // Check if 1h email already sent
+      // Use cumulative windows (not narrow 1h slots) so a delayed cron never misses a stage.
+      // Priority: 48h > 24h > 1h — send the most advanced eligible stage not yet sent.
+      if (hoursSinceAbandonment >= 48) {
         const alreadySent = await db.emailLog.findFirst({
-          where: { to: email, type: 'CART_RECOVERY_1H', metadata: { path: ['cartSessionId'], equals: cart.id } },
-        })
-        if (!alreadySent) stage = '1h'
-      } else if (hoursSinceAbandonment >= 24 && hoursSinceAbandonment < 25) {
-        const alreadySent = await db.emailLog.findFirst({
-          where: { to: email, type: 'CART_RECOVERY_24H', metadata: { path: ['cartSessionId'], equals: cart.id } },
-        })
-        if (!alreadySent) stage = '24h'
-      } else if (hoursSinceAbandonment >= 48 && hoursSinceAbandonment < 49) {
-        const alreadySent = await db.emailLog.findFirst({
-          where: { to: email, type: 'CART_RECOVERY_48H', metadata: { path: ['cartSessionId'], equals: cart.id } },
+          where: { to: email, type: 'CART_RECOVERY_48H', metadata: { path: ['cartSessionId'], equals: cart.id }, status: 'sent' },
         })
         if (!alreadySent) stage = '48h'
+      } else if (hoursSinceAbandonment >= 24) {
+        const alreadySent = await db.emailLog.findFirst({
+          where: { to: email, type: 'CART_RECOVERY_24H', metadata: { path: ['cartSessionId'], equals: cart.id }, status: 'sent' },
+        })
+        if (!alreadySent) stage = '24h'
+      } else if (hoursSinceAbandonment >= 1) {
+        const alreadySent = await db.emailLog.findFirst({
+          where: { to: email, type: 'CART_RECOVERY_1H', metadata: { path: ['cartSessionId'], equals: cart.id }, status: 'sent' },
+        })
+        if (!alreadySent) stage = '1h'
       }
 
       if (!stage) continue
@@ -136,18 +138,26 @@ export async function POST(req: NextRequest) {
         })
       )
 
-      await sendEmail({
-        to: email,
-        subject: subjects[stage],
-        html,
-        unsubscribeToken: buildUnsubToken(email),
-      })
-
-      // Mark log as sent after successful delivery
-      await db.emailLog.update({
-        where: { id: logEntry.id },
-        data: { status: 'sent' },
-      })
+      try {
+        await sendEmail({
+          to: email,
+          subject: subjects[stage],
+          html,
+          unsubscribeToken: buildUnsubToken(email),
+        })
+        // Mark log as sent only after confirmed delivery
+        await db.emailLog.update({
+          where: { id: logEntry.id },
+          data: { status: 'sent' },
+        })
+      } catch (sendErr) {
+        // Mark log as failed so next cron run can retry
+        await db.emailLog.update({
+          where: { id: logEntry.id },
+          data: { status: 'failed' },
+        })
+        throw sendErr
+      }
 
       await db.cartSession.update({
         where: { id: cart.id },
@@ -168,7 +178,7 @@ export async function POST(req: NextRequest) {
       abandonedAt: null,
       convertedOrderId: null,
       lastActivityAt: { lt: oneHourAgo },
-      customer: { email: { not: null } },
+      customer: { isNot: null },
     },
     data: { abandonedAt: now },
   })

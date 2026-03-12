@@ -66,10 +66,12 @@ export default function CartPage() {
   const [shippingMethods, setShippingMethods] = useState<ShippingMethodOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<string>("");
   const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState(false);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState<number | null>(null);
 
   const fetchShipping = useCallback(async (country: string, sub: number) => {
     setShippingLoading(true);
+    setShippingError(false);
     try {
       const res = await fetch("/api/shipping/calculate", {
         method: "POST",
@@ -83,9 +85,13 @@ export default function CartPage() {
         if (data.methods.length > 0) {
           setSelectedShipping(data.methods[0].id);
         }
+      } else {
+        setShippingMethods([]);
+        setShippingError(true);
       }
     } catch {
       setShippingMethods([]);
+      setShippingError(true);
     } finally {
       setShippingLoading(false);
     }
@@ -352,6 +358,10 @@ export default function CartPage() {
                 <Loader2 size={12} className="animate-spin" />
                 {tc("loading")}
               </div>
+            )}
+
+            {shippingError && !shippingLoading && (
+              <p className="mt-2 text-xs text-red-500">{t("shippingError")}</p>
             )}
 
             {shippingMethods.length > 0 && !shippingLoading && (

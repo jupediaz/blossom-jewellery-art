@@ -11,7 +11,7 @@ export default async function AccountLayout({
   const session = await auth()
 
   if (!session?.user) {
-    redirect('/account/login')
+    redirect('/login')
   }
 
   const navItems = [

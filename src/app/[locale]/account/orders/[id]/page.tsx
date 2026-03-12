@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 import { redirect, notFound } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { Package, ArrowLeft, Truck } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import { formatPrice } from '@/lib/utils'
 
 interface OrderDetailPageProps {
@@ -12,11 +12,12 @@ interface OrderDetailPageProps {
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
   const session = await auth()
-  if (!session?.user) redirect('/account/login')
+  if (!session?.user) redirect('/login')
 
   const { id } = await params
   const t = await getTranslations('Account')
   const tc = await getTranslations('Common')
+  const locale = await getLocale()
 
   const order = await db.order.findUnique({
     where: { id },
@@ -75,7 +76,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         <div className="rounded-xl border border-cream-dark p-4">
           <p className="text-xs text-warm-gray uppercase tracking-wide mb-1">{t('orderDate')}</p>
           <p className="text-sm font-medium">
-            {order.createdAt.toLocaleDateString('en-GB', {
+            {order.createdAt.toLocaleDateString(locale, {
               day: 'numeric',
               month: 'long',
               year: 'numeric',
