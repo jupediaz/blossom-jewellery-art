@@ -18,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "$DEPLOY_DIR"
-          git pull origin production
+          git fetch origin production && git reset --hard origin/production
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml up -d --no-build
           echo "Deploy completado: $(date)"
