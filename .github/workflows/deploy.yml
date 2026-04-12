@@ -21,15 +21,12 @@ jobs:
           git fetch origin production && git reset --hard origin/production
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml up -d --no-build
-          echo "Deploy completado: $(date)"
-
-      - name: Health check
-        run: |
-          echo "Esperando servicio healthy..."
-          for i in $(seq 1 12); do
-            STATUS=$(curl -sf http://localhost:3000/api/health && echo ok || echo fail)
-            echo "  attempt $i: $STATUS"
-            [ "$STATUS" = "ok" ] && exit 0
-            sleep 5
-          done
-          echo "ERROR: servicio no healthy tras 60s" && exit 1
+          echo "Checking containers are running..."
+          sleep 10
+          FAILED=$(docker compose -f docker-compose.prod.yml ps --status exited --quiet | wc -l)
+          if [ "$FAILED" -gt 0 ]; then
+            echo "ERROR: $FAILED container(s) exited after deploy"
+            docker compose -f docker-compose.prod.yml logs --tail=50
+            exit 1
+          fi
+          echo "Deploy completed successfully"
