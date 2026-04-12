@@ -1,9 +1,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-# Generate Prisma client with a placeholder DB URL during build
-ENV DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
-RUN npm ci --legacy-peer-deps && npx prisma generate
+RUN npm ci --legacy-peer-deps
 
 FROM node:20-alpine AS builder
 WORKDIR /app
@@ -11,6 +9,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
+RUN npx prisma generate
 RUN npm run build
 
 FROM node:20-alpine AS runner
