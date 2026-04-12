@@ -1,33 +1,35 @@
-name: Deploy
+name: Deploy to Xeon
 
 on:
   push:
-    branches: [master]
+    branches: [production]
 
 concurrency:
-  group: deploy-blossom
+  group: deploy-${{ github.repository }}
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: [self-hosted, linux, x64, xeon]
+    env:
+      DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
     steps:
       - name: Deploy blossom to Xeon
         run: |
           set -euo pipefail
-          COMPOSE_DIR="/etc/dokploy/compose/compose-synthesize-cross-platform-panel-c4m29k/code"
-          PROJECT="compose-synthesize-cross-platform-panel-c4m29k"
-          COMPOSE_FILE="docker-compose.prod.yml"
-          cd "$COMPOSE_DIR"
-          git fetch origin master && git reset --hard origin/master
-          docker compose -f "$COMPOSE_FILE" -p "$PROJECT" build
-          docker compose -f "$COMPOSE_FILE" -p "$PROJECT" up -d
-          echo "Checking containers are running..."
-          sleep 10
-          FAILED=$(docker compose -f "$COMPOSE_FILE" -p "$PROJECT" ps --status exited --quiet | wc -l)
-          if [ "$FAILED" -gt 0 ]; then
-            echo "ERROR: $FAILED container(s) exited after deploy"
-            docker compose -f "$COMPOSE_FILE" -p "$PROJECT" logs --tail=50
-            exit 1
-          fi
-          echo "Deploy completed successfully"
+          cd "$DEPLOY_DIR"
+          git pull origin production
+          docker compose -f docker-compose.prod.yml build
+          docker compose -f docker-compose.prod.yml up -d --no-build
+          echo "Deploy completado: $(date)"
+
+      - name: Health check
+        run: |
+          echo "Esperando servicio healthy..."
+          for i in $(seq 1 12); do
+            STATUS=$(curl -sf http://localhost:3000/api/health && echo ok || echo fail)
+            echo "  attempt $i: $STATUS"
+            [ "$STATUS" = "ok" ] && exit 0
+            sleep 5
+          done
+          echo "ERROR: servicio no healthy tras 60s" && exit 1
