@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.blossom.rule=Host(`blossombyolha.com`)"
+      - "traefik.http.routers.blossom.entrypoints=websecure"
+      - "traefik.http.routers.blossom.tls=true"
+      - "traefik.http.routers.blossom.tls.certresolver=letsencrypt"
+      - "traefik.http.services.blossom.loadbalancer.server.port=3000"
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
