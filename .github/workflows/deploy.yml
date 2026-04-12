@@ -19,7 +19,7 @@ jobs:
           PROJECT="compose-synthesize-cross-platform-panel-c4m29k"
           COMPOSE_FILE="docker-compose.prod.yml"
           cd "$COMPOSE_DIR"
-          git pull origin master
+          git fetch origin master && git reset --hard origin/master
           docker compose -f "$COMPOSE_FILE" -p "$PROJECT" build
           docker compose -f "$COMPOSE_FILE" -p "$PROJECT" up -d
           echo "Checking containers are running..."
