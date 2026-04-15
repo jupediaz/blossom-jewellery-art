@@ -2,7 +2,7 @@ name: Deploy to Xeon
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 concurrency:
   group: deploy-${{ github.repository }}
@@ -21,8 +21,8 @@ jobs:
           cd "$DEPLOY_DIR"
           git remote set-url origin https://github.com/${{ github.repository }}.git
           AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
-          git -c http.extraheader="$AUTH_HEADER" fetch origin +refs/heads/master:refs/remotes/origin/master
-          git reset --hard refs/remotes/origin/master
+          git -c http.extraheader="$AUTH_HEADER" fetch origin +refs/heads/main:refs/remotes/origin/main
+          git reset --hard refs/remotes/origin/main
           EXPECTED="${{ github.sha }}"
           ACTUAL=$(git rev-parse HEAD)
           if [ "$ACTUAL" != "$EXPECTED" ]; then
