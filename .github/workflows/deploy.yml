@@ -18,7 +18,16 @@ jobs:
         run: |
           set -euo pipefail
           cd "$DEPLOY_DIR"
-          git fetch origin production && git reset --hard origin/production
+          git remote set-url origin https://github.com/${{ github.repository }}.git
+          AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
+          git -c http.extraheader="$AUTH_HEADER" fetch origin +refs/heads/master:refs/remotes/origin/master
+          git reset --hard refs/remotes/origin/master
+          EXPECTED="${{ github.sha }}"
+          ACTUAL=$(git rev-parse HEAD)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::Commit drift: expected $EXPECTED got $ACTUAL"
+            exit 1
+          fi
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml up -d --no-build
           echo "Checking containers are running..."
