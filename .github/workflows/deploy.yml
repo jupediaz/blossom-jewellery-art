@@ -37,10 +37,13 @@ jobs:
             exit 1
           fi
           docker compose -f apps/blossom/docker-compose.prod.yml build
-          docker compose -f apps/blossom/docker-compose.prod.yml up -d --no-build
-          echo "Checking containers are running..."
+          # Apply pending DB migrations before starting the app. If this fails,
+          # set -e aborts the deploy and the app is left untouched.
+          docker compose -f apps/blossom/docker-compose.prod.yml run --rm migrate
+          docker compose -f apps/blossom/docker-compose.prod.yml up -d --no-build app
+          echo "Checking app container is running..."
           sleep 10
-          FAILED=$(docker compose -f apps/blossom/docker-compose.prod.yml ps --status exited --quiet | wc -l)
+          FAILED=$(docker compose -f apps/blossom/docker-compose.prod.yml ps --status exited --quiet app | wc -l)
           if [ "$FAILED" -gt 0 ]; then
             echo "ERROR: $FAILED container(s) exited after deploy"
             docker compose -f apps/blossom/docker-compose.prod.yml logs --tail=50

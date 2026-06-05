@@ -16,6 +16,13 @@ WORKDIR /app/apps/blossom
 RUN npx prisma generate
 RUN npm run build
 
+# One-shot migration image: reuses the builder (has prisma CLI, schema,
+# migrations and prisma.config.ts). Run before starting the app on deploy.
+FROM builder AS migrator
+WORKDIR /app/apps/blossom
+ENV NODE_ENV=production
+CMD ["npx", "prisma", "migrate", "deploy"]
+
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production

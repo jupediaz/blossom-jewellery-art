@@ -20,6 +20,17 @@ services:
     - traefik.http.services.blossom.loadbalancer.server.port=3000
     networks:
     - dokploy-network
+  # One-shot DB migration. Run with `docker compose run --rm migrate` before
+  # bringing up `app`. Reads DATABASE_URL from .env (process.env).
+  migrate:
+    build:
+      context: ../..
+      dockerfile: apps/blossom/Dockerfile
+      target: migrator
+    env_file: .env
+    restart: "no"
+    networks:
+    - dokploy-network
 networks:
   dokploy-network:
     external: true
