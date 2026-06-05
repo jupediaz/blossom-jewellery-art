@@ -5,8 +5,13 @@ import type { OrderStatus } from '@/generated/prisma/client'
 
 function escapeCSV(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return ''
-  const str = String(value)
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+  let str = String(value)
+  // Neutralize spreadsheet formula injection: prefix cells that start with a
+  // formula-trigger character so Excel/Sheets treat them as text, not formulas.
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`
+  }
+  if (/[,"\n\r]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`
   }
   return str
