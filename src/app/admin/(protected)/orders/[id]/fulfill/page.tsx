@@ -45,17 +45,37 @@ export default function FulfillOrderPage() {
   const [trackingNumber, setTrackingNumber] = useState('')
   const [carrier, setCarrier] = useState('Correos')
   const [error, setError] = useState('')
+  const [packedItems, setPackedItems] = useState<Set<string>>(new Set())
+
+  const togglePacked = (itemId: string) =>
+    setPackedItems((prev) => {
+      const next = new Set(prev)
+      next.has(itemId) ? next.delete(itemId) : next.add(itemId)
+      return next
+    })
+
+  const allPacked = order ? order.items.every((i) => packedItems.has(i.id)) : false
 
   useEffect(() => {
     fetch(`/api/admin/orders/${orderId}`)
       .then((r) => r.json())
       .then(setOrder)
+      .catch(() => setError('Failed to load order. Please refresh the page.'))
       .finally(() => setLoading(false))
   }, [orderId])
 
   async function handleFulfill() {
-    if (!trackingNumber.trim()) {
+    const tn = trackingNumber.trim()
+    if (!tn) {
       setError('Tracking number is required')
+      return
+    }
+    if (tn.length < 5 || tn.length > 50) {
+      setError('Tracking number must be between 5 and 50 characters')
+      return
+    }
+    if (!/^[A-Z0-9\-\s]+$/i.test(tn)) {
+      setError('Tracking number can only contain letters, numbers, hyphens, and spaces')
       return
     }
 
@@ -194,7 +214,12 @@ export default function FulfillOrderPage() {
                   </td>
                   <td className="py-3 text-center text-sm font-medium">{item.quantity}</td>
                   <td className="py-3 text-right">
-                    <input type="checkbox" className="rounded" />
+                    <input
+                      type="checkbox"
+                      className="rounded accent-charcoal cursor-pointer"
+                      checked={packedItems.has(item.id)}
+                      onChange={() => togglePacked(item.id)}
+                    />
                   </td>
                 </tr>
               ))}
@@ -253,6 +278,14 @@ export default function FulfillOrderPage() {
             />
           </div>
         </div>
+
+        {order.items.length > 0 && (
+          <p className={`text-sm ${allPacked ? 'text-emerald-700 font-medium' : 'text-gray-500'}`}>
+            {allPacked
+              ? `All ${order.items.length} items packed — ready to ship`
+              : `${packedItems.size}/${order.items.length} items packed`}
+          </p>
+        )}
 
         <div className="flex items-center gap-3 pt-2">
           <button

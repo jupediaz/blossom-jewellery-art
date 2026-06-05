@@ -8,6 +8,8 @@ import { formatPrice } from "@/lib/utils";
 import { trackBeginCheckout } from "@/lib/analytics";
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { CartUpsell } from "./CartUpsell";
 
 interface ShippingMethodOption {
   id: string;
@@ -51,9 +53,13 @@ export default function CartPage() {
   const t = useTranslations("Cart");
   const tc = useTranslations("Common");
   const locale = useLocale();
+  const { status: authStatus } = useSession();
+  // Only show guest email field when confirmed unauthenticated — avoids flicker during session hydration
+  const isGuest = authStatus === 'unauthenticated';
   const { items, removeItem, updateQuantity, totalPrice, clearCart } =
     useCartStore();
   const [couponCode, setCouponCode] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
   const [couponApplied, setCouponApplied] = useState<{
     code: string;
     discount: number;
@@ -150,6 +156,7 @@ export default function CartPage() {
           locale,
           shippingMethodId: selectedShipping || undefined,
           countryCode: selectedCountry || undefined,
+          guestEmail: isGuest && guestEmail ? guestEmail : undefined,
         }),
       });
       const data = await response.json();
@@ -397,10 +404,22 @@ export default function CartPage() {
                     </span>
                   </label>
                 ))}
-                {freeShippingThreshold && !shippingMethods[0]?.freeShipping && subtotal < freeShippingThreshold && (
-                  <p className="text-xs text-sage-dark">
-                    {t("freeShippingNote", { amount: formatPrice(freeShippingThreshold) })}
-                  </p>
+                {freeShippingThreshold && !shippingMethods[0]?.freeShipping && (
+                  <div className="mt-2 space-y-1.5">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className="h-full rounded-full bg-sage transition-all duration-500"
+                        style={{ width: `${Math.min(100, (subtotal / freeShippingThreshold) * 100)}%` }}
+                      />
+                    </div>
+                    {subtotal >= freeShippingThreshold ? (
+                      <p className="text-xs font-medium text-emerald-700">{t("freeShippingUnlocked")}</p>
+                    ) : (
+                      <p className="text-xs text-sage-dark">
+                        {t("freeShippingNote", { amount: formatPrice(freeShippingThreshold - subtotal) })}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -432,10 +451,25 @@ export default function CartPage() {
               <span>{formatPrice(displayTotal)}</span>
             </div>
           </div>
+          {isGuest && (
+            <div className="mt-4 mb-2">
+              <label className="block text-xs font-medium text-warm-gray mb-1">
+                {t("guestEmail")}
+              </label>
+              <input
+                type="email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                placeholder={t("guestEmailPlaceholder")}
+                className="w-full rounded-lg border border-cream-dark px-3 py-2 text-sm focus:border-charcoal focus:outline-none"
+              />
+              <p className="mt-1 text-xs text-warm-gray/70">{t("guestEmailNote")}</p>
+            </div>
+          )}
           <button
             onClick={handleCheckout}
             disabled={checkingOut}
-            className="w-full mt-6 bg-charcoal text-cream py-3 rounded text-sm tracking-wide hover:bg-charcoal/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full mt-4 bg-charcoal text-cream py-3 rounded text-sm tracking-wide hover:bg-charcoal/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {checkingOut ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -447,6 +481,9 @@ export default function CartPage() {
           </p>
         </div>
       </div>
+
+      {/* You may also like */}
+      {items.length > 0 && <CartUpsell />}
     </div>
   );
 }

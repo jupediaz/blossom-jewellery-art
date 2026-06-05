@@ -2,7 +2,7 @@ import { db } from '@/lib/db'
 import { sanityFetch } from '@/lib/sanity/client'
 import { allProductsQuery } from '@/lib/sanity/queries'
 import { EmptyState } from '@/components/admin/EmptyState'
-import { Package, ExternalLink, ImagePlus } from 'lucide-react'
+import { Package, ExternalLink, ImagePlus, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { AIDescriptionGeneratorLoader as AIDescriptionGenerator } from './AIDescriptionGeneratorLoader'
 
@@ -171,13 +171,23 @@ export default async function AdminProductsPage() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right">
-                      <Link
-                        href={`/admin/ai-studio?productId=${product._id}&productName=${encodeURIComponent(product.name)}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-purple-200 px-2.5 py-1 text-xs font-medium text-purple-600 hover:bg-purple-50"
-                      >
-                        <ImagePlus className="h-3 w-3" />
-                        AI Images
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/studio/structure/product;${product._id}`}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                        >
+                          <Pencil className="h-3 w-3" />
+                          Edit
+                        </Link>
+                        <Link
+                          href={`/admin/ai-studio?productId=${product._id}&productName=${encodeURIComponent(product.name)}`}
+                          className="inline-flex items-center gap-1 rounded-lg border border-purple-200 px-2.5 py-1 text-xs font-medium text-purple-600 hover:bg-purple-50"
+                        >
+                          <ImagePlus className="h-3 w-3" />
+                          AI Images
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )

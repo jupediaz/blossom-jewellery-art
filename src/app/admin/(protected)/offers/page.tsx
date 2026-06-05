@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Zap, Plus } from 'lucide-react'
 import { format } from 'date-fns'
+import { OfferActions } from './OfferActions'
 
 export default async function OffersPage() {
   const offers = await db.offer.findMany({
@@ -43,6 +44,7 @@ export default async function OffersPage() {
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Scope</th>
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Period</th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -82,6 +84,9 @@ export default async function OffersPage() {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                       {format(offer.validFrom, 'dd MMM')} - {format(offer.validUntil, 'dd MMM yyyy')}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <OfferActions offerId={offer.id} />
                     </td>
                   </tr>
                 )

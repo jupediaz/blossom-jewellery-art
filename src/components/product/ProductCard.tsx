@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import type { Product } from "@/lib/types";
 
 export interface ActiveOffer {
@@ -24,6 +24,7 @@ interface ProductCardProps {
 export function ProductCard({ product, offer, isNew }: ProductCardProps) {
   const t = useTranslations("Products");
   const tc = useTranslations("Common");
+  const locale = useLocale();
   const { addItem, openCart } = useCartStore();
 
   // Compute offer-based discounted price
@@ -146,7 +147,7 @@ export function ProductCard({ product, offer, isNew }: ProductCardProps) {
       {offer && (
         <p className="text-[9px] text-terracotta font-body mt-0.5">
           {t("saleEnds", {
-            date: new Date(offer.validUntil).toLocaleDateString(undefined, {
+            date: new Date(offer.validUntil).toLocaleDateString(locale, {
               day: "numeric",
               month: "short",
             }),

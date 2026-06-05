@@ -5,6 +5,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge'
 import { formatPrice } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ArrowLeft, Mail, MapPin, ShoppingCart } from 'lucide-react'
+import { SendResetButton } from './SendResetButton'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -128,6 +129,7 @@ export default async function CustomerDetailPage({ params }: Props) {
               <p className="mt-1 text-gray-500">
                 Locale: {customer.locale} &middot; Currency: {customer.currency}
               </p>
+              <SendResetButton customerId={customer.id} />
             </div>
           </div>
 

@@ -37,58 +37,55 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ created: 0, existing: 0, message: 'No products found in Sanity' })
   }
 
-  let created = 0
-  let existing = 0
+  // Collect all product IDs for a single batch fetch — replaces N+1 findFirst per product/variant
+  const productIds = products.map((p) => p._id)
+  const existingRecords = await db.inventory.findMany({
+    where: { sanityProductId: { in: productIds } },
+    select: { sanityProductId: true, sanityVariantKey: true },
+  })
+
+  // Build a Set for O(1) lookup: "productId__variantKey" (null variant → "productId__")
+  const existingKeys = new Set(
+    existingRecords.map((r) => `${r.sanityProductId}__${r.sanityVariantKey ?? ''}`)
+  )
+
+  // Build all records that need to be created
+  const toCreate: Array<{
+    sanityProductId: string
+    sanityVariantKey?: string
+    quantityTotal: number
+  }> = []
 
   for (const product of products) {
     if (!product.variants || product.variants.length === 0) {
-      // Single-variant product
-      const exists = await db.inventory.findUnique({
-        where: { sanityProductId_sanityVariantKey: { sanityProductId: product._id, sanityVariantKey: null as unknown as string } },
-      })
-
-      if (!exists) {
-        // findUnique with null in compound unique needs different approach
-        const existsNull = await db.inventory.findFirst({
-          where: { sanityProductId: product._id, sanityVariantKey: null },
+      const key = `${product._id}__`
+      if (!existingKeys.has(key)) {
+        toCreate.push({
+          sanityProductId: product._id,
+          quantityTotal: product.inStock ? 1 : 0,
         })
-
-        if (!existsNull) {
-          await db.inventory.create({
-            data: {
-              sanityProductId: product._id,
-              quantityTotal: product.inStock ? 1 : 0,
-            },
-          })
-          created++
-        } else {
-          existing++
-        }
-      } else {
-        existing++
       }
     } else {
-      // Multi-variant product
       for (const variant of product.variants) {
-        const existsVariant = await db.inventory.findFirst({
-          where: { sanityProductId: product._id, sanityVariantKey: variant.name },
-        })
-
-        if (!existsVariant) {
-          await db.inventory.create({
-            data: {
-              sanityProductId: product._id,
-              sanityVariantKey: variant.name,
-              quantityTotal: variant.inStock ? 1 : 0,
-            },
+        const key = `${product._id}__${variant.name}`
+        if (!existingKeys.has(key)) {
+          toCreate.push({
+            sanityProductId: product._id,
+            sanityVariantKey: variant.name,
+            quantityTotal: variant.inStock ? 1 : 0,
           })
-          created++
-        } else {
-          existing++
         }
       }
     }
   }
+
+  // Single createMany — one round-trip for all new records
+  if (toCreate.length > 0) {
+    await db.inventory.createMany({ data: toCreate, skipDuplicates: true })
+  }
+
+  const created = toCreate.length
+  const existing = existingRecords.length
 
   return NextResponse.json({
     created,

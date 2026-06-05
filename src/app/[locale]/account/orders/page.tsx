@@ -1,28 +1,43 @@
 import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
+
 import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
-import { Package } from 'lucide-react'
+import { Package, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
+
+const PAGE_SIZE = 10
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Account')
   return { title: t('orderHistory') }
 }
 
-export default async function AccountOrdersPage() {
+export default async function AccountOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
   const session = await auth()
   if (!session?.user) redirect('/login')
 
   const t = await getTranslations('Account')
   const locale = await getLocale()
+  const { page: pageParam } = await searchParams
+  const page = Math.max(1, parseInt(pageParam || '1', 10))
 
-  const orders = await db.order.findMany({
-    where: { customerId: session.user.id },
-    include: { items: true },
-    orderBy: { createdAt: 'desc' },
-  })
+  const [orders, total] = await Promise.all([
+    db.order.findMany({
+      where: { customerId: session.user.id },
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    db.order.count({ where: { customerId: session.user.id } }),
+  ])
+  const totalPages = Math.ceil(total / PAGE_SIZE)
 
   if (orders.length === 0) {
     return (
@@ -138,6 +153,40 @@ export default async function AccountOrdersPage() {
           </div>
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-gray-500">
+            {t('ordersShowing', { from: (page - 1) * PAGE_SIZE + 1, to: Math.min(page * PAGE_SIZE, total), total })}
+          </p>
+          <div className="flex gap-2">
+            {page > 1 ? (
+              <Link
+                href={`/account/orders?page=${page - 1}`}
+                className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs hover:bg-gray-50"
+              >
+                <ChevronLeft size={12} /> {t('previous')}
+              </Link>
+            ) : (
+              <span className="flex items-center gap-1 rounded-lg border border-gray-100 px-3 py-1.5 text-xs text-gray-300">
+                <ChevronLeft size={12} /> {t('previous')}
+              </span>
+            )}
+            {page < totalPages ? (
+              <Link
+                href={`/account/orders?page=${page + 1}`}
+                className="flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs hover:bg-gray-50"
+              >
+                {t('next')} <ChevronRight size={12} />
+              </Link>
+            ) : (
+              <span className="flex items-center gap-1 rounded-lg border border-gray-100 px-3 py-1.5 text-xs text-gray-300">
+                {t('next')} <ChevronRight size={12} />
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

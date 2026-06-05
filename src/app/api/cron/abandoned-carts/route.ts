@@ -47,6 +47,25 @@ export async function POST(req: NextRequest) {
 
   stats.checked = abandonedCarts.length
 
+  // Batch-fetch all sent recovery emails for these carts in one query — avoids N+1 (up to 3 queries/cart)
+  const cartIds = abandonedCarts.map((c) => c.id)
+  let sentSet = new Set<string>()
+  if (cartIds.length > 0) {
+    const sentEmails = await db.emailLog.findMany({
+      where: {
+        type: { in: ['CART_RECOVERY_1H', 'CART_RECOVERY_24H', 'CART_RECOVERY_48H'] },
+        status: 'sent',
+        OR: cartIds.map((id) => ({
+          metadata: { path: ['cartSessionId'], equals: id },
+        })),
+      },
+      select: { type: true, metadata: true },
+    })
+    sentSet = new Set(
+      sentEmails.map((e) => `${(e.metadata as Record<string, string>).cartSessionId}__${e.type}`)
+    )
+  }
+
   for (const cart of abandonedCarts) {
     const email = cart.customer?.email
     if (!email) continue
@@ -66,20 +85,11 @@ export async function POST(req: NextRequest) {
       // Use cumulative windows (not narrow 1h slots) so a delayed cron never misses a stage.
       // Priority: 48h > 24h > 1h — send the most advanced eligible stage not yet sent.
       if (hoursSinceAbandonment >= 48) {
-        const alreadySent = await db.emailLog.findFirst({
-          where: { to: email, type: 'CART_RECOVERY_48H', metadata: { path: ['cartSessionId'], equals: cart.id }, status: 'sent' },
-        })
-        if (!alreadySent) stage = '48h'
+        if (!sentSet.has(`${cart.id}__CART_RECOVERY_48H`)) stage = '48h'
       } else if (hoursSinceAbandonment >= 24) {
-        const alreadySent = await db.emailLog.findFirst({
-          where: { to: email, type: 'CART_RECOVERY_24H', metadata: { path: ['cartSessionId'], equals: cart.id }, status: 'sent' },
-        })
-        if (!alreadySent) stage = '24h'
+        if (!sentSet.has(`${cart.id}__CART_RECOVERY_24H`)) stage = '24h'
       } else if (hoursSinceAbandonment >= 1) {
-        const alreadySent = await db.emailLog.findFirst({
-          where: { to: email, type: 'CART_RECOVERY_1H', metadata: { path: ['cartSessionId'], equals: cart.id }, status: 'sent' },
-        })
-        if (!alreadySent) stage = '1h'
+        if (!sentSet.has(`${cart.id}__CART_RECOVERY_1H`)) stage = '1h'
       }
 
       if (!stage) continue
@@ -88,21 +98,20 @@ export async function POST(req: NextRequest) {
       let discountCode: string | undefined
       if (stage === '48h') {
         discountCode = `BLOSSOM10-${cart.id.slice(-6).toUpperCase()}`
-        // Create the coupon in DB
-        const existing = await db.coupon.findUnique({ where: { code: discountCode } })
-        if (!existing) {
-          await db.coupon.create({
-            data: {
-              code: discountCode,
-              type: 'PERCENTAGE',
-              value: 10,
-              maxUses: 1,
-              maxUsesPerCustomer: 1,
-              validFrom: now,
-              validUntil: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
-            },
-          })
-        }
+        // Upsert is atomic — safe if two cron runs overlap
+        await db.coupon.upsert({
+          where: { code: discountCode },
+          update: {},
+          create: {
+            code: discountCode,
+            type: 'PERCENTAGE',
+            value: 10,
+            maxUses: 1,
+            maxUsesPerCustomer: 1,
+            validFrom: now,
+            validUntil: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          },
+        })
       }
 
       const subjects: Record<string, string> = {

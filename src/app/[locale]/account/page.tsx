@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
+
 import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { Package, MapPin, Heart } from 'lucide-react'

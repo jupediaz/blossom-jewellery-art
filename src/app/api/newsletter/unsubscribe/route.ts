@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
-import { db } from "@/lib/db";
+import { newsletterDb } from "@/lib/db";
+import * as Sentry from "@sentry/nextjs";
 
 function computeToken(email: string): string {
   const secret = process.env.NEXTAUTH_SECRET;
@@ -33,13 +34,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (db as any).newsletterSubscriber.updateMany({
+    await newsletterDb.updateMany({
       where: { email: email.toLowerCase() },
       data: { isActive: false },
     });
-  } catch {
-    // DB unavailable — unsubscribe acknowledged without persistence
+  } catch (err) {
+    // DB unavailable — log to Sentry and return 503 so user knows unsubscribe failed
+    Sentry.captureException(err, { extra: { context: 'newsletter-unsubscribe' } })
+    return NextResponse.json(
+      { error: 'Unsubscribe temporarily unavailable. Please try again later.' },
+      { status: 503 }
+    )
   }
 
   // Redirect to confirmation page

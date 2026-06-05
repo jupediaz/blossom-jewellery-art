@@ -11,9 +11,21 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Collections");
+  const title = t("title");
+  const description = t("subtitle");
   return {
-    title: t("title"),
-    description: t("subtitle"),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: "/images/og-collections.jpg", width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 

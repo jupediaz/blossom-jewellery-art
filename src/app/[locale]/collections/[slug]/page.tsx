@@ -8,6 +8,7 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import type { Collection } from "@/lib/types";
 import { mockCollections, mockProducts } from "@/lib/mock-data";
 import { getTranslations } from "next-intl/server";
+import { siteConfig } from "@/lib/env";
 import { db } from "@/lib/db";
 
 const collectionImages: Record<string, string> = {
@@ -50,11 +51,20 @@ export async function generateMetadata({
       { slug }
     );
     if (!collection) return {};
+    const canonicalPath = `/collections/${slug}`;
     return {
       title: collection.name,
       description:
         collection.description ||
         `Browse the ${collection.name} collection of handcrafted jewelry.`,
+      alternates: {
+        canonical: `${siteConfig.url}/en${canonicalPath}`,
+        languages: {
+          en: `${siteConfig.url}/en${canonicalPath}`,
+          es: `${siteConfig.url}/es${canonicalPath}`,
+          uk: `${siteConfig.url}/uk${canonicalPath}`,
+        },
+      },
     };
   } catch {
     return {};

@@ -6,6 +6,7 @@ import { formatPrice } from '@/lib/utils'
 import { format } from 'date-fns'
 import { ArrowLeft, Package, User, MapPin, CreditCard } from 'lucide-react'
 import { OrderActions } from './OrderActions'
+import { InternalNoteForm } from './InternalNoteForm'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -28,6 +29,7 @@ export default async function OrderDetailPage({ params }: Props) {
   if (!order) notFound()
 
   const shipping = order.shippingAddress as {
+    name?: string
     firstName?: string
     lastName?: string
     line1?: string
@@ -35,6 +37,10 @@ export default async function OrderDetailPage({ params }: Props) {
     postalCode?: string
     country?: string
   }
+  const shippingName =
+    shipping.name ||
+    [shipping.firstName, shipping.lastName].filter(Boolean).join(' ') ||
+    null
 
   return (
     <div className="space-y-6">
@@ -201,7 +207,7 @@ export default async function OrderDetailPage({ params }: Props) {
               </h3>
             </div>
             <div className="px-6 py-4 text-sm text-gray-700">
-              <p>{shipping.firstName} {shipping.lastName}</p>
+              {shippingName && <p>{shippingName}</p>}
               <p>{shipping.line1}</p>
               <p>
                 {shipping.city}, {shipping.postalCode}
@@ -238,27 +244,16 @@ export default async function OrderDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Notes */}
-          {(order.customerNote || order.internalNote) && (
+          {/* Customer Note */}
+          {order.customerNote && (
             <div className="rounded-xl border border-gray-200 bg-white px-6 py-4">
-              {order.customerNote && (
-                <div className="mb-3">
-                  <p className="text-xs font-medium uppercase text-gray-500">
-                    Customer Note
-                  </p>
-                  <p className="mt-1 text-sm text-gray-700">{order.customerNote}</p>
-                </div>
-              )}
-              {order.internalNote && (
-                <div>
-                  <p className="text-xs font-medium uppercase text-gray-500">
-                    Internal Note
-                  </p>
-                  <p className="mt-1 text-sm text-gray-700">{order.internalNote}</p>
-                </div>
-              )}
+              <p className="text-xs font-medium uppercase text-gray-500">Customer Note</p>
+              <p className="mt-1 text-sm text-gray-700">{order.customerNote}</p>
             </div>
           )}
+
+          {/* Internal Note */}
+          <InternalNoteForm orderId={order.id} initialNote={order.internalNote} />
         </div>
       </div>
     </div>

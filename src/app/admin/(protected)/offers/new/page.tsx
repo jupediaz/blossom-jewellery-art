@@ -9,6 +9,7 @@ export default function NewOfferPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [applyToAll, setApplyToAll] = useState(true)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -16,16 +17,22 @@ export default function NewOfferPage() {
     setError('')
 
     const form = new FormData(e.currentTarget)
+
+    const parseIds = (raw: string) =>
+      raw.split(',').map((s) => s.trim()).filter(Boolean)
+
     const data = {
       name: form.get('name') as string,
       type: form.get('type') as string,
       discountType: form.get('discountType') as string,
       discountValue: Number(form.get('discountValue')),
-      applyToAll: form.get('applyToAll') === 'true',
+      applyToAll,
       validFrom: new Date(form.get('validFrom') as string).toISOString(),
       validUntil: new Date(form.get('validUntil') as string).toISOString(),
       badgeText: (form.get('badgeText') as string) || null,
       bannerText: (form.get('bannerText') as string) || null,
+      applicableProducts: applyToAll ? [] : parseIds(form.get('applicableProducts') as string || ''),
+      applicableCollections: applyToAll ? [] : parseIds(form.get('applicableCollections') as string || ''),
     }
 
     try {
@@ -87,12 +94,38 @@ export default function NewOfferPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Apply To</label>
-            <select name="applyToAll" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal">
+            <select
+              value={applyToAll ? 'true' : 'false'}
+              onChange={(e) => setApplyToAll(e.target.value === 'true')}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"
+            >
               <option value="true">All Products</option>
               <option value="false">Specific Products/Collections</option>
             </select>
           </div>
         </div>
+
+        {!applyToAll && (
+          <div className="space-y-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-xs text-amber-700 font-medium">Enter Sanity product/collection IDs, comma-separated</p>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Product IDs</label>
+              <input
+                name="applicableProducts"
+                placeholder="sanity-id-1, sanity-id-2"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Collection IDs</label>
+              <input
+                name="applicableCollections"
+                placeholder="sanity-collection-id-1, sanity-collection-id-2"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

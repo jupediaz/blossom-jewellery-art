@@ -3,9 +3,10 @@ import { db } from '@/lib/db'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Users } from 'lucide-react'
 import { format } from 'date-fns'
+import { AdminSearchInput } from '@/components/admin/AdminSearchInput'
 
 interface Props {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string; q?: string }>
 }
 
 const ITEMS_PER_PAGE = 20
@@ -13,10 +14,23 @@ const ITEMS_PER_PAGE = 20
 export default async function CustomersPage({ searchParams }: Props) {
   const params = await searchParams
   const page = Math.max(1, Number(params.page ?? 1))
+  const q = params.q?.trim()
+
+  const where = {
+    role: 'CUSTOMER' as const,
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: 'insensitive' as const } },
+            { email: { contains: q, mode: 'insensitive' as const } },
+          ],
+        }
+      : {}),
+  }
 
   const [customers, total] = await Promise.all([
     db.user.findMany({
-      where: { role: 'CUSTOMER' },
+      where,
       orderBy: { createdAt: 'desc' },
       take: ITEMS_PER_PAGE,
       skip: (page - 1) * ITEMS_PER_PAGE,
@@ -28,16 +42,19 @@ export default async function CustomersPage({ searchParams }: Props) {
         },
       },
     }),
-    db.user.count({ where: { role: 'CUSTOMER' } }),
+    db.user.count({ where }),
   ])
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-gray-900">Customers</h2>
-        <p className="text-sm text-gray-500">{total} registered customers</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">Customers</h2>
+          <p className="text-sm text-gray-500">{total} registered customers</p>
+        </div>
+        <AdminSearchInput placeholder="Name or email…" />
       </div>
 
       {customers.length === 0 ? (
@@ -56,6 +73,9 @@ export default async function CustomersPage({ searchParams }: Props) {
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
                   Orders
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Actions
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
                   Total Spent
@@ -85,6 +105,16 @@ export default async function CustomersPage({ searchParams }: Props) {
                     <td className="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">
                       {customer._count.orders}
                     </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-center">
+                      {customer._count.orders > 0 && (
+                        <Link
+                          href={`/admin/orders?q=${encodeURIComponent(customer.email)}`}
+                          className="text-xs text-blue-600 hover:underline"
+                        >
+                          View orders →
+                        </Link>
+                      )}
+                    </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium text-gray-900">
                       {new Intl.NumberFormat('en-EU', {
                         style: 'currency',
@@ -108,7 +138,7 @@ export default async function CustomersPage({ searchParams }: Props) {
               <div className="flex gap-2">
                 {page > 1 && (
                   <Link
-                    href={`/admin/customers?page=${page - 1}`}
+                    href={`/admin/customers?page=${page - 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
                     className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50"
                   >
                     Previous
@@ -116,7 +146,7 @@ export default async function CustomersPage({ searchParams }: Props) {
                 )}
                 {page < totalPages && (
                   <Link
-                    href={`/admin/customers?page=${page + 1}`}
+                    href={`/admin/customers?page=${page + 1}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
                     className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50"
                   >
                     Next

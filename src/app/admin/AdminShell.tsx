@@ -11,9 +11,12 @@ interface AdminShellProps {
     email: string
     role: string
   }
+  unreadMessages?: number
+  pendingReviews?: number
+  pendingReturns?: number
 }
 
-export function AdminShell({ children, user }: AdminShellProps) {
+export function AdminShell({ children, user, unreadMessages = 0, pendingReviews = 0, pendingReturns = 0 }: AdminShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -22,6 +25,9 @@ export function AdminShell({ children, user }: AdminShellProps) {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         user={user}
+        unreadMessages={unreadMessages}
+        pendingReviews={pendingReviews}
+        pendingReturns={pendingReturns}
       />
       <div className="lg:pl-64">
         <div className="sticky top-0 z-30 flex items-center gap-4 bg-gray-50 px-6 py-3 lg:hidden">

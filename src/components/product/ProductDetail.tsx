@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { ShoppingBag, ChevronLeft, ChevronRight, Minus, Plus, Lock, Ruler } from "lucide-react";
+import { ShoppingBag, ChevronLeft, ChevronRight, Minus, Plus, Lock, Ruler, Share2, Check } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
 import { urlFor } from "@/lib/sanity/client";
@@ -39,6 +39,24 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
     ? currentVariant?.inStock ?? product.inStock
     : product.inStock;
 
+  const [added, setAdded] = useState(false)
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [copied, setCopied] = useState(false)
+  const handleShare = useCallback(async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product.name, url })
+      } catch {
+        // User cancelled or share failed
+      }
+    } else {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }, [product.name])
+
   const handleAddToCart = () => {
     const imageUrl = hasSanityImages
       ? urlFor(sanityImages[0]).width(200).url()
@@ -59,6 +77,10 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
       description: quantity > 1 ? `${quantity}× ${product.name}` : product.name,
       type: "success",
     });
+    // Brief visual confirmation on the button itself
+    setAdded(true)
+    if (addedTimerRef.current) clearTimeout(addedTimerRef.current)
+    addedTimerRef.current = setTimeout(() => setAdded(false), 1500)
     openCart();
   };
 
@@ -174,7 +196,7 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
           <WishlistButton productId={product._id} variant={selectedVariant} />
         </div>
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <span className="text-xl font-medium">{formatPrice(finalPrice)}</span>
           {product.compareAtPrice && product.compareAtPrice > product.price && (
             <span className="text-sm text-warm-gray line-through">
@@ -182,6 +204,20 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
             </span>
           )}
         </div>
+
+        {/* Material pills */}
+        {product.materials && product.materials.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {product.materials.map((mat) => (
+              <span
+                key={mat}
+                className="rounded-full border border-cream-dark bg-cream px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-warm-gray"
+              >
+                {mat}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Variants */}
         {product.variants && product.variants.length > 0 && (
@@ -224,10 +260,13 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
               </span>
             )
           ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs text-warm-gray font-medium">
-              <span className="h-1.5 w-1.5 rounded-full bg-warm-gray/50" />
-              {t("soldOut")}
-            </span>
+            <div className="space-y-1.5">
+              <span className="inline-flex items-center gap-1.5 text-xs text-warm-gray font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-warm-gray/50" />
+                {t("soldOut")}
+              </span>
+              <p className="text-xs text-sage">{t("notifyWhenBack")}</p>
+            </div>
           )}
         </div>
 
@@ -257,16 +296,27 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
             onClick={handleAddToCart}
             disabled={!isInStock}
             className={cn(
-              "flex-1 py-3 rounded text-sm tracking-wide transition-colors flex items-center justify-center gap-2",
+              "flex-1 py-3 rounded text-sm tracking-wide transition-all flex items-center justify-center gap-2",
               isInStock
-                ? "bg-charcoal text-cream hover:bg-charcoal/90"
+                ? added
+                  ? "bg-sage text-cream"
+                  : "bg-charcoal text-cream hover:bg-charcoal/90"
                 : "bg-cream-dark text-warm-gray cursor-not-allowed"
             )}
           >
-            <ShoppingBag size={16} />
-            {isInStock ? tc("addToCart") : t("soldOut")}
+            {added ? <Check size={16} /> : <ShoppingBag size={16} />}
+            {isInStock ? (added ? tc("addedToCart") : tc("addToCart")) : t("soldOut")}
           </button>
         </div>
+
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 text-xs text-warm-gray hover:text-charcoal transition-colors mt-1"
+        >
+          {copied ? <Check size={13} className="text-sage" /> : <Share2 size={13} />}
+          {copied ? tc("linkCopied") : tc("share")}
+        </button>
 
         {/* Trust badges */}
         <div className="grid grid-cols-2 gap-2 mb-8 py-4 border-y border-cream-dark">

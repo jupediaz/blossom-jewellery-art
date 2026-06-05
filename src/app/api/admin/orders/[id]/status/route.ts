@@ -63,19 +63,32 @@ export async function PATCH(
     updateData.deliveredAt = new Date()
   }
 
-  const [updatedOrder] = await db.$transaction([
-    db.order.update({
+  const [updatedOrder] = await db.$transaction(async (tx) => {
+    const updated = await tx.order.update({
       where: { id },
       data: updateData,
-    }),
-    db.orderStatusHistory.create({
-      data: {
-        orderId: id,
-        status,
-        note,
-      },
-    }),
-  ])
+    })
+    await tx.orderStatusHistory.create({
+      data: { orderId: id, status, note },
+    })
+
+    // Release reserved inventory when order is cancelled or refunded
+    if (status === 'CANCELLED' || status === 'REFUNDED') {
+      for (const item of order.items) {
+        await tx.inventory.updateMany({
+          where: {
+            sanityProductId: item.sanityProductId,
+            sanityVariantKey: item.variantName ?? null,
+          },
+          data: {
+            quantityReserved: { decrement: item.quantity },
+          },
+        })
+      }
+    }
+
+    return [updated]
+  })
 
   // Send notification emails
   const customerEmail = order.customer?.email || order.guestEmail

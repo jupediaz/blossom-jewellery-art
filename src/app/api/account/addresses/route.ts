@@ -74,18 +74,28 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json()
-  const { id } = body
+  let rawBody: { id?: string } & Record<string, unknown>
+  try {
+    rawBody = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
 
-  if (!id) {
+  const { id, ...fields } = rawBody
+
+  if (!id || typeof id !== 'string') {
     return NextResponse.json({ error: 'Address ID required' }, { status: 400 })
   }
 
-  // Whitelist allowed fields to prevent mass-assignment
-  const data: Record<string, unknown> = {}
-  const allowedFields = ['label', 'firstName', 'lastName', 'line1', 'line2', 'city', 'state', 'postalCode', 'country', 'phone', 'isDefault'] as const
-  for (const field of allowedFields) {
-    if (body[field] !== undefined) data[field] = body[field]
+  // Validate patch fields through partial schema to ensure correct types
+  let data: Partial<z.infer<typeof addressSchema>>
+  try {
+    data = addressSchema.partial().parse(fields)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.issues[0].message }, { status: 400 })
+    }
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
   // Verify ownership

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       where: {
         customerId,
         couponId: coupon.id,
-        paymentStatus: { in: ['PAID', 'PARTIALLY_REFUNDED'] },
+        paymentStatus: { in: ['PAID', 'PARTIALLY_REFUNDED', 'PENDING'] },
       },
     })
     if (customerUses >= coupon.maxUsesPerCustomer) {

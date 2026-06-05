@@ -156,7 +156,7 @@ export default async function MarketingPage() {
                       </p>
                       <p className="text-xs text-gray-500">
                         &euro;{Number(cart.subtotal).toFixed(2)} &middot;{' '}
-                        {cart.abandonedAt?.toLocaleDateString('en-GB', {
+                        {cart.abandonedAt?.toLocaleDateString(undefined, {
                           day: 'numeric',
                           month: 'short',
                           hour: '2-digit',

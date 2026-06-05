@@ -22,8 +22,7 @@ export function urlFor(source: { asset: { _ref: string } }) {
   return builder.image(source);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function sanityFetch<T>(query: string, params?: any): Promise<T> {
+export async function sanityFetch<T>(query: string, params?: Record<string, unknown>): Promise<T> {
   if (!sanityClient) {
     return [] as unknown as T;
   }

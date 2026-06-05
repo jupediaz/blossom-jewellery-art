@@ -27,14 +27,14 @@ export default function ForgotPasswordPage() {
       })
 
       if (res.status === 429) {
-        setError('Too many requests. Please try again later.')
+        setError(t('rateLimitError'))
         setLoading(false)
         return
       }
 
       setSent(true)
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('rateLimitError'))
     } finally {
       setLoading(false)
     }

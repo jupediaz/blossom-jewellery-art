@@ -38,7 +38,7 @@ export function AnalyticsCharts({
 }: AnalyticsChartsProps) {
   const formattedRevenue = dailyRevenue.map((d) => ({
     ...d,
-    date: new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+    date: new Date(d.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
   }))
 
   return (

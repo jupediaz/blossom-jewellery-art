@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Layers, ExternalLink } from 'lucide-react'
+import { Layers, ExternalLink, Pencil } from 'lucide-react'
 import { sanityFetch } from '@/lib/sanity/client'
 import { allCollectionsQuery } from '@/lib/sanity/queries'
 import { EmptyState } from '@/components/admin/EmptyState'
@@ -141,6 +141,19 @@ export default async function AdminCollectionsPage() {
                     <p className="mt-1 text-xs leading-relaxed text-gray-500">
                       {truncate(collection.description, 80)}
                     </p>
+                  )}
+                  {!isMock && (
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <Link
+                        href={`/studio/structure/collection;${collection._id}`}
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-charcoal"
+                      >
+                        <Pencil className="h-3 w-3" />
+                        Edit in Studio
+                      </Link>
+                    </div>
                   )}
                 </div>
               </Link>

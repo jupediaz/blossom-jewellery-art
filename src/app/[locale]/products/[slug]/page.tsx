@@ -10,7 +10,8 @@ import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import type { Product } from "@/lib/types";
 import { mockProducts } from "@/lib/mock-data";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
+import ReviewList from "@/components/product/ReviewList";
 
 export const revalidate = 60;
 
@@ -29,9 +30,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   try {
     const product = await sanityFetch<Product>(productBySlugQuery, {
       slug,
@@ -43,12 +44,23 @@ export async function generateMetadata({
       product.seo?.metaDescription ||
       `${product.name} — Handcrafted artisan jewelry by ${siteConfig.creator}. ${product.materials?.join(", ") || ""}`;
 
+    const canonicalPath = `/products/${product.slug.current}`;
+
     return {
       title,
       description,
+      alternates: {
+        canonical: `${siteConfig.url}/en${canonicalPath}`,
+        languages: {
+          en: `${siteConfig.url}/en${canonicalPath}`,
+          es: `${siteConfig.url}/es${canonicalPath}`,
+          uk: `${siteConfig.url}/uk${canonicalPath}`,
+        },
+      },
       openGraph: {
         title,
         description,
+        url: `${siteConfig.url}/${locale}${canonicalPath}`,
         images: product.imageUrl ? [{ url: product.imageUrl }] : [],
       },
     };
@@ -111,6 +123,7 @@ export default async function ProductPage({
   }
 
   const t = await getTranslations("Common");
+  const locale = await getLocale();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -133,6 +146,8 @@ export default async function ProductPage({
         ]}
       />
       <ProductDetail product={currentProduct} maxQuantity={maxQuantity} />
+
+      <ReviewList productId={currentProduct._id} locale={locale} />
 
       {/* Related Products */}
       {currentProduct.relatedProducts && currentProduct.relatedProducts.length > 0 && (

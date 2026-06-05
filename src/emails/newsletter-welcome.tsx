@@ -8,7 +8,7 @@ interface NewsletterWelcomeProps {
   locale?: string;
 }
 
-const copy: Record<string, { subject: string; preview: string; heading: string; body1: string; body2: string; cta: string; sign: string }> = {
+const copy: Record<string, { subject: string; preview: string; heading: string; body1: string; body2: string; cta: string; sign: string; unsubscribe: string }> = {
   en: {
     subject: "Welcome to Blossom by Olha",
     preview: "You're now part of the Blossom family",
@@ -17,6 +17,7 @@ const copy: Record<string, { subject: string; preview: string; heading: string; 
     body2: "Each piece is handcrafted from polymer clay, inspired by the organic beauty of botanical forms. We can't wait to share what's coming next.",
     cta: "Explore the Collection",
     sign: "With love,\nOlha\nFounder & Artist, Blossom by Olha",
+    unsubscribe: "Unsubscribe",
   },
   es: {
     subject: "Bienvenida a Blossom by Olha",
@@ -26,6 +27,7 @@ const copy: Record<string, { subject: string; preview: string; heading: string; 
     body2: "Cada pieza está hecha a mano con arcilla polimérica, inspirada en la belleza orgánica de las formas botánicas. No podemos esperar para compartir lo que viene.",
     cta: "Explorar la Colección",
     sign: "Con cariño,\nOlha\nFundadora & Artista, Blossom by Olha",
+    unsubscribe: "Cancelar suscripción",
   },
   uk: {
     subject: "Ласкаво просимо до Blossom by Olha",
@@ -35,6 +37,7 @@ const copy: Record<string, { subject: string; preview: string; heading: string; 
     body2: "Кожен виріб виготовляється вручну з полімерної глини, натхненний органічною красою ботанічних форм. Не можемо дочекатися, щоб поділитись тим, що буде далі.",
     cta: "Переглянути Колекцію",
     sign: "З любов'ю,\nОльга\nЗасновниця & Художниця, Blossom by Olha",
+    unsubscribe: "Відписатися",
   },
 };
 
@@ -75,7 +78,7 @@ export default function NewsletterWelcome({ email = "", locale = "en" }: Newslet
         </Text>
         <Text style={unsubFooter}>
           <Link href={unsubscribeUrl} style={{ color: "#aaa" }}>
-            Unsubscribe
+            {t.unsubscribe}
           </Link>
         </Text>
       </Section>

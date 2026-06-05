@@ -1041,3 +1041,78 @@ Features:
 - All 10 sections populated with content from research docs
 - Accessible at: hub.codelabs.studio (Ideas section)
 - Method: Direct database insert via psql to Neon PostgreSQL
+
+---
+
+## Round 7 Improvements (2026-03-13)
+
+### Customer Order Cancellation
+**Status:** ✅ Complete
+**Priority:** High
+**Completed:** 2026-03-13
+
+Features:
+- [x] CancelOrderButton client component (2-step confirm UI)
+- [x] POST /api/account/orders/[id]/cancel endpoint
+- [x] Status check (PENDING/CONFIRMED only), ownership verification
+- [x] DB transaction: update status + history + quantityReserved decrement
+- [x] i18n: en/es/uk keys added
+
+### Customer Settings Page
+**Status:** ✅ Complete
+**Priority:** High
+**Completed:** 2026-03-13
+
+Features:
+- [x] /account/settings page with profile and password sections
+- [x] PATCH /api/account/settings endpoint (Zod validation, bcrypt verify)
+- [x] Split save actions (name vs password independently)
+- [x] Settings link added to account layout nav (i18n)
+- [x] Account layout fully translated (all nav labels + back to shop)
+
+### Admin Internal Notes
+**Status:** ✅ Complete
+**Priority:** Medium
+**Completed:** 2026-03-13
+
+Features:
+- [x] InternalNoteForm client component (amber-styled, auto-clears on empty)
+- [x] PATCH /api/admin/orders/[id] endpoint
+- [x] Integrated into admin order detail sidebar
+- [x] Separate customer note display preserved
+
+### Admin Order CSV Export
+**Status:** ✅ Complete
+**Priority:** Medium
+**Completed:** 2026-03-13
+
+Features:
+- [x] GET /api/admin/orders/export (status filter, date range, 10k limit)
+- [x] Native CSV generation (no external deps, RFC 4180 compliant)
+- [x] ExportButton client component respects current status filter
+- [x] Export button in orders page header
+
+### Admin Newsletter Management
+**Status:** ✅ Complete
+**Priority:** High
+**Completed:** 2026-03-13
+
+Features:
+- [x] /admin/newsletter page with subscriber table
+- [x] Search by email, filter by locale and active status
+- [x] Toggle subscribe/unsubscribe per subscriber
+- [x] Stats bar (total, active, unsubscribed counts)
+- [x] Export to CSV (GET /api/admin/newsletter/export)
+- [x] Pagination (50/page)
+- [x] Newsletter link added to admin sidebar
+
+### Schema Integrity Fixes
+**Status:** ✅ Complete
+**Priority:** Medium
+**Completed:** 2026-03-13
+
+Features:
+- [x] StockMovement.inventory: added onDelete: Cascade
+- [x] Order.coupon: added onDelete: SetNull (preserve orders on coupon deletion)
+- [x] Order.shippingMethod: added onDelete: SetNull (preserve orders on method deletion)
+- [x] Applied via prisma db push (Neon PostgreSQL)

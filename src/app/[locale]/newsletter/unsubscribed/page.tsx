@@ -8,9 +8,9 @@ export default async function UnsubscribedPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-24 text-center">
       <CheckCircle size={48} className="mx-auto text-sage-dark mb-6" />
-      <h1 className="font-heading text-3xl font-light mb-4">Unsubscribed</h1>
+      <h1 className="font-heading text-3xl font-light mb-4">{tc("unsubscribedTitle")}</h1>
       <p className="text-warm-gray mb-8">
-        You have been successfully removed from our newsletter. You will no longer receive emails from Blossom by Olha.
+        {tc("unsubscribedText")}
       </p>
       <Link
         href="/"

@@ -1,5 +1,6 @@
 export const metadata = {
   title: 'Admin | Blossom by Olha',
+  robots: { index: false, follow: false },
 }
 
 export default function AdminLayout({

@@ -152,6 +152,23 @@ export const blogPostBySlugQuery = groq`
   }
 `;
 
+// Search query — uses GROQ match operator (Sanity full-text index) instead of client-side includes
+export const searchProductsQuery = groq`
+  *[_type == "product" && !(_id in path("drafts.**")) && (
+    name match $query ||
+    collection->name match $query ||
+    category->name match $query
+  )] | order(orderRank) {
+    _id,
+    name,
+    slug,
+    price,
+    inStock,
+    collection->{name},
+    "imageUrl": images[0].asset->url
+  }
+`;
+
 // Site settings
 export const siteSettingsQuery = groq`
   *[_type == "siteSettings"][0] {

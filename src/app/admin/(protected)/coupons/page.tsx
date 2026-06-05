@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Ticket, Plus } from 'lucide-react'
 import { format } from 'date-fns'
+import { CouponActions } from './CouponActions'
 
 export default async function CouponsPage() {
   const coupons = await db.coupon.findMany({
@@ -44,6 +45,7 @@ export default async function CouponsPage() {
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Uses</th>
                 <th className="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Valid Until</th>
+                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -84,6 +86,9 @@ export default async function CouponsPage() {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-500">
                       {coupon.validUntil ? format(coupon.validUntil, 'dd MMM yyyy') : 'No expiry'}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <CouponActions couponId={coupon.id} />
                     </td>
                   </tr>
                 )

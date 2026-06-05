@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { redirect } from 'next/navigation'
+
 import { sanityFetch } from '@/lib/sanity/client'
 import { Heart } from 'lucide-react'
+import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { WishlistRemoveButton } from './WishlistRemoveButton'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Account')
@@ -73,7 +74,18 @@ export default async function WishlistPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {wishlistItems.map((item) => {
           const product = productMap.get(item.sanityProductId)
-          if (!product) return null
+          if (!product) {
+            return (
+              <div
+                key={item.id}
+                className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-gray-200 p-6 text-center"
+              >
+                <Heart className="h-8 w-8 text-gray-300" />
+                <p className="text-xs text-gray-400">{t('itemUnavailable')}</p>
+                <WishlistRemoveButton wishlistId={item.id} />
+              </div>
+            )
+          }
 
           return (
             <div

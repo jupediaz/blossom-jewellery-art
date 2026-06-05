@@ -28,6 +28,7 @@ model User {
   cartSessions  CartSession[]
   wishlists     Wishlist[]
   imageSessions ImageGenerationSession[]
+  reviews       Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,7 +103,7 @@ model StockMovement {
   quantity    Int
   reason      String?
   orderId     String?
-  inventory   Inventory    @relation(fields: [inventoryId], references: [id])
+  inventory   Inventory    @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -144,13 +145,13 @@ model Order {
   currency       String  @default("EUR")
 
   couponId String?
-  coupon   Coupon? @relation(fields: [couponId], references: [id])
+  coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
 
   shippingAddress Json
   billingAddress  Json?
 
   shippingMethodId String?
-  shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
+  shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id], onDelete: SetNull)
   trackingNumber   String?
   carrier          String?
   shippedAt        DateTime?
@@ -162,6 +163,7 @@ model Order {
   items         OrderItem[]
   statusHistory OrderStatusHistory[]
   refunds       Refund[]
+  returns       Return[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -170,6 +172,7 @@ model Order {
   @@index([status])
   @@index([createdAt])
   @@index([guestEmail])
+  @@index([stripePaymentIntent])
 }
 
 enum OrderStatus {
@@ -291,6 +294,7 @@ model CartSession {
 
   @@index([customerId])
   @@index([abandonedAt])
+  @@index([customerId, abandonedAt])
 }
 
 // ─── SHIPPING ───────────────────────────────────
@@ -369,6 +373,7 @@ model Wishlist {
   createdAt DateTime @default(now())
 
   @@unique([userId, sanityProductId, variantName])
+  @@index([sanityProductId])
 }
 
 // ─── ADDRESSES ──────────────────────────────────
@@ -406,6 +411,22 @@ model NewsletterSubscriber {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ─── CONTACT MESSAGES ───────────────────────────
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 // ─── EMAIL LOG ──────────────────────────────────
@@ -509,4 +530,84 @@ enum GenerationStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+// ─── REVIEWS ────────────────────────────────────
+
+model Review {
+  id              String   @id @default(cuid())
+  sanityProductId String
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  authorName      String
+  rating          Int      // 1–5
+  title           String?
+  body            String
+  isVerified      Boolean  @default(false) // purchased product
+  isApproved      Boolean  @default(false) // admin approved
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sanityProductId, isApproved])
+  @@index([userId])
+}
+
+// ─── RETURNS / RMA ───────────────────────────────
+
+model Return {
+  id         String       @id @default(cuid())
+  orderId    String
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId String?
+
+  reason     ReturnReason
+  details    String?
+  status     ReturnStatus @default(REQUESTED)
+  resolution ReturnResolution?
+  adminNote  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([customerId])
+  @@index([status])
+}
+
+enum ReturnReason {
+  WRONG_ITEM
+  DEFECTIVE
+  NOT_AS_DESCRIBED
+  CHANGED_MIND
+  OTHER
+}
+
+enum ReturnStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReturnResolution {
+  REFUND
+  EXCHANGE
+  STORE_CREDIT
+}
+
+// ─── NEWSLETTER BROADCASTS ───────────────────────
+
+model NewsletterBroadcast {
+  id          String   @id @default(cuid())
+  subject     String
+  previewText String?
+  locale      String?  // null = all locales
+  sentTo      Int      @default(0)
+  failed      Int      @default(0)
+  sentAt      DateTime @default(now())
+  sentBy      String?  // admin user email
+
+  @@index([sentAt])
 }

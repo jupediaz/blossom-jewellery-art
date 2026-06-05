@@ -14,11 +14,13 @@ declare module 'next-auth' {
       name?: string | null
       image?: string | null
       role: UserRole
+      hasPassword: boolean
     }
   }
 
   interface User {
     role: UserRole
+    hasPassword?: boolean
   }
 }
 
@@ -62,6 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           image: user.image,
           role: user.role,
+          hasPassword: true,
         }
       },
     }),
@@ -71,6 +74,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id
         token.role = user.role
+        // Credential logins set this explicitly; OAuth logins never reach authorize(), so default false
+        token.hasPassword = user.hasPassword ?? false
       }
       return token
     },
@@ -78,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token) {
         session.user.id = token.id as string
         session.user.role = token.role as UserRole
+        session.user.hasPassword = (token.hasPassword as boolean) ?? false
       }
       return session
     },

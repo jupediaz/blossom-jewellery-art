@@ -8,6 +8,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  try {
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
   const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
@@ -113,4 +114,8 @@ export async function GET() {
     },
     couponOrders,
   })
+  } catch (err) {
+    console.error('[Analytics] Failed to fetch analytics data:', err)
+    return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 })
+  }
 }

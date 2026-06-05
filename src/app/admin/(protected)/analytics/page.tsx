@@ -2,17 +2,29 @@ import { db } from '@/lib/db'
 import { StatsCard } from '@/components/admin/StatsCard'
 import { DollarSign, ShoppingBag, Users, TrendingUp } from 'lucide-react'
 import { AnalyticsChartsLoader as AnalyticsCharts } from './AnalyticsChartsLoader'
+import { DateRangeSelector } from './DateRangeSelector'
+import Link from 'next/link'
 
-export default async function AnalyticsPage() {
+const VALID_DAYS = [7, 30, 90, 365] as const
+
+interface Props {
+  searchParams: Promise<{ days?: string }>
+}
+
+export default async function AnalyticsPage({ searchParams }: Props) {
+  const { days: daysParam } = await searchParams
+  const days = VALID_DAYS.includes(Number(daysParam) as (typeof VALID_DAYS)[number])
+    ? Number(daysParam)
+    : 30
+
   const now = new Date()
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
+  const periodStart = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
+  const prevPeriodStart = new Date(now.getTime() - days * 2 * 24 * 60 * 60 * 1000)
 
-  // Aggregate data server-side
   const [currentPeriod, previousPeriod, statusBreakdown, topProducts, customerStats] =
     await Promise.all([
       db.order.aggregate({
-        where: { paymentStatus: 'PAID', createdAt: { gte: thirtyDaysAgo } },
+        where: { paymentStatus: 'PAID', createdAt: { gte: periodStart } },
         _sum: { total: true },
         _count: true,
         _avg: { total: true },
@@ -20,7 +32,7 @@ export default async function AnalyticsPage() {
       db.order.aggregate({
         where: {
           paymentStatus: 'PAID',
-          createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+          createdAt: { gte: prevPeriodStart, lt: periodStart },
         },
         _sum: { total: true },
         _count: true,
@@ -28,7 +40,7 @@ export default async function AnalyticsPage() {
       db.order.groupBy({
         by: ['status'],
         _count: true,
-        where: { createdAt: { gte: thirtyDaysAgo } },
+        where: { createdAt: { gte: periodStart } },
       }),
       db.$queryRaw<
         Array<{ productName: string; totalSold: number; revenue: number }>
@@ -40,7 +52,7 @@ export default async function AnalyticsPage() {
         FROM "OrderItem" oi
         JOIN "Order" o ON oi."orderId" = o.id
         WHERE o."paymentStatus" = 'PAID'
-          AND o."createdAt" >= ${thirtyDaysAgo}
+          AND o."createdAt" >= ${periodStart}
         GROUP BY oi."productName"
         ORDER BY "totalSold" DESC
         LIMIT 10
@@ -62,7 +74,6 @@ export default async function AnalyticsPage() {
 
   const avgOrder = Number(currentPeriod._avg.total || 0)
 
-  // Get daily revenue for chart
   const dailyRevenue = await db.$queryRaw<
     Array<{ date: string; revenue: number; orders: number }>
   >`
@@ -72,16 +83,21 @@ export default async function AnalyticsPage() {
       COUNT(*)::int as orders
     FROM "Order" o
     WHERE o."paymentStatus" = 'PAID'
-      AND o."createdAt" >= ${thirtyDaysAgo}
+      AND o."createdAt" >= ${periodStart}
     GROUP BY DATE(o."createdAt")
     ORDER BY date ASC
   `
 
+  const rangeLabel = days === 7 ? 'Last 7 days' : days === 30 ? 'Last 30 days' : days === 90 ? 'Last 90 days' : 'Last 12 months'
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-gray-900">Analytics</h2>
-        <p className="text-sm text-gray-500">Last 30 days performance</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900">Analytics</h2>
+          <p className="text-sm text-gray-500">{rangeLabel} performance vs. previous period</p>
+        </div>
+        <DateRangeSelector currentDays={days} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

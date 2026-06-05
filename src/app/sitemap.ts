@@ -4,7 +4,7 @@ import { routing } from '@/i18n/routing'
 
 export const revalidate = 3600 // Regenerate sitemap at most once per hour
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blossombyolha.com'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'
 
 function localePrefix(locale: string) {
   return locale === routing.defaultLocale ? '' : `/${locale}`
@@ -32,6 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/blog',
     '/privacy',
     '/terms',
+    '/orders/track',
   ]
 
   const staticEntries: MetadataRoute.Sitemap = staticPages.map((path) => ({

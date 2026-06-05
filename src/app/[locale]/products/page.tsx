@@ -19,13 +19,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+const PAGE_SIZE = 24;
+
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; collection?: string; sort?: string }>;
+  searchParams: Promise<{ category?: string; collection?: string; sort?: string; page?: string }>;
 }) {
   const t = await getTranslations("Products");
   const params = await searchParams;
+  const currentPage = Math.max(1, Number(params.page ?? 1));
   let products: Product[] = mockProducts;
   let categories: Category[] = [];
 
@@ -119,7 +122,12 @@ export default async function ProductsPage({
     });
   }
 
-  // Mark the first 6 products as "new" when sort=new
+  const totalProducts = products.length;
+  const totalPages = Math.max(1, Math.ceil(totalProducts / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = products.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // Mark the first 6 products as "new" when sort=new (across all pages, based on full sorted list)
   const newProductIds: Set<string> =
     params.sort === "new"
       ? new Set(products.slice(0, 6).map((p) => p._id))
@@ -242,11 +250,43 @@ export default async function ProductsPage({
           >
             {t("sortPriceHigh")}
           </Link>
+          <span>/</span>
+          <Link
+            href={`/products?${activeCollection ? `collection=${activeCollection}&` : ""}${params.category ? `category=${params.category}&` : ""}sort=name`}
+            className={`hover:text-charcoal transition-colors ${params.sort === "name" ? "text-charcoal font-medium" : ""}`}
+          >
+            {t("sortName")}
+          </Link>
         </div>
       </div>
 
-      {products.length > 0 ? (
-        <ProductGrid products={products} offersByProductId={offersByProductId} newProductIds={newProductIds} />
+      {paginatedProducts.length > 0 ? (
+        <>
+          <ProductGrid products={paginatedProducts} offersByProductId={offersByProductId} newProductIds={newProductIds} />
+          {totalPages > 1 && (
+            <div className="mt-12 flex items-center justify-center gap-4 text-sm">
+              {safePage > 1 && (
+                <Link
+                  href={`/products?${new URLSearchParams({ ...(params.category ? { category: params.category } : {}), ...(params.collection ? { collection: params.collection } : {}), ...(params.sort ? { sort: params.sort } : {}), page: String(safePage - 1) }).toString()}`}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-warm-gray hover:border-charcoal hover:text-charcoal transition-colors"
+                >
+                  ← {t("previous")}
+                </Link>
+              )}
+              <span className="text-warm-gray">
+                {safePage} / {totalPages}
+              </span>
+              {safePage < totalPages && (
+                <Link
+                  href={`/products?${new URLSearchParams({ ...(params.category ? { category: params.category } : {}), ...(params.collection ? { collection: params.collection } : {}), ...(params.sort ? { sort: params.sort } : {}), page: String(safePage + 1) }).toString()}`}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-warm-gray hover:border-charcoal hover:text-charcoal transition-colors"
+                >
+                  {t("next")} →
+                </Link>
+              )}
+            </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-16">
           <p className="text-warm-gray">

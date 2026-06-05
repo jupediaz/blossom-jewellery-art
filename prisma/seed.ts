@@ -1,8 +1,14 @@
+import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient, UserRole } from '../src/generated/prisma/client'
 import { hash } from 'bcryptjs'
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
+// Strip sslmode from URL — same pattern as db.ts to avoid TLS cert rejection
+const dbUrl = new URL(process.env.DATABASE_URL!)
+dbUrl.searchParams.delete('sslmode')
+dbUrl.searchParams.delete('sslaccept')
+const pool = new Pool({ connectionString: dbUrl.toString(), ssl: { rejectUnauthorized: false } })
+const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
@@ -45,6 +51,25 @@ async function main() {
     },
   })
   console.log(`Product manager created: ${pm.email}`)
+
+  // Create demo customer user
+  const customerEmail = 'ana@blossombyolha.com'
+  const customerPassword = process.env.CUSTOMER_SEED_PASSWORD || 'changeme-in-production'
+
+  const customer = await prisma.user.upsert({
+    where: { email: customerEmail },
+    update: {},
+    create: {
+      email: customerEmail,
+      name: 'Ana García',
+      passwordHash: await hash(customerPassword, 12),
+      role: UserRole.CUSTOMER,
+      emailVerified: new Date(),
+      locale: 'es',
+      currency: 'EUR',
+    },
+  })
+  console.log(`Demo customer created: ${customer.email}`)
 
   // Seed shipping zones
   const spainZone = await prisma.shippingZone.upsert({

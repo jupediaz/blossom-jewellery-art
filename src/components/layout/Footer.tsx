@@ -61,6 +61,7 @@ export function Footer() {
             </h4>
             <ul className="space-y-3 text-[13px] text-navy font-body">
               <li><Link href="/shipping" className="opacity-70 hover:opacity-100 transition-opacity">{t("shippingReturns")}</Link></li>
+              <li><Link href="/orders/track" className="opacity-70 hover:opacity-100 transition-opacity">{t("trackOrder")}</Link></li>
               <li><Link href="/size-guide" className="opacity-70 hover:opacity-100 transition-opacity">{t("sizeGuide")}</Link></li>
               <li><Link href="/faq" className="opacity-70 hover:opacity-100 transition-opacity">{t("faq")}</Link></li>
               <li><Link href="/privacy" className="opacity-70 hover:opacity-100 transition-opacity">{t("privacyPolicy")}</Link></li>

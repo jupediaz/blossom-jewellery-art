@@ -27,6 +27,9 @@ export const siteConfig = {
   name: "Blossom by Olha",
   description: "Handcrafted artisan jewelry by Olha — unique pieces inspired by nature and crafted with love in Europe.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://blossombyolha.com",
+  email: process.env.CONTACT_EMAIL || "hello@blossombyolha.com",
+  location: "Marbella, Spain",
+  tagline: "Handcrafted polymer clay jewelry",
   ogImage: "/og-image.jpg",
   creator: "Olha",
   keywords: [

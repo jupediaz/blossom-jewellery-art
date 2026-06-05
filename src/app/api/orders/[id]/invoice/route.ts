@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { jsPDF } from 'jspdf'
+import { siteConfig } from '@/lib/env'
 
 export async function GET(
   req: NextRequest,
@@ -13,6 +14,7 @@ export async function GET(
   }
 
   const { id } = await params
+  const locale = req.nextUrl.searchParams.get('locale') || 'en'
 
   const order = await db.order.findUnique({
     where: { id },
@@ -40,13 +42,13 @@ export async function GET(
 
   // Header
   doc.setFontSize(20)
-  doc.text('BLOSSOM BY OLHA', margin, y)
+  doc.text(siteConfig.name.toUpperCase(), margin, y)
   y += 8
   doc.setFontSize(9)
   doc.setTextColor(100)
-  doc.text('Handcrafted polymer clay jewelry | Marbella, Spain', margin, y)
+  doc.text(`${siteConfig.tagline} | ${siteConfig.location}`, margin, y)
   y += 4
-  doc.text('hello@blossombyolha.com', margin, y)
+  doc.text(siteConfig.email, margin, y)
   y += 12
 
   // Invoice title
@@ -60,7 +62,7 @@ export async function GET(
   doc.setTextColor(100)
   doc.text(`Order: ${order.orderNumber}`, margin, y)
   doc.text(
-    `Date: ${order.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+    `Date: ${order.createdAt.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })}`,
     120,
     y
   )
@@ -154,7 +156,7 @@ export async function GET(
   doc.setTextColor(150)
   doc.text('Thank you for supporting handmade artisan jewelry.', margin, y)
   y += 4
-  doc.text('Each piece is handcrafted with love in Marbella, Spain.', margin, y)
+  doc.text(`Each piece is handcrafted with love in ${siteConfig.location}.`, margin, y)
 
   const pdfBuffer = doc.output('arraybuffer')
 

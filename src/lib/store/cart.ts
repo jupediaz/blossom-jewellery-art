@@ -52,6 +52,8 @@ export const useCartStore = create<CartState>()(
               ),
             };
           }
+          // Enforce max 20 unique items — mirrors server-side checkout validation
+          if (state.items.length >= 20) return state;
           return { items: [...state.items, { ...item, quantity: qty }] };
         });
       },

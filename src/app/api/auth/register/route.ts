@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
+import crypto from 'crypto'
 import { db } from '@/lib/db'
 import { rateLimit } from '@/lib/rate-limit'
 import { sendEmail } from '@/lib/email'
 import { render } from '@react-email/render'
 import Welcome from '@/emails/welcome'
+import EmailVerification from '@/emails/email-verification'
 import { z } from 'zod'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'
 
 const registerSchema = z.object({
   name: z.string().min(1).max(100).optional(),
@@ -45,16 +49,33 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  // Send welcome email (fire-and-forget, don't block registration)
+  // Generate email verification token
+  const rawToken = crypto.randomBytes(32).toString('hex')
+  const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex')
+
   try {
-    const html = await render(Welcome({ name: name || 'there' }))
+    await db.verificationToken.create({
+      data: {
+        identifier: `verify:${email}`,
+        token: hashedToken,
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+      },
+    })
+
+    const verifyUrl = `${SITE_URL}/account/verify-email?token=${rawToken}&email=${encodeURIComponent(email)}`
+    const html = await render(EmailVerification({ verifyUrl, name: name || 'there' }))
     await sendEmail({
       to: email,
-      subject: 'Welcome to Blossom by Olha',
+      subject: 'Verify your email — Blossom by Olha',
       html,
     })
   } catch (emailError) {
-    console.error('Failed to send welcome email:', emailError)
+    console.error('Failed to send verification email:', emailError)
+    // Send welcome email as fallback
+    try {
+      const html = await render(Welcome({ name: name || 'there' }))
+      await sendEmail({ to: email, subject: 'Welcome to Blossom by Olha', html })
+    } catch { /* best-effort */ }
   }
 
   return NextResponse.json({ success: true }, { status: 201 })

@@ -4,15 +4,25 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from '@/i18n/navigation'
 import { Link } from '@/i18n/navigation'
-import { Loader2 } from 'lucide-react'
+import { Loader2, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+
+const DEMO_CUSTOMER = {
+  email: 'ana@blossombyolha.com',
+  password: 'changeme-in-production',
+  label: 'Ana García',
+  role: 'Demo Customer',
+}
 
 export default function CustomerLoginPage() {
   const router = useRouter()
   const t = useTranslations('Account')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const quickLoginEnabled = process.env.NEXT_PUBLIC_QUICK_LOGIN === 'true'
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -36,6 +46,25 @@ export default function CustomerLoginPage() {
     }
   }
 
+  async function handleDemoLogin() {
+    setDemoLoading(true)
+    setError('')
+
+    const result = await signIn('credentials', {
+      email: DEMO_CUSTOMER.email,
+      password: DEMO_CUSTOMER.password,
+      redirect: false,
+    })
+
+    if (result?.error) {
+      setError(t('invalidCredentials'))
+      setDemoLoading(false)
+    } else {
+      router.push('/account')
+      router.refresh()
+    }
+  }
+
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
@@ -48,12 +77,43 @@ export default function CustomerLoginPage() {
           </p>
         </div>
 
+        {quickLoginEnabled && (
+          <div>
+            <p className="mb-2 text-center text-xs font-medium uppercase tracking-wider text-gray-400">
+              Quick Access
+            </p>
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={demoLoading || loading || googleLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-cream-dark bg-cream/50 px-4 py-2.5 text-sm font-medium text-charcoal hover:bg-cream transition-colors disabled:opacity-50"
+            >
+              {demoLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <User className="h-4 w-4" />
+              )}
+              <span>
+                {DEMO_CUSTOMER.label}
+                <span className="ml-1.5 text-[10px] font-normal text-warm-gray">
+                  {DEMO_CUSTOMER.role}
+                </span>
+              </span>
+            </button>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-gray-200" />
+              <span className="text-xs text-gray-400">{t('or')}</span>
+              <div className="h-px flex-1 bg-gray-200" />
+            </div>
+          </div>
+        )}
+
         <button
           onClick={() => {
             setGoogleLoading(true)
             signIn('google', { callbackUrl: '/account' })
           }}
-          disabled={googleLoading}
+          disabled={googleLoading || loading || demoLoading}
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
           {googleLoading ? (
@@ -119,7 +179,7 @@ export default function CustomerLoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || demoLoading || googleLoading}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-charcoal px-4 py-2.5 text-sm font-medium text-white hover:bg-charcoal/90 disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}

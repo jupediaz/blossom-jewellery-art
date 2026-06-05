@@ -30,3 +30,34 @@ function createPrismaClient() {
 export const db = globalForPrisma.prisma ?? createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+
+// NewsletterSubscriber is fully typed in the generated client — use directly
+export const newsletterDb = db.newsletterSubscriber
+
+export type ContactMessage = {
+  id: string
+  name: string
+  email: string
+  subject: string
+  message: string
+  isRead: boolean
+  createdAt: Date
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const contactMessageDb = (db as any).contactMessage as {
+  create: (args: {
+    data: { name: string; email: string; subject: string; message: string }
+  }) => Promise<ContactMessage>
+  findMany: (args: {
+    where?: { isRead?: boolean }
+    orderBy?: { createdAt: 'asc' | 'desc' }
+    take?: number
+    skip?: number
+  }) => Promise<ContactMessage[]>
+  count: (args: { where?: { isRead?: boolean } }) => Promise<number>
+  update: (args: {
+    where: { id: string }
+    data: { isRead: boolean }
+  }) => Promise<ContactMessage>
+}

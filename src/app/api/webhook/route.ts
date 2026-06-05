@@ -64,6 +64,28 @@ export async function POST(request: NextRequest) {
       await handleChargeFailed(paymentIntent.id)
       break
     }
+
+    case 'payment_intent.succeeded': {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent
+      await handlePaymentIntentSucceeded(paymentIntent)
+      break
+    }
+
+    case 'charge.refunded': {
+      const charge = event.data.object as Stripe.Charge
+      if (charge.payment_intent) {
+        await handleChargeRefunded(String(charge.payment_intent))
+      }
+      break
+    }
+
+    case 'charge.dispute.created': {
+      const dispute = event.data.object as Stripe.Dispute
+      if (dispute.payment_intent) {
+        await handleChargeRefunded(String(dispute.payment_intent))
+      }
+      break
+    }
   }
 
   return NextResponse.json({ received: true })
@@ -175,31 +197,32 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
       },
     })
 
-    // Convert reservations to sales
+    // Convert reservations to sales — single batch fetch to avoid N+1
+    const saleProductIds = items.map((i) => i.id)
+    const saleInventory = await tx.inventory.findMany({
+      where: { sanityProductId: { in: saleProductIds }, trackInventory: true },
+    })
+    const saleInventoryMap = new Map(saleInventory.map((inv) => [inv.sanityProductId, inv]))
+
     for (const item of items) {
-      const inventory = await tx.inventory.findFirst({
-        where: { sanityProductId: item.id },
+      const inventory = saleInventoryMap.get(item.id)
+      if (!inventory) continue
+      await tx.inventory.update({
+        where: { id: inventory.id },
+        data: {
+          quantityReserved: { decrement: item.qty },
+          quantitySold: { increment: item.qty },
+        },
       })
-
-      if (inventory && inventory.trackInventory) {
-        await tx.inventory.update({
-          where: { id: inventory.id },
-          data: {
-            quantityReserved: { decrement: item.qty },
-            quantitySold: { increment: item.qty },
-          },
-        })
-
-        await tx.stockMovement.create({
-          data: {
-            inventoryId: inventory.id,
-            type: 'SALE',
-            quantity: item.qty,
-            reason: `Order ${orderNumber}`,
-            orderId: order.id,
-          },
-        })
-      }
+      await tx.stockMovement.create({
+        data: {
+          inventoryId: inventory.id,
+          type: 'SALE',
+          quantity: item.qty,
+          reason: `Order ${orderNumber}`,
+          orderId: order.id,
+        },
+      })
     }
 
     // Increment coupon usage atomically — single SQL prevents race condition where two
@@ -273,6 +296,27 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
   }
 }
 
+async function handleChargeRefunded(paymentIntentId: string) {
+  const order = await db.order.findFirst({
+    where: { stripePaymentIntent: paymentIntentId },
+  })
+  if (!order || order.status === 'REFUNDED') return
+
+  await db.$transaction([
+    db.order.update({
+      where: { id: order.id },
+      data: { status: 'REFUNDED', paymentStatus: 'REFUNDED' },
+    }),
+    db.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        status: 'REFUNDED',
+        note: 'Refund processed via Stripe',
+      },
+    }),
+  ])
+}
+
 async function handleChargeFailed(paymentIntentId: string) {
   // Find any pending order for this payment intent and release its inventory reservations
   // (Orders are only created on checkout.session.completed, so this handles the rare case
@@ -299,6 +343,32 @@ async function handleChargeFailed(paymentIntentId: string) {
       data: { paymentStatus: 'FAILED' },
     }).catch(() => {/* best-effort */})
   }
+}
+
+// Safety net: if checkout.session.completed was missed, ensure the order is marked PAID.
+// Idempotent — does nothing if order is already PAID or doesn't exist.
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  const order = await db.order.findFirst({
+    where: { stripePaymentIntent: paymentIntent.id },
+  })
+  if (!order || order.paymentStatus === 'PAID') return
+
+  await db.$transaction([
+    db.order.update({
+      where: { id: order.id },
+      data: {
+        paymentStatus: 'PAID',
+        status: order.status === 'PENDING' ? 'CONFIRMED' : order.status,
+      },
+    }),
+    db.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        status: order.status === 'PENDING' ? 'CONFIRMED' : order.status,
+        note: 'Payment confirmed via payment_intent.succeeded',
+      },
+    }),
+  ])
 }
 
 async function handleCheckoutExpired(session: Stripe.Checkout.Session) {

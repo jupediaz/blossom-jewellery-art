@@ -1,10 +1,13 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { Package, ArrowLeft, Truck } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
 import { formatPrice } from '@/lib/utils'
+import { CancelOrderButton } from './CancelOrderButton'
+import { ReturnRequestButton } from './ReturnRequestButton'
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>
@@ -25,6 +28,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
       items: true,
       statusHistory: { orderBy: { createdAt: 'desc' } },
       shippingMethod: true,
+      coupon: { select: { code: true } },
     },
   })
 
@@ -33,6 +37,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   }
 
   const shippingAddress = order.shippingAddress as {
+    name?: string
     firstName?: string
     lastName?: string
     line1?: string
@@ -40,6 +45,10 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     postalCode?: string
     country?: string
   }
+  const recipientName =
+    shippingAddress.name ||
+    [shippingAddress.firstName, shippingAddress.lastName].filter(Boolean).join(' ') ||
+    null
 
   return (
     <div className="space-y-6">
@@ -95,16 +104,26 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
       {/* Tracking */}
       {order.trackingNumber && (
-        <div className="flex items-center gap-3 rounded-xl bg-blue-50 px-4 py-3">
-          <Truck size={18} className="text-blue-600" />
-          <div>
-            <p className="text-sm font-medium text-blue-800">
-              {t('tracking')}: {order.trackingNumber}
-            </p>
-            {order.carrier && (
-              <p className="text-xs text-blue-600">{order.carrier}</p>
-            )}
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-blue-50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Truck size={18} className="text-blue-600 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-blue-800">
+                {t('tracking')}: {order.trackingNumber}
+              </p>
+              {order.carrier && (
+                <p className="text-xs text-blue-600">{order.carrier}</p>
+              )}
+            </div>
           </div>
+          <a
+            href={`https://www.17track.net/en/track#nums=${order.trackingNumber}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+          >
+            {t('trackPackage')}
+          </a>
         </div>
       )}
 
@@ -151,7 +170,14 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         </div>
         {Number(order.discountAmount) > 0 && (
           <div className="flex justify-between text-emerald-600">
-            <span>{tc('discount')}</span>
+            <span>
+              {tc('discount')}
+              {order.coupon?.code && (
+                <span className="ml-1.5 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-mono font-semibold tracking-wider border border-emerald-200">
+                  {order.coupon.code}
+                </span>
+              )}
+            </span>
             <span>-{formatPrice(Number(order.discountAmount))}</span>
           </div>
         )}
@@ -169,14 +195,33 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         </div>
       </div>
 
+      {/* Status Timeline */}
+      {order.statusHistory.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium mb-3">{t('orderTimeline')}</h3>
+          <div className="relative border-l border-cream-dark ml-3 space-y-4">
+            {order.statusHistory.map((entry, i) => (
+              <div key={entry.id} className="relative pl-6">
+                <div className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ${i === 0 ? 'bg-charcoal' : 'bg-cream-dark border border-warm-gray'}`} />
+                <p className="text-xs font-medium text-charcoal">{t(`orderStatus.${entry.status}`)}</p>
+                <p className="text-[11px] text-warm-gray">
+                  {entry.createdAt.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </p>
+                {entry.note && <p className="text-xs text-warm-gray mt-0.5 italic">{entry.note}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Shipping Address */}
       {shippingAddress && (
         <div>
           <h3 className="text-sm font-medium mb-2">{t('shippingAddress')}</h3>
           <div className="rounded-xl border border-cream-dark p-4 text-sm text-warm-gray">
-            <p className="font-medium text-charcoal">
-              {shippingAddress.firstName} {shippingAddress.lastName}
-            </p>
+            {recipientName && (
+              <p className="font-medium text-charcoal">{recipientName}</p>
+            )}
             {shippingAddress.line1 && <p>{shippingAddress.line1}</p>}
             <p>
               {shippingAddress.city}
@@ -185,6 +230,21 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             {shippingAddress.country && <p>{shippingAddress.country}</p>}
           </div>
         </div>
+      )}
+
+      {/* Cancel Order */}
+      {(order.status === 'PENDING' || order.status === 'CONFIRMED') && (
+        <CancelOrderButton orderId={order.id} />
+      )}
+
+      {/* Return Request */}
+      {order.status === 'DELIVERED' && (() => {
+        const referenceDate = order.deliveredAt ?? order.createdAt
+        const windowEnd = new Date(referenceDate)
+        windowEnd.setDate(windowEnd.getDate() + 30)
+        return new Date() <= windowEnd
+      })() && (
+        <ReturnRequestButton orderId={order.id} />
       )}
     </div>
   )

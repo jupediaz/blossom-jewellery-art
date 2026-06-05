@@ -29,15 +29,14 @@ export async function POST(req: NextRequest) {
 
     // Try to persist to database if available
     try {
-      const { db } = await import("@/lib/db");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await (db as any).newsletterSubscriber.upsert({
+      const { newsletterDb } = await import("@/lib/db");
+      const result = await newsletterDb.upsert({
         where: { email },
         update: { locale: locale || "en", isActive: true },
         create: { email, locale: locale || "en" },
       });
       // If updatedAt is very close to createdAt, it's a new subscriber
-      isNew = Math.abs(result.updatedAt - result.createdAt) < 1000;
+      isNew = Math.abs(result.updatedAt.getTime() - result.createdAt.getTime()) < 1000;
     } catch {
       // Database not available yet — subscription acknowledged without persistence
     }

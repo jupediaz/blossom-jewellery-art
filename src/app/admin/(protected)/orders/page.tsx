@@ -6,11 +6,14 @@ import { formatPrice } from '@/lib/utils'
 import { ShoppingCart } from 'lucide-react'
 import { format } from 'date-fns'
 import type { OrderStatus } from '@/generated/prisma/client'
+import { ExportButton } from './ExportButton'
+import { AdminSearchInput } from '@/components/admin/AdminSearchInput'
 
 interface Props {
   searchParams: Promise<{
     status?: string
     page?: string
+    q?: string
   }>
 }
 
@@ -20,8 +23,22 @@ export default async function OrdersPage({ searchParams }: Props) {
   const params = await searchParams
   const statusFilter = params.status as OrderStatus | undefined
   const page = Math.max(1, Number(params.page ?? 1))
+  const q = params.q?.trim()
 
-  const where = statusFilter ? { status: statusFilter } : {}
+  const where = {
+    ...(statusFilter ? { status: statusFilter } : {}),
+    ...(q
+      ? {
+          OR: [
+            { orderNumber: { contains: q, mode: 'insensitive' as const } },
+            { guestName: { contains: q, mode: 'insensitive' as const } },
+            { guestEmail: { contains: q, mode: 'insensitive' as const } },
+            { customer: { name: { contains: q, mode: 'insensitive' as const } } },
+            { customer: { email: { contains: q, mode: 'insensitive' as const } } },
+          ],
+        }
+      : {}),
+  }
 
   const [orders, total] = await Promise.all([
     db.order.findMany({
@@ -55,6 +72,10 @@ export default async function OrdersPage({ searchParams }: Props) {
         <div>
           <h2 className="text-2xl font-semibold text-gray-900">Orders</h2>
           <p className="text-sm text-gray-500">{total} total orders</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <AdminSearchInput placeholder="Order #, customer…" />
+          <ExportButton status={statusFilter} />
         </div>
       </div>
 
@@ -170,7 +191,7 @@ export default async function OrdersPage({ searchParams }: Props) {
               <div className="flex gap-2">
                 {page > 1 && (
                   <Link
-                    href={`/admin/orders?page=${page - 1}${statusFilter ? `&status=${statusFilter}` : ''}`}
+                    href={`/admin/orders?page=${page - 1}${statusFilter ? `&status=${statusFilter}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
                     className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50"
                   >
                     Previous
@@ -178,7 +199,7 @@ export default async function OrdersPage({ searchParams }: Props) {
                 )}
                 {page < totalPages && (
                   <Link
-                    href={`/admin/orders?page=${page + 1}${statusFilter ? `&status=${statusFilter}` : ''}`}
+                    href={`/admin/orders?page=${page + 1}${statusFilter ? `&status=${statusFilter}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
                     className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm hover:bg-gray-50"
                   >
                     Next

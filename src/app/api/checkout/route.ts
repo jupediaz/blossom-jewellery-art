@@ -23,6 +23,7 @@ interface CheckoutBody {
   countryCode?: string
   customerNote?: string
   locale?: string
+  guestEmail?: string
 }
 
 export async function POST(request: NextRequest) {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as CheckoutBody
-    const { items, couponCode, shippingMethodId, countryCode, customerNote, locale } = body
+    const { items, couponCode, shippingMethodId, countryCode, customerNote, locale, guestEmail } = body
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: 'No items provided' }, { status: 400 })
@@ -194,7 +195,7 @@ export async function POST(request: NextRequest) {
             where: {
               customerId,
               couponId: coupon.id,
-              paymentStatus: { in: ['PAID', 'PARTIALLY_REFUNDED'] },
+              paymentStatus: { in: ['PAID', 'PARTIALLY_REFUNDED', 'PENDING'] },
             },
           })
           if (customerUses >= coupon.maxUsesPerCustomer) {
@@ -246,36 +247,37 @@ export async function POST(request: NextRequest) {
       shippingMethodName = method.name
     }
 
-    // Reserve inventory for each item
-    const inventoryReservations: Array<{ id: string; qty: number }> = []
+    // Reserve inventory — single batch fetch to avoid N+1, then transactional update
+    const inventoryProductIds = validatedItems.map((i) => i.id)
+    const inventoryRecords = await db.inventory.findMany({
+      where: { sanityProductId: { in: inventoryProductIds }, trackInventory: true },
+    })
+    const inventoryMap = new Map(inventoryRecords.map((inv) => [inv.sanityProductId, inv]))
+
+    // Availability check (before touching DB)
     for (const item of validatedItems) {
-      const inventory = await db.inventory.findFirst({
-        where: { sanityProductId: item.id },
-      })
+      const inventory = inventoryMap.get(item.id)
+      if (!inventory) continue
+      const available = inventory.quantityTotal - inventory.quantityReserved - inventory.quantitySold
+      if (available < item.quantity) {
+        return NextResponse.json(
+          { error: `"${item.name}" is out of stock` },
+          { status: 400 }
+        )
+      }
+    }
 
-      if (inventory && inventory.trackInventory) {
-        const available =
-          inventory.quantityTotal - inventory.quantityReserved - inventory.quantitySold
-        if (available < item.quantity) {
-          // Release any reservations we already made (using each reservation's own qty)
-          for (const res of inventoryReservations) {
-            await db.inventory.update({
-              where: { id: res.id },
-              data: { quantityReserved: { decrement: res.qty } },
-            })
-          }
-          return NextResponse.json(
-            { error: `"${item.name}" is out of stock` },
-            { status: 400 }
-          )
-        }
-
-        await db.inventory.update({
+    // Atomic transaction: all reservations or none
+    const inventoryReservations: Array<{ id: string; qty: number }> = []
+    await db.$transaction(async (tx) => {
+      for (const item of validatedItems) {
+        const inventory = inventoryMap.get(item.id)
+        if (!inventory) continue
+        await tx.inventory.update({
           where: { id: inventory.id },
           data: { quantityReserved: { increment: item.quantity } },
         })
-
-        await db.stockMovement.create({
+        await tx.stockMovement.create({
           data: {
             inventoryId: inventory.id,
             type: 'RESERVATION',
@@ -283,10 +285,9 @@ export async function POST(request: NextRequest) {
             reason: 'Checkout reservation',
           },
         })
-
         inventoryReservations.push({ id: inventory.id, qty: item.quantity })
       }
-    }
+    })
 
     // Build Stripe line items (use offer-discounted price when available)
     const total = subtotal - discountAmount + shippingCost
@@ -381,8 +382,33 @@ export async function POST(request: NextRequest) {
       stripeSessionParams.discounts = [{ coupon: stripeCoupon.id }]
     }
 
+    if (!customerId && guestEmail) {
+      stripeSessionParams.customer_email = guestEmail
+    }
+
     if (customerId) {
       stripeSessionParams.customer_email = session?.user?.email || undefined
+
+      // Pre-fill shipping address from saved default — improves checkout UX for returning customers
+      const defaultAddress = await db.address.findFirst({
+        where: { userId: customerId, isDefault: true },
+      }).catch(() => null)
+
+      if (defaultAddress) {
+        stripeSessionParams.payment_intent_data = {
+          shipping: {
+            name: `${defaultAddress.firstName} ${defaultAddress.lastName}`,
+            address: {
+              line1: defaultAddress.line1,
+              line2: defaultAddress.line2 || undefined,
+              city: defaultAddress.city,
+              state: defaultAddress.state || undefined,
+              postal_code: defaultAddress.postalCode,
+              country: defaultAddress.country,
+            },
+          },
+        }
+      }
     }
 
     let stripeSession: Stripe.Checkout.Session

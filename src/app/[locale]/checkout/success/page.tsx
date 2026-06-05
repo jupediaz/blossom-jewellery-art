@@ -4,11 +4,15 @@ import { db } from '@/lib/db'
 import { getTranslations } from 'next-intl/server'
 import { formatPrice } from '@/lib/utils'
 import { PurchaseTracker } from '@/components/PurchaseTracker'
+import { OrderPoller } from '@/components/checkout/OrderPoller'
 import type { Metadata } from 'next'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('Checkout')
-  return { title: t('success') }
+  return {
+    title: t('success'),
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function CheckoutSuccessPage({
@@ -125,17 +129,32 @@ export default async function CheckoutSuccessPage({
           <p className="text-center text-sm text-gray-500">
             {t('confirmationEmail')}
           </p>
+
+          {!order.customerId && (
+            <p className="text-center text-sm text-gray-400">
+              {t('guestTrackHint')}{' '}
+              <Link href="/orders/track" className="underline hover:text-gray-600 transition-colors">
+                {t('guestTrackLink')}
+              </Link>
+            </p>
+          )}
         </div>
+      ) : sessionId ? (
+        // Webhook hasn't processed yet — poll client-side with backoff
+        <>
+          <OrderPoller sessionId={sessionId} />
+          <p className="mt-4 text-center text-sm text-gray-400">
+            {t('guestTrackHint')}{' '}
+            <Link href="/orders/track" className="underline hover:text-gray-600 transition-colors">
+              {t('guestTrackLink')}
+            </Link>
+          </p>
+        </>
       ) : (
         <div className="mt-4 text-center">
           <p className="text-warm-gray text-sm mb-8">
             {t('confirmationEmailNoOrder')}
           </p>
-          {sessionId && (
-            <p className="text-xs text-warm-gray/60 mb-8">
-              {t('reference')}: {sessionId.slice(0, 20)}...
-            </p>
-          )}
         </div>
       )}
 

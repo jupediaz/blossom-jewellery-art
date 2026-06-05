@@ -5,6 +5,7 @@ import { Heart, X } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useLocale } from 'next-intl'
+import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 interface WishlistButtonProps {
@@ -15,31 +16,31 @@ interface WishlistButtonProps {
 
 export function WishlistButton({ productId, variant, className }: WishlistButtonProps) {
   const t = useTranslations('Products')
-  const tAuth = useTranslations('Auth')
+  const tAccount = useTranslations('Account')
   const tc = useTranslations('Common')
   const locale = useLocale()
   const { status } = useSession()
   const [isInWishlist, setIsInWishlist] = useState(false)
+  const [wishlistItemId, setWishlistItemId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
-    // Only check wishlist if user is authenticated
     if (status !== 'authenticated') return
     fetch('/api/account/wishlist')
       .then((res) => {
-        if (!res.ok) return [] // Not authenticated
+        if (!res.ok) return []
         return res.json()
       })
-      .then((items: { sanityProductId: string; variantName: string | null }[]) => {
+      .then((items: { id: string; sanityProductId: string; variantName: string | null }[]) => {
         if (Array.isArray(items)) {
-          setIsInWishlist(
-            items.some(
-              (item) =>
-                item.sanityProductId === productId &&
-                (item.variantName || null) === (variant || null)
-            )
+          const match = items.find(
+            (item) =>
+              item.sanityProductId === productId &&
+              (item.variantName || null) === (variant || null)
           )
+          setIsInWishlist(!!match)
+          setWishlistItemId(match?.id ?? null)
         }
       })
       .catch(() => {})
@@ -48,21 +49,11 @@ export function WishlistButton({ productId, variant, className }: WishlistButton
   const toggle = async () => {
     setLoading(true)
     try {
-      if (isInWishlist) {
-        // Find the item ID first, then delete
-        const res = await fetch('/api/account/wishlist')
-        if (!res.ok) return
-        const items: { id: string; sanityProductId: string; variantName: string | null }[] = await res.json()
-        const item = items.find(
-          (i) =>
-            i.sanityProductId === productId &&
-            (i.variantName || null) === (variant || null)
-        )
-        if (item) {
-          await fetch(`/api/account/wishlist?id=${item.id}`, { method: 'DELETE' })
-          setIsInWishlist(false)
-        }
-      } else {
+      if (isInWishlist && wishlistItemId) {
+        await fetch(`/api/account/wishlist?id=${wishlistItemId}`, { method: 'DELETE' })
+        setIsInWishlist(false)
+        setWishlistItemId(null)
+      } else if (!isInWishlist) {
         const res = await fetch('/api/account/wishlist', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -73,7 +64,9 @@ export function WishlistButton({ productId, variant, className }: WishlistButton
           return
         }
         if (res.ok) {
+          const data = await res.json()
           setIsInWishlist(true)
+          setWishlistItemId(data.id ?? null)
         }
       }
     } catch {
@@ -83,7 +76,9 @@ export function WishlistButton({ productId, variant, className }: WishlistButton
     }
   }
 
-  const loginHref = locale === 'en' ? '/login' : `/${locale}/login`
+  const pathname = usePathname()
+  const loginBase = locale === 'en' ? '/login' : `/${locale}/login`
+  const loginHref = `${loginBase}?callbackUrl=${encodeURIComponent(pathname)}`
 
   return (
     <>
@@ -124,13 +119,13 @@ export function WishlistButton({ productId, variant, className }: WishlistButton
                 <X size={18} />
               </button>
             </div>
-            <p className="text-sm text-warm-gray mb-6">{tAuth('signInSubtitle')}</p>
+            <p className="text-sm text-warm-gray mb-6">{tAccount('signInSubtitle')}</p>
             <div className="flex flex-col gap-3">
               <a
                 href={loginHref}
                 className="block w-full bg-charcoal text-cream text-center py-2.5 rounded text-sm tracking-wide hover:bg-charcoal/90 transition-colors"
               >
-                {tAuth('signIn')}
+                {tAccount('signIn')}
               </a>
               <button
                 onClick={() => setShowAuthModal(false)}

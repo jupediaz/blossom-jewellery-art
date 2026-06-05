@@ -11,7 +11,7 @@ import { PortableTextRenderer } from "@/components/PortableText";
 import { BlogPostJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import type { BlogPost } from "@/lib/types";
 import { mockBlogPosts } from "@/lib/mock-data";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 export const revalidate = 60;
 
@@ -38,10 +38,19 @@ export async function generateMetadata({
       slug,
     });
     if (!post) return {};
+    const canonicalPath = `/blog/${slug}`;
     return {
       title: post.seo?.metaTitle || post.title,
       description: post.seo?.metaDescription || post.excerpt,
       authors: [{ name: siteConfig.creator }],
+      alternates: {
+        canonical: `${siteConfig.url}/en${canonicalPath}`,
+        languages: {
+          en: `${siteConfig.url}/en${canonicalPath}`,
+          es: `${siteConfig.url}/es${canonicalPath}`,
+          uk: `${siteConfig.url}/uk${canonicalPath}`,
+        },
+      },
       openGraph: {
         title: post.seo?.metaTitle || post.title,
         description: post.seo?.metaDescription || post.excerpt,
@@ -60,6 +69,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const t = await getTranslations("Blog");
+  const locale = await getLocale();
   const { slug } = await params;
   let post: BlogPost | null = null;
 
@@ -113,7 +123,7 @@ export default async function BlogPostPage({
           {post.author && <span>{t("byAuthor", { author: post.author })}</span>}
           {post.publishedAt && (
             <time dateTime={post.publishedAt}>
-              {new Date(post.publishedAt).toLocaleDateString("en-US", {
+              {new Date(post.publishedAt).toLocaleDateString(locale, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
