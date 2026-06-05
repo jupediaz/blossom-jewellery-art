@@ -1,8 +1,10 @@
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      # Monorepo: build from the repo root so the workspace install and Next
+      # standalone output can see the root lockfile and hoisted node_modules.
+      context: ../..
+      dockerfile: apps/blossom/Dockerfile
     restart: unless-stopped
     env_file: .env
     environment:

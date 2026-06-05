@@ -1,11 +1,18 @@
-name: Deploy to Xeon
+name: Deploy Blossom to Xeon
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/blossom/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'turbo.json'
+      - '.github/workflows/deploy.yml'
 
 concurrency:
-  group: deploy-${{ github.repository }}
+  group: deploy-blossom-${{ github.repository }}
   cancel-in-progress: false
 
 jobs:
@@ -29,14 +36,14 @@ jobs:
             echo "::error::Commit drift: expected $EXPECTED got $ACTUAL"
             exit 1
           fi
-          docker compose -f docker-compose.prod.yml build
-          docker compose -f docker-compose.prod.yml up -d --no-build
+          docker compose -f apps/blossom/docker-compose.prod.yml build
+          docker compose -f apps/blossom/docker-compose.prod.yml up -d --no-build
           echo "Checking containers are running..."
           sleep 10
-          FAILED=$(docker compose -f docker-compose.prod.yml ps --status exited --quiet | wc -l)
+          FAILED=$(docker compose -f apps/blossom/docker-compose.prod.yml ps --status exited --quiet | wc -l)
           if [ "$FAILED" -gt 0 ]; then
             echo "ERROR: $FAILED container(s) exited after deploy"
-            docker compose -f docker-compose.prod.yml logs --tail=50
+            docker compose -f apps/blossom/docker-compose.prod.yml logs --tail=50
             exit 1
           fi
           echo "Deploy completed successfully"

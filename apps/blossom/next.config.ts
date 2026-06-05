@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Monorepo: trace and bundle workspace-hoisted dependencies from the repo root
+  // so the standalone output includes everything (node_modules live at root).
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   images: {
     remotePatterns: [
       {
