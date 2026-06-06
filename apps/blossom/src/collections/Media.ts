@@ -6,7 +6,9 @@ export const Media: CollectionConfig = {
   slug: 'media',
   access: { read: () => true },
   upload: {
-    mimeTypes: ['image/*'],
+    // Raster formats only — SVG is excluded to prevent stored XSS via
+    // <script> in uploaded vector files.
+    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'],
     imageSizes: [
       { name: 'thumbnail', width: 400 },
       { name: 'card', width: 768 },

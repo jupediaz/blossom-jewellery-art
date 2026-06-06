@@ -15,12 +15,22 @@ import { Media } from './collections/Media'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Fail closed: never start with a missing signing secret (forgeable sessions)
+// or empty R2 credentials (uploads silently routed to the wrong endpoint).
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) throw new Error(`${name} is required but is not set`)
+  return value
+}
+
+const payloadSecret = requireEnv('PAYLOAD_SECRET')
+
 // Payload admin lives under /cms/* to avoid colliding with Blossom's own
 // /admin panel (orders, inventory, fulfilment). It shares the project's
 // Postgres (db.codelabs.studio) — Payload owns its own tables, Prisma owns the
 // commerce tables. Images go to the existing Cloudflare R2 bucket.
 export default buildConfig({
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: payloadSecret,
   admin: {
     user: Users.slug,
     importMap: {
@@ -46,14 +56,14 @@ export default buildConfig({
   plugins: [
     s3Storage({
       collections: { media: true },
-      bucket: process.env.R2_BUCKET_NAME || '',
+      bucket: requireEnv('R2_BUCKET_NAME'),
       config: {
-        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        endpoint: `https://${requireEnv('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
         region: 'auto',
         forcePathStyle: true,
         credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+          accessKeyId: requireEnv('R2_ACCESS_KEY_ID'),
+          secretAccessKey: requireEnv('R2_SECRET_ACCESS_KEY'),
         },
       },
     }),
