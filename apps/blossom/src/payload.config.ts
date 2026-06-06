@@ -59,6 +59,10 @@ export default buildConfig({
     defaultLocale: 'en',
   },
   db: postgresAdapter({
+    // Isolate Payload in its own schema so its drizzle migrations only manage
+    // Payload's tables and never collide with Prisma's tables in `public`
+    // (the shared schema otherwise confuses Payload's push/migrate).
+    schemaName: 'payload',
     pool: {
       connectionString: pgConnectionString(),
       ssl: { rejectUnauthorized: false },
