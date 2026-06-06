@@ -1,17 +1,24 @@
 # Build context = monorepo ROOT (see docker-compose.prod.yml: context: ../..)
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 # Root manifest + lockfile + the app manifest drive the workspace install
 COPY package.json package-lock.json ./
 COPY apps/blossom/package.json ./apps/blossom/package.json
 RUN npm ci --legacy-peer-deps
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
+# Build-time placeholders for the Payload config (real values injected at runtime
+# via the compose env_file). The config fails closed if these are unset.
+ENV PAYLOAD_SECRET=placeholder-build-secret
+ENV R2_BUCKET_NAME=placeholder
+ENV R2_ACCOUNT_ID=placeholder
+ENV R2_ACCESS_KEY_ID=placeholder
+ENV R2_SECRET_ACCESS_KEY=placeholder
 WORKDIR /app/apps/blossom
 RUN npx prisma generate
 RUN npm run build
@@ -23,7 +30,7 @@ WORKDIR /app/apps/blossom
 ENV NODE_ENV=production
 CMD ["npx", "prisma", "migrate", "deploy"]
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
