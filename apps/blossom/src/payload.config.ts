@@ -25,6 +25,14 @@ function requireEnv(name: string): string {
 
 const payloadSecret = requireEnv('PAYLOAD_SECRET')
 
+// db.codelabs.studio uses a self-signed cert. pg honors connection-string
+// params over the explicit ssl option, so strip sslmode here and set ssl below.
+function pgConnectionString(): string {
+  const url = new URL(requireEnv('DATABASE_URL'))
+  url.searchParams.delete('sslmode')
+  return url.toString()
+}
+
 // Payload admin lives under /cms/* to avoid colliding with Blossom's own
 // /admin panel (orders, inventory, fulfilment). It shares the project's
 // Postgres (db.codelabs.studio) — Payload owns its own tables, Prisma owns the
@@ -51,7 +59,10 @@ export default buildConfig({
     defaultLocale: 'en',
   },
   db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URL },
+    pool: {
+      connectionString: pgConnectionString(),
+      ssl: { rejectUnauthorized: false },
+    },
   }),
   plugins: [
     s3Storage({

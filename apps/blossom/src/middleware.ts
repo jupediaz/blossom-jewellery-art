@@ -7,8 +7,8 @@ const intlMiddleware = createIntlMiddleware(routing)
 export default function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
 
-  // Admin routes: auth is handled server-side, no i18n needed
-  if (pathname.startsWith('/admin')) {
+  // Admin panel and Payload CMS: auth handled by each, no i18n needed
+  if (pathname.startsWith('/admin') || pathname.startsWith('/cms')) {
     return
   }
 
@@ -17,5 +17,5 @@ export default function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|studio|_next|.*\\..*).*)'],
+  matcher: ['/((?!api|studio|cms|_next|.*\\..*).*)'],
 }
