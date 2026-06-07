@@ -1,6 +1,5 @@
 import { db } from '@/lib/db'
-import { sanityFetch } from '@/lib/sanity/client'
-import { allProductsQuery } from '@/lib/sanity/queries'
+import { getAllProducts } from '@/lib/cms/queries'
 import { EmptyState } from '@/components/admin/EmptyState'
 import { Package, ExternalLink, ImagePlus, Pencil } from 'lucide-react'
 import Link from 'next/link'
@@ -20,7 +19,7 @@ interface SanityProduct {
 
 export default async function AdminProductsPage() {
   const [products, inventoryRecords] = await Promise.all([
-    sanityFetch<SanityProduct[]>(allProductsQuery),
+    getAllProducts(),
     db.inventory.findMany(),
   ])
 

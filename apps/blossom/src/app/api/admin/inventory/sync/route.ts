@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { sanityFetch } from '@/lib/sanity/client'
-import { groq } from 'next-sanity'
-
-const syncProductsQuery = groq`
-  *[_type == "product" && !(_id in path("drafts.**"))] {
-    _id,
-    name,
-    slug,
-    inStock,
-    variants[] {
-      name,
-      inStock
-    }
-  }
-`
+import { getAllProducts } from '@/lib/cms/queries'
 
 interface SanityProduct {
   _id: string
@@ -31,10 +17,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const products = await sanityFetch<SanityProduct[]>(syncProductsQuery)
+  const cmsProducts = await getAllProducts()
+  const products: SanityProduct[] = cmsProducts.map((p) => ({
+    _id: p._id,
+    name: p.name,
+    slug: p.slug,
+    inStock: p.inStock,
+    variants: p.variants,
+  }))
 
   if (!products || products.length === 0) {
-    return NextResponse.json({ created: 0, existing: 0, message: 'No products found in Sanity' })
+    return NextResponse.json({ created: 0, existing: 0, message: 'No products found in CMS' })
   }
 
   // Collect all product IDs for a single batch fetch — replaces N+1 findFirst per product/variant

@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { sanityFetch } from "@/lib/sanity/client";
-import { productBySlugQuery, allProductsQuery } from "@/lib/sanity/queries";
+import { getAllProducts, getProductBySlug } from "@/lib/cms/queries";
 import { siteConfig } from "@/lib/env";
 import { db } from "@/lib/db";
 import { ProductDetail } from "@/components/product/ProductDetail";
@@ -17,7 +16,7 @@ export const revalidate = 60;
 
 export async function generateStaticParams() {
   try {
-    const products = await sanityFetch<Product[]>(allProductsQuery);
+    const products = await getAllProducts();
     if (products.length > 0) {
       return products.map((p) => ({ slug: p.slug.current }));
     }
@@ -34,9 +33,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, locale } = await params;
   try {
-    const product = await sanityFetch<Product>(productBySlugQuery, {
-      slug,
-    });
+    const product = await getProductBySlug(slug);
     if (!product) return {};
 
     const title = product.seo?.metaTitle || product.name;
@@ -78,8 +75,7 @@ export default async function ProductPage({
   let product: Product | null = null;
 
   try {
-    const sanityProduct = await sanityFetch<Product>(productBySlugQuery, { slug });
-    // Only use Sanity product if it's valid (not empty array or null)
+    const sanityProduct = await getProductBySlug(slug);
     if (sanityProduct && typeof sanityProduct === 'object' && !Array.isArray(sanityProduct)) {
       product = sanityProduct;
     }

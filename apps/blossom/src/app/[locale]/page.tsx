@@ -3,11 +3,7 @@ import { Link } from '@/i18n/navigation';
 import Image from "next/image";
 import { getTranslations } from 'next-intl/server';
 import { siteConfig } from "@/lib/env";
-import { sanityFetch } from "@/lib/sanity/client";
-import {
-  featuredProductsQuery,
-  allCollectionsQuery,
-} from "@/lib/sanity/queries";
+import { getFeaturedProducts, getAllCollections } from "@/lib/cms/queries";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { LocalBusinessJsonLd } from "@/components/JsonLd";
@@ -31,11 +27,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getData() {
-  const [featuredProducts, collections] = await Promise.all([
-    sanityFetch<Product[]>(featuredProductsQuery),
-    sanityFetch<Collection[]>(allCollectionsQuery),
-  ]);
-  return { featuredProducts, collections };
+  try {
+    const [featuredProducts, collections] = await Promise.all([
+      getFeaturedProducts(),
+      getAllCollections(),
+    ]);
+    if (featuredProducts.length === 0 && collections.length === 0) {
+      return { featuredProducts: mockProducts.filter((p) => p.featured), collections: mockCollections };
+    }
+    return { featuredProducts, collections };
+  } catch {
+    return { featuredProducts: mockProducts.filter((p) => p.featured), collections: mockCollections };
+  }
 }
 
 /* Bijoux-style dash button */

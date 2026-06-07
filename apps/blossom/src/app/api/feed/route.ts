@@ -4,8 +4,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { sanityFetch } from "@/lib/sanity/client";
-import { allProductsQuery } from "@/lib/sanity/queries";
+import { getAllProducts } from "@/lib/cms/queries";
 import { siteConfig } from "@/lib/env";
 import type { Product } from "@/lib/types";
 
@@ -13,7 +12,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 export async function GET() {
   try {
-    const products = await sanityFetch<Product[]>(allProductsQuery);
+    const products = await getAllProducts();
 
     const feed = products
       .filter((p) => p.inStock && p.imageUrl)

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 
-import { sanityFetch } from '@/lib/sanity/client'
+import { getProductsByIds } from '@/lib/cms/queries'
 import { Heart } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
@@ -44,24 +44,9 @@ export default async function WishlistPage() {
     )
   }
 
-  // Fetch product details from Sanity for wishlist items
+  // Fetch product details from the CMS for wishlist items
   const productIds = wishlistItems.map((w) => w.sanityProductId)
-  const products = await sanityFetch<
-    Array<{
-      _id: string
-      name: string
-      slug: { current: string }
-      price: number
-      imageUrl?: string
-      inStock: boolean
-    }>
-  >(
-    `*[_type == "product" && _id in $ids] {
-      _id, name, slug, price, inStock,
-      "imageUrl": images[0].asset->url
-    }`,
-    { ids: productIds }
-  )
+  const products = await getProductsByIds(productIds)
 
   const productMap = new Map(products.map((p) => [p._id, p]))
 

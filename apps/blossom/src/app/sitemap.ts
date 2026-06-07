@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { sanityFetch } from '@/lib/sanity/client'
+import { getAllProducts, getAllCollections } from '@/lib/cms/queries'
 import { routing } from '@/i18n/routing'
 
 export const revalidate = 3600 // Regenerate sitemap at most once per hour
@@ -46,17 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic product pages
   type SlugResult = { slug: { current: string } }
 
-  const [products, collections, blogPosts] = await Promise.all([
-    sanityFetch<SlugResult[]>(
-      `*[_type == "product" && !(_id in path("drafts.**"))]{ slug }`
-    ),
-    sanityFetch<SlugResult[]>(
-      `*[_type == "collection" && !(_id in path("drafts.**"))]{ slug }`
-    ),
-    sanityFetch<SlugResult[]>(
-      `*[_type == "blogPost" && !(_id in path("drafts.**"))]{ slug }`
-    ),
+  const [products, collections] = await Promise.all([
+    getAllProducts(),
+    getAllCollections(),
   ])
+  // Blog still on Sanity (not yet migrated); omit until it moves to Payload.
+  const blogPosts: SlugResult[] = []
 
   const productEntries: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${siteUrl}/products/${p.slug.current}`,

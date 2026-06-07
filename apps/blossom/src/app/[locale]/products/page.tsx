@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Link } from '@/i18n/navigation';
-import { sanityFetch } from "@/lib/sanity/client";
-import { allProductsQuery, newProductsQuery, allCategoriesQuery } from "@/lib/sanity/queries";
+import { getAllProducts, getNewProducts, getAllCategories } from "@/lib/cms/queries";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { getTranslations } from "next-intl/server";
 import type { Product, Category } from "@/lib/types";
@@ -37,10 +36,9 @@ export default async function ProductsPage({
   const [sanityResult, dbOffers] = await Promise.all([
     (async () => {
       try {
-        const productQuery = params.sort === "new" ? newProductsQuery : allProductsQuery;
         const [sanityProducts, sanityCategories] = await Promise.all([
-          sanityFetch<Product[]>(productQuery),
-          sanityFetch<Category[]>(allCategoriesQuery),
+          params.sort === "new" ? getNewProducts() : getAllProducts(),
+          getAllCategories(),
         ]);
         return { products: sanityProducts, categories: sanityCategories };
       } catch {

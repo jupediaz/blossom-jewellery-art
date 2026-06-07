@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sanityFetch } from "@/lib/sanity/client";
-import { searchProductsQuery } from "@/lib/sanity/queries";
+import { searchProducts } from "@/lib/cms/queries";
 import { mockProducts } from "@/lib/mock-data";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -26,11 +25,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ results: [], total: 0 });
   }
 
-  // Append wildcard for prefix matching ("ring" → matches "rings", "ring holder", etc.)
-  const groqQuery = `${raw.toLowerCase()}*`;
-
   try {
-    const sanityResults = await sanityFetch<SearchResult[]>(searchProductsQuery, { query: groqQuery });
+    const sanityResults = await searchProducts(raw);
     const page = sanityResults.slice(offset, offset + limit).map((p) => ({
       _id: p._id,
       name: p.name,

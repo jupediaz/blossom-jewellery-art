@@ -4,7 +4,7 @@ import { stripe } from '@/lib/stripe'
 import { db } from '@/lib/db'
 import { auth } from '@/lib/auth'
 import { rateLimit } from '@/lib/rate-limit'
-import { sanityFetch } from '@/lib/sanity/client'
+import { getProductsForCheckout } from '@/lib/cms/queries'
 import { mockProducts } from '@/lib/mock-data'
 
 interface CheckoutItem {
@@ -72,12 +72,8 @@ export async function POST(request: NextRequest) {
     let serverPrices: Record<string, { price: number; name: string; inStock: boolean; collectionId?: string }> = {}
 
     try {
-      type PriceResult = { _id: string; name: string; price: number; inStock: boolean; collection?: { slug: { current: string } } }
-      const sanityPrices = await sanityFetch<PriceResult[]>(
-        `*[_type == "product" && _id in $ids]{ _id, name, price, inStock, collection->{ slug } }`,
-        { ids: productIds }
-      )
-      for (const p of sanityPrices) {
+      const cmsPrices = await getProductsForCheckout(productIds)
+      for (const p of cmsPrices) {
         serverPrices[p._id] = { price: p.price, name: p.name, inStock: p.inStock, collectionId: p.collection?.slug.current }
       }
     } catch {

@@ -175,6 +175,17 @@ export async function searchProducts(query: string, locale: Locale = 'en') {
   })
 }
 
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return []
+  const payload = await getPayloadClient()
+  const numericIds = ids.map((i) => (Number.isNaN(Number(i)) ? i : Number(i)))
+  const res = await payload.find({
+    collection: 'products', depth: 1, limit: ids.length,
+    where: { id: { in: numericIds } },
+  })
+  return res.docs.map((d) => mapProductCard(d as AnyDoc))
+}
+
 // Server-side price/stock lookup for checkout validation (replaces the Sanity
 // GROQ price fetch). Returns a map keyed by product id (string).
 export async function getProductsForCheckout(ids: string[]) {

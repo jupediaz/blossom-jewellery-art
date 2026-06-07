@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { sanityFetch } from "@/lib/sanity/client";
-import { collectionBySlugQuery, allCollectionsQuery } from "@/lib/sanity/queries";
+import { getAllCollections, getCollectionBySlug } from "@/lib/cms/queries";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import type { Collection } from "@/lib/types";
 import { mockCollections, mockProducts } from "@/lib/mock-data";
@@ -27,9 +26,7 @@ export const revalidate = 60;
 
 export async function generateStaticParams() {
   try {
-    const collections = await sanityFetch<Collection[]>(
-      allCollectionsQuery
-    );
+    const collections = await getAllCollections();
     if (collections.length > 0) {
       return collections.map((c) => ({ slug: c.slug.current }));
     }
@@ -46,10 +43,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const collection = await sanityFetch<Collection>(
-      collectionBySlugQuery,
-      { slug }
-    );
+    const collection = await getCollectionBySlug(slug);
     if (!collection) return {};
     const canonicalPath = `/collections/${slug}`;
     return {
@@ -82,7 +76,7 @@ export default async function CollectionPage({
   let collection: Collection | null = null;
 
   try {
-    const sanityCollection = await sanityFetch<Collection>(collectionBySlugQuery, { slug });
+    const sanityCollection = await getCollectionBySlug(slug);
     // Only use Sanity collection if it's valid (not empty array or null)
     if (sanityCollection && typeof sanityCollection === 'object' && !Array.isArray(sanityCollection)) {
       collection = sanityCollection;
