@@ -50,3 +50,4 @@ networks:
 # deploy pipeline: Forgejo push -> Dokploy webhook (auto-deploy on main)
 
 # auto-deploy: Forgejo push -> Dokploy (internal webhook, dokploy-network)
+# autodeploy-confirm 1780864348
