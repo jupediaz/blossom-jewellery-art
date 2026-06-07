@@ -46,7 +46,8 @@
     "products": "Products",
     "collections": "Collections",
     "unsubscribedTitle": "Unsubscribed",
-    "unsubscribedText": "You have been successfully removed from our newsletter. You will no longer receive emails from Blossom by Olha."
+    "unsubscribedText": "You have been successfully removed from our newsletter. You will no longer receive emails from Blossom by Olha.",
+    "clickToZoom": "Click to zoom"
   },
   "Home": {
     "heroH1Line1": "finest",

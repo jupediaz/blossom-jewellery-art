@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { ShoppingBag, ChevronLeft, ChevronRight, Minus, Plus, Lock, Ruler, Share2, Check } from "lucide-react";
+import { ShoppingBag, ChevronLeft, ChevronRight, Minus, Plus, Lock, Ruler, Share2, Check, X, ZoomIn } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -29,6 +29,11 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
 
   const sanityImages = product.images || [];
   const hasSanityImages = sanityImages.length > 0;
+  const imageCount = hasSanityImages ? sanityImages.length : product.imageUrl ? 1 : 0;
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const currentLargeUrl = hasSanityImages
+    ? sanityImages[selectedImage]?.url || ""
+    : product.imageUrl || "";
   const currentVariant = product.variants?.find(
     (v) => v.name === selectedVariant
   );
@@ -85,9 +90,27 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
   };
 
   const nextImage = () =>
-    setSelectedImage((prev) => (prev + 1) % sanityImages.length);
+    setSelectedImage((prev) => (prev + 1) % (sanityImages.length || 1));
   const prevImage = () =>
-    setSelectedImage((prev) => (prev - 1 + sanityImages.length) % sanityImages.length);
+    setSelectedImage((prev) => (prev - 1 + (sanityImages.length || 1)) % (sanityImages.length || 1));
+
+  // Lightbox: lock body scroll + keyboard navigation while open.
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+      else if (e.key === "ArrowRight") nextImage();
+      else if (e.key === "ArrowLeft") prevImage();
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lightboxOpen, imageCount]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
@@ -100,10 +123,14 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
                 src={sanityImages[selectedImage]?.url || ""}
                 alt={sanityImages[selectedImage].alt || product.name}
                 fill
-                className="object-cover"
+                onClick={() => setLightboxOpen(true)}
+                className="object-cover cursor-zoom-in"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
+              <span className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
+                <ZoomIn size={11} /> {tc("clickToZoom")}
+              </span>
               {sanityImages.length > 1 && (
                 <>
                   <button
@@ -128,7 +155,8 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
               src={product.imageUrl}
               alt={product.name}
               fill
-              className="object-cover"
+              onClick={() => setLightboxOpen(true)}
+              className="object-cover cursor-zoom-in"
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority
             />
@@ -387,6 +415,57 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
           )}
         </div>
       </div>
+
+      {/* Lightbox — full-screen zoomed view */}
+      {lightboxOpen && currentLargeUrl && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setLightboxOpen(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
+            aria-label="Close"
+          >
+            <X size={22} />
+          </button>
+
+          {imageCount > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                className="absolute left-3 sm:left-6 z-10 rounded-full bg-white/10 p-2.5 text-white hover:bg-white/20 transition-colors"
+                aria-label="Previous image"
+              >
+                <ChevronLeft size={26} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                className="absolute right-3 sm:right-6 z-10 rounded-full bg-white/10 p-2.5 text-white hover:bg-white/20 transition-colors"
+                aria-label="Next image"
+              >
+                <ChevronRight size={26} />
+              </button>
+            </>
+          )}
+
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={currentLargeUrl}
+            alt={product.name}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[92vh] max-w-[94vw] object-contain select-none"
+          />
+
+          {imageCount > 1 && (
+            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white">
+              {selectedImage + 1} / {imageCount}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

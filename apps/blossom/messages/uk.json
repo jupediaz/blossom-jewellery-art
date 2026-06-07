@@ -46,7 +46,8 @@
     "products": "Товари",
     "collections": "Колекції",
     "unsubscribedTitle": "Відписку виконано",
-    "unsubscribedText": "Вас успішно видалено з нашої розсилки. Ви більше не отримуватимете листів від Blossom by Olha."
+    "unsubscribedText": "Вас успішно видалено з нашої розсилки. Ви більше не отримуватимете листів від Blossom by Olha.",
+    "clickToZoom": "Натисніть, щоб збільшити"
   },
   "Home": {
     "heroH1Line1": "найкраща",
