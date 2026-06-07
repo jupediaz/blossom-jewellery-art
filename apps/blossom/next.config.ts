@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "pub-8901f7dc70734521bb212bbabaad0187.r2.dev",
       },
+      {
+        // AI-generated glamour photography (shared codelabs R2 bucket)
+        protocol: "https",
+        hostname: "pub-95b130cd21014a42901539acb17fa9ae.r2.dev",
+      },
     ],
   },
   async headers() {
@@ -55,7 +60,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sanity.io",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.sanity.io",
               "font-src 'self' https://fonts.gstatic.com https://*.sanity.io",
-              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://*.sanity.io",
+              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://*.sanity.io https://pub-8901f7dc70734521bb212bbabaad0187.r2.dev https://pub-95b130cd21014a42901539acb17fa9ae.r2.dev",
               "connect-src 'self' https://*.sanity.io wss://*.sanity.io https://*.sentry.io",
               "frame-src https://*.sanity.io",
               "object-src 'none'",
@@ -77,7 +82,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://www.google-analytics.com",
+              "img-src 'self' data: blob: https://cdn.sanity.io https://images.unsplash.com https://www.google-analytics.com https://pub-8901f7dc70734521bb212bbabaad0187.r2.dev https://pub-95b130cd21014a42901539acb17fa9ae.r2.dev",
               "connect-src 'self' https://*.sanity.io https://*.stripe.com https://*.sentry.io https://www.google-analytics.com https://region1.google-analytics.com",
               "frame-src https://js.stripe.com",
               "object-src 'none'",
