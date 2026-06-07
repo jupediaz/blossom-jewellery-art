@@ -1,0 +1,48 @@
+# Root compose consumed by Dokploy (composePath: ./docker-compose.prod.yml).
+# The monorepo refactor moved the canonical compose under apps/blossom/, which
+# left Dokploy's git deploy without a root compose to find. This restores it,
+# pointing at the monorepo Dockerfile so the build context is the repo root.
+#
+# `name: blossom` pins the compose project name so containers stay blossom-app-*
+# and zero-downtime swaps replace the running instance instead of spawning a
+# parallel project. Mirrors apps/blossom/docker-compose.prod.yml (used for
+# manual deploys) but with root-relative paths.
+name: blossom
+services:
+  app:
+    build:
+      context: .
+      dockerfile: apps/blossom/Dockerfile
+    restart: unless-stopped
+    env_file: apps/blossom/.env
+    environment:
+    - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.blossom.rule=Host(`blossombyolha.com`) || Host(`blossom.codelabs.studio`)
+    - traefik.http.routers.blossom.entrypoints=websecure
+    - traefik.http.routers.blossom.tls=true
+    - traefik.http.routers.blossom.tls.certresolver=letsencrypt-dns
+    - traefik.http.services.blossom.loadbalancer.server.port=3000
+    networks:
+    - dokploy-network
+  # One-shot DB migration. Run with `docker compose run --rm migrate` before
+  # bringing up `app`. Reads DATABASE_URL from apps/blossom/.env.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/blossom/Dockerfile
+      target: migrator
+    env_file: apps/blossom/.env
+    restart: "no"
+    networks:
+    - dokploy-network
+networks:
+  dokploy-network:
+    external: true
