@@ -31,6 +31,17 @@ const locales: { code: Locale; label: string; flag: React.ReactNode }[] = [
     ),
   },
   {
+    code: 'pt',
+    label: 'Português',
+    flag: (
+      <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
+        <rect width="24" height="16" fill="#FF0000" />
+        <rect width="9" height="16" fill="#006600" />
+        <circle cx="9" cy="8" r="2.6" fill="#FFD700" stroke="#fff" strokeWidth="0.5" />
+      </svg>
+    ),
+  },
+  {
     code: 'uk',
     label: 'Українська',
     flag: (
