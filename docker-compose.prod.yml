@@ -46,3 +46,5 @@ services:
 networks:
   dokploy-network:
     external: true
+
+# deploy pipeline: Forgejo push -> Dokploy webhook (auto-deploy on main)
