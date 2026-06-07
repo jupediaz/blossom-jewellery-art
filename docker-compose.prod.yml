@@ -14,7 +14,7 @@ services:
       context: .
       dockerfile: apps/blossom/Dockerfile
     restart: unless-stopped
-    env_file: apps/blossom/.env
+    env_file: .env
     environment:
     - NODE_ENV=production
     healthcheck:
@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: apps/blossom/Dockerfile
       target: migrator
-    env_file: apps/blossom/.env
+    env_file: .env
     restart: "no"
     networks:
     - dokploy-network
