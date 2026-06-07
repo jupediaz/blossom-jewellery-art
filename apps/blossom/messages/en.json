@@ -357,7 +357,8 @@
     "deleteConfirmPrompt": "Enter your password to confirm:",
     "deleteConfirmButton": "Delete My Account",
     "deleteAccountSuccess": "Account deleted. Goodbye!",
-    "passwordRequired": "Password is required to delete your account"
+    "passwordRequired": "Password is required to delete your account",
+    "orderNumber": "Order number"
   },
   "Shipping": {
     "title": "Shipping & Returns",

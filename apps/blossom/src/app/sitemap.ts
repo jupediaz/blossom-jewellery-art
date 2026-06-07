@@ -46,10 +46,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic product pages
   type SlugResult = { slug: { current: string } }
 
-  const [products, collections] = await Promise.all([
-    getAllProducts(),
-    getAllCollections(),
-  ])
+  let products: SlugResult[] = []
+  let collections: SlugResult[] = []
+  try {
+    ;[products, collections] = await Promise.all([getAllProducts(), getAllCollections()])
+  } catch {
+    // CMS unreachable at build time — sitemap regenerates via ISR at runtime
+  }
   // Blog still on Sanity (not yet migrated); omit until it moves to Payload.
   const blogPosts: SlugResult[] = []
 

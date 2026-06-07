@@ -356,7 +356,9 @@
     "deleteConfirmPrompt": "Introduce tu contraseña para confirmar:",
     "deleteConfirmButton": "Eliminar Mi Cuenta",
     "deleteAccountSuccess": "Cuenta eliminada. ¡Hasta pronto!",
-    "passwordRequired": "Se requiere contraseña para eliminar la cuenta"
+    "passwordRequired": "Se requiere contraseña para eliminar la cuenta",
+    "orderNumber": "Número de pedido",
+    "itemUnavailable": "Esta pieza ya no está disponible"
   },
   "Shipping": {
     "title": "Envío y Devoluciones",

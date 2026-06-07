@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        // Payload media stored in Cloudflare R2 (public bucket)
+        protocol: "https",
+        hostname: "pub-8901f7dc70734521bb212bbabaad0187.r2.dev",
+      },
     ],
   },
   async headers() {

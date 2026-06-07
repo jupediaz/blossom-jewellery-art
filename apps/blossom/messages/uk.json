@@ -356,7 +356,9 @@
     "deleteConfirmPrompt": "Введіть пароль для підтвердження:",
     "deleteConfirmButton": "Видалити мій акаунт",
     "deleteAccountSuccess": "Акаунт видалено. До побачення!",
-    "passwordRequired": "Для видалення акаунта потрібен пароль"
+    "passwordRequired": "Для видалення акаунта потрібен пароль",
+    "orderNumber": "Номер замовлення",
+    "itemUnavailable": "Цей виріб більше недоступний"
   },
   "Shipping": {
     "title": "Доставка та Повернення",
