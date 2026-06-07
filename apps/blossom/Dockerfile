@@ -20,7 +20,10 @@ ENV R2_ACCOUNT_ID=placeholder
 ENV R2_ACCESS_KEY_ID=placeholder
 ENV R2_SECRET_ACCESS_KEY=placeholder
 WORKDIR /app/apps/blossom
-RUN npx prisma generate
+# Use --no-install so npx runs the lockfile-pinned prisma from the workspace
+# node_modules. Without it, npx fetches a fresh isolated prisma copy that fails
+# to resolve `prisma/config` when loading prisma.config.ts (breaks every rebuild).
+RUN npx --no-install prisma generate
 RUN npm run build
 
 # One-shot migration image: reuses the builder (has prisma CLI, schema,
@@ -28,7 +31,7 @@ RUN npm run build
 FROM builder AS migrator
 WORKDIR /app/apps/blossom
 ENV NODE_ENV=production
-CMD ["npx", "prisma", "migrate", "deploy"]
+CMD ["npx", "--no-install", "prisma", "migrate", "deploy"]
 
 FROM node:22-alpine AS runner
 WORKDIR /app
