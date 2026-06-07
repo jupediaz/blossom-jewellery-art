@@ -21,7 +21,7 @@ const locales: { code: Locale; label: string; flag: React.ReactNode }[] = [
   },
   {
     code: 'es',
-    label: 'Espanol',
+    label: 'Español',
     flag: (
       <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
         <rect width="24" height="4" fill="#AA151B" />
@@ -37,6 +37,50 @@ const locales: { code: Locale; label: string; flag: React.ReactNode }[] = [
       <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
         <rect width="24" height="8" fill="#005BBB" />
         <rect width="24" height="8" y="8" fill="#FFD500" />
+      </svg>
+    ),
+  },
+  {
+    code: 'ru',
+    label: 'Русский',
+    flag: (
+      <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
+        <rect width="24" height="16" fill="#fff" />
+        <rect width="24" height="5.34" y="5.33" fill="#0039A6" />
+        <rect width="24" height="5.33" y="10.67" fill="#D52B1E" />
+      </svg>
+    ),
+  },
+  {
+    code: 'fr',
+    label: 'Français',
+    flag: (
+      <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
+        <rect width="24" height="16" fill="#fff" />
+        <rect width="8" height="16" fill="#0055A4" />
+        <rect width="8" height="16" x="16" fill="#EF4135" />
+      </svg>
+    ),
+  },
+  {
+    code: 'de',
+    label: 'Deutsch',
+    flag: (
+      <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
+        <rect width="24" height="5.34" fill="#000" />
+        <rect width="24" height="5.33" y="5.33" fill="#DD0000" />
+        <rect width="24" height="5.34" y="10.67" fill="#FFCE00" />
+      </svg>
+    ),
+  },
+  {
+    code: 'it',
+    label: 'Italiano',
+    flag: (
+      <svg viewBox="0 0 24 16" className="h-3.5 w-5 rounded-sm" aria-hidden="true">
+        <rect width="24" height="16" fill="#fff" />
+        <rect width="8" height="16" fill="#009246" />
+        <rect width="8" height="16" x="16" fill="#CE2B37" />
       </svg>
     ),
   },
