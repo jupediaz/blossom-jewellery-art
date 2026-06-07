@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from '@/i18n/navigation';
 import Image from "next/image";
-import { sanityFetch, urlFor } from "@/lib/sanity/client";
-import { allCollectionsQuery } from "@/lib/sanity/queries";
+import { getAllCollections } from "@/lib/cms/queries";
 import type { Collection } from "@/lib/types";
 import { mockCollections } from "@/lib/mock-data";
 import { getTranslations } from "next-intl/server";
@@ -34,7 +33,7 @@ export default async function CollectionsPage() {
   let collections: Collection[] = mockCollections;
 
   try {
-    const sanityCollections = await sanityFetch<Collection[]>(allCollectionsQuery);
+    const sanityCollections = await getAllCollections();
     if (sanityCollections.length > 0) {
       collections = sanityCollections;
     }
@@ -76,7 +75,7 @@ export default async function CollectionsPage() {
               className="group relative aspect-[4/5] overflow-hidden rounded-lg bg-cream-dark"
             >
               <Image
-                src={collection.image ? urlFor(collection.image).width(800).url() : collectionImages[collection.slug.current] || fallbackImages[idx % fallbackImages.length]}
+                src={collection.image?.url || collectionImages[collection.slug.current] || fallbackImages[idx % fallbackImages.length]}
                 alt={collection.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"

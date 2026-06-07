@@ -2,8 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ExternalLink, Package, Layers } from 'lucide-react'
-import { sanityFetch } from '@/lib/sanity/client'
-import { collectionBySlugQuery } from '@/lib/sanity/queries'
+import { getCollectionBySlug } from '@/lib/cms/queries'
 import { db } from '@/lib/db'
 import type { Collection } from '@/lib/types'
 
@@ -14,7 +13,7 @@ interface Props {
 export default async function AdminCollectionDetailPage({ params }: Props) {
   const { slug } = await params
 
-  const collection = await sanityFetch<Collection | null>(collectionBySlugQuery, { slug })
+  const collection = await getCollectionBySlug(slug)
 
   if (!collection) {
     notFound()
@@ -33,15 +32,7 @@ export default async function AdminCollectionDetailPage({ params }: Props) {
 
   const inventoryMap = new Map(inventoryRecords.map((inv) => [inv.sanityProductId, inv]))
 
-  // Build cover image URL from Sanity image reference
-  const buildSanityUrl = (ref: string) =>
-    `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? ''}/${
-      process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production'
-    }/${ref.replace('image-', '').replace(/-([a-z]+)$/, '.$1')}`
-
-  const coverUrl = collection.image?.asset?._ref
-    ? buildSanityUrl(collection.image.asset._ref)
-    : null
+  const coverUrl = collection.image?.url ?? null
 
   return (
     <div className="space-y-6">

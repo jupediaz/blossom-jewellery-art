@@ -1,8 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Layers, ExternalLink, Pencil } from 'lucide-react'
-import { sanityFetch } from '@/lib/sanity/client'
-import { allCollectionsQuery } from '@/lib/sanity/queries'
+import { getAllCollections } from '@/lib/cms/queries'
 import { EmptyState } from '@/components/admin/EmptyState'
 import type { Collection } from '@/lib/types'
 
@@ -36,7 +35,7 @@ function truncate(text: string, max: number): string {
 }
 
 export default async function AdminCollectionsPage() {
-  const fetched = await sanityFetch<Collection[]>(allCollectionsQuery)
+  const fetched = await getAllCollections()
   const collections = fetched && fetched.length > 0 ? fetched : mockCollections
   const isMock = !fetched || fetched.length === 0
 
@@ -84,16 +83,7 @@ export default async function AdminCollectionsPage() {
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {collections.map((collection) => {
-            const imageUrl =
-              collection.image?.asset?._ref
-                ? `https://cdn.sanity.io/images/${
-                    process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? ''
-                  }/${
-                    process.env.NEXT_PUBLIC_SANITY_DATASET ?? 'production'
-                  }/${collection.image.asset._ref
-                    .replace('image-', '')
-                    .replace(/-([a-z]+)$/, '.$1')}`
-                : null
+            const imageUrl = collection.image?.url ?? null
 
             const href = isMock
               ? '#'

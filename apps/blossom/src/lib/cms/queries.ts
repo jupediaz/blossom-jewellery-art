@@ -1,4 +1,5 @@
 import { getPayloadClient } from './payload'
+import type { Product, Category, Collection, CmsMedia } from '@/lib/types'
 
 // Commerce data access backed by Payload, returning the SAME shape the storefront
 // expected from the former Sanity GROQ queries (slug as { current }, imageUrl
@@ -15,13 +16,13 @@ function firstImageUrl(images: unknown): string | undefined {
   return first?.url ?? undefined
 }
 
-function mapRef(rel: unknown) {
+function mapRef(rel: unknown): Product['category'] {
   if (!rel || typeof rel !== 'object') return undefined
   const r = rel as { id: number | string; name?: string; slug?: string }
-  return { _id: String(r.id), name: r.name, slug: { current: r.slug } }
+  return { _id: String(r.id), name: r.name ?? '', slug: { current: r.slug ?? '' } }
 }
 
-function mapProductCard(p: AnyDoc) {
+function mapProductCard(p: AnyDoc): Product {
   return {
     _id: String(p.id),
     _createdAt: p.createdAt as string,
@@ -29,7 +30,7 @@ function mapProductCard(p: AnyDoc) {
     slug: { current: p.slug as string },
     price: p.price as number,
     compareAtPrice: (p.compareAtPrice as number | null) ?? undefined,
-    images: p.images,
+    images: ((p.images as CmsMedia[]) ?? []).filter((m) => m && typeof m === 'object'),
     imageUrl: firstImageUrl(p.images),
     category: mapRef(p.category),
     collection: mapRef(p.collection),
@@ -38,11 +39,18 @@ function mapProductCard(p: AnyDoc) {
   }
 }
 
-function mapProductDetail(p: AnyDoc) {
+function mapProductDetail(p: AnyDoc): Product {
+  const materials = Array.isArray(p.materials)
+    ? (p.materials as { value?: string }[]).map((m) => m.value).filter((v): v is string => !!v)
+    : undefined
   return {
     ...mapProductCard(p),
     description: p.description, // Lexical richtext (rendered by RichText component)
-    seo: p.seo,
+    materials,
+    dimensions: p.dimensions as string | undefined,
+    careInstructions: p.careInstructions as string | undefined,
+    variants: p.variants as { name: string; priceModifier?: number; inStock: boolean }[] | undefined,
+    seo: p.seo as Product['seo'],
   }
 }
 
@@ -104,14 +112,14 @@ export async function getProductsByCategory(categorySlug: string, locale: Locale
 export async function getAllCategories(locale: Locale = 'en') {
   const payload = await getPayloadClient()
   const res = await payload.find({ collection: 'categories', locale, depth: 1, limit: 1000, sort: 'name' })
-  return res.docs.map((c) => {
+  return res.docs.map((c): Category => {
     const d = c as AnyDoc
     return {
       _id: String(d.id),
       name: d.name as string,
       slug: { current: d.slug as string },
       description: d.description as string | undefined,
-      image: d.image,
+      image: (d.image as CmsMedia) ?? undefined,
     }
   })
 }
@@ -121,14 +129,14 @@ export async function getAllCollections(locale: Locale = 'en') {
   const res = await payload.find({ collection: 'collections', locale, depth: 1, limit: 1000, sort: 'name' })
   const collections = res.docs as AnyDoc[]
   return Promise.all(
-    collections.map(async (d) => {
+    collections.map(async (d): Promise<Collection> => {
       const count = await payload.count({ collection: 'products', where: { collection: { equals: d.id } } })
       return {
         _id: String(d.id),
         name: d.name as string,
         slug: { current: d.slug as string },
         description: d.description as string | undefined,
-        image: d.image,
+        image: (d.image as CmsMedia) ?? undefined,
         productCount: count.totalDocs,
       }
     }),
@@ -144,14 +152,15 @@ export async function getCollectionBySlug(slug: string, locale: Locale = 'en') {
     collection: 'products', locale, depth: 1, limit: 1000,
     where: { collection: { equals: d.id } },
   })
-  return {
+  const result: Collection = {
     _id: String(d.id),
     name: d.name as string,
     slug: { current: d.slug as string },
     description: d.description as string | undefined,
-    image: d.image,
+    image: (d.image as CmsMedia) ?? undefined,
     products: products.docs.map((p) => mapProductCard(p as AnyDoc)),
   }
+  return result
 }
 
 export async function searchProducts(query: string, locale: Locale = 'en') {

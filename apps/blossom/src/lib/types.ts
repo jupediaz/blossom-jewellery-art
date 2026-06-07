@@ -12,15 +12,26 @@ export interface SanityImage {
   };
 }
 
+// Payload media (R2-backed upload). Replaces SanityImage for products/catalog.
+export interface CmsMedia {
+  id?: string | number;
+  url?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  thumbnailURL?: string;
+  sizes?: Record<string, { url?: string; width?: number; height?: number }>;
+}
+
 export interface Product {
   _id: string;
   _createdAt?: string;
   name: string;
   slug: { current: string };
-  description?: unknown[];
+  description?: unknown;
   price: number;
   compareAtPrice?: number;
-  images: SanityImage[];
+  images: CmsMedia[];
   category?: {
     _id: string;
     name: string;
@@ -54,7 +65,7 @@ export interface Category {
   name: string;
   slug: { current: string };
   description?: string;
-  image?: SanityImage;
+  image?: CmsMedia;
 }
 
 export interface Collection {
@@ -62,7 +73,7 @@ export interface Collection {
   name: string;
   slug: { current: string };
   description?: string;
-  image?: SanityImage;
+  image?: CmsMedia;
   productCount?: number;
   products?: Product[];
 }

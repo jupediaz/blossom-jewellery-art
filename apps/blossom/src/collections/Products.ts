@@ -34,6 +34,18 @@ export const Products: CollectionConfig = {
     { name: 'category', type: 'relationship', relationTo: 'categories' },
     { name: 'inStock', type: 'checkbox', defaultValue: true },
     { name: 'featured', type: 'checkbox', defaultValue: false, admin: { description: 'Show on homepage.' } },
+    { name: 'materials', type: 'array', fields: [{ name: 'value', type: 'text' }] },
+    { name: 'dimensions', type: 'text', localized: true },
+    { name: 'careInstructions', type: 'textarea', localized: true },
+    {
+      name: 'variants',
+      type: 'array',
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'priceModifier', type: 'number' },
+        { name: 'inStock', type: 'checkbox', defaultValue: true },
+      ],
+    },
     {
       name: 'seo',
       type: 'group',

@@ -6,9 +6,9 @@ import { Link } from "@/i18n/navigation";
 import { ShoppingBag, ChevronLeft, ChevronRight, Minus, Plus, Lock, Ruler, Share2, Check } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { formatPrice, cn } from "@/lib/utils";
-import { urlFor } from "@/lib/sanity/client";
 import { useTranslations } from "next-intl";
-import { PortableText } from "@portabletext/react";
+import { RichText } from "@payloadcms/richtext-lexical/react";
+import type { SerializedEditorState } from "@payloadcms/richtext-lexical/lexical";
 import { WishlistButton } from "./WishlistButton";
 import { useToast } from "@/components/Toast";
 import type { Product } from "@/lib/types";
@@ -59,7 +59,7 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
 
   const handleAddToCart = () => {
     const imageUrl = hasSanityImages
-      ? urlFor(sanityImages[0]).width(200).url()
+      ? sanityImages[0]?.url || product.imageUrl || ""
       : product.imageUrl || "";
     addItem(
       {
@@ -97,7 +97,7 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
           {hasSanityImages ? (
             <>
               <Image
-                src={urlFor(sanityImages[selectedImage]).width(800).url()}
+                src={sanityImages[selectedImage]?.url || ""}
                 alt={sanityImages[selectedImage].alt || product.name}
                 fill
                 className="object-cover"
@@ -161,7 +161,7 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
                 )}
               >
                 <Image
-                  src={urlFor(img).width(100).url()}
+                  src={img?.url || ""}
                   alt={img.alt || `${product.name} thumbnail ${i + 1}`}
                   fill
                   className="object-cover"
@@ -338,11 +338,10 @@ export function ProductDetail({ product, maxQuantity = 10 }: ProductDetailProps)
           </div>
         </div>
 
-        {/* Description — PortableText (Sanity) or plain string fallback */}
-        {product.description && Array.isArray(product.description) && product.description.length > 0 && (
+        {/* Description — Payload Lexical rich text */}
+        {product.description != null && (
           <div className="prose prose-sm text-warm-gray mb-6 leading-relaxed">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            <PortableText value={product.description as any} />
+            <RichText data={product.description as SerializedEditorState} />
           </div>
         )}
 
