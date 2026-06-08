@@ -25,3 +25,10 @@ test-results/
 screenshots/
 .playwright-mcp/
 *.png
+
+# The global ~/.gitignore_global has `*password*` (security rule) which silently
+# excludes legit source code under password-named routes. Re-include source so
+# the password-recovery flow (incl. admin reset) is tracked.
+!**/*password*/
+!**/*password*/**
+!**/src/**/*password*
