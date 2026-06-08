@@ -1,5 +1,6 @@
 import { db } from '@/lib/db'
 import { ModelProfileEditor } from '@/components/admin/ai-studio/ModelProfileEditor'
+import { imageStorage } from '@/lib/ai/storage'
 import type { BrandModelProfileData, ReferenceImage } from '@/lib/ai/types'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -14,10 +15,12 @@ export default async function ModelProfilePage() {
     })
 
     if (dbProfile) {
+      const refs = dbProfile.referenceImages as unknown as ReferenceImage[]
       profile = {
         id: dbProfile.id,
         name: dbProfile.name,
-        referenceImages: dbProfile.referenceImages as unknown as ReferenceImage[],
+        // Resolve the public URL for preview (R2 or local) without persisting it.
+        referenceImages: refs.map((img) => ({ ...img, url: imageStorage.getUrl(img.path) })),
         isActive: dbProfile.isActive,
         notes: dbProfile.notes,
       }

@@ -2,17 +2,24 @@
 
 export type ImageMode = 'SCENE' | 'ENHANCE' | 'COMPOSE'
 export type GenerationStatusType = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
-export type GeminiModel = 'gemini-2.5-flash' | 'gemini-2.5-pro'
+export type GeminiModel = 'gemini-2.5-flash-image' | 'gemini-2.5-flash' | 'gemini-2.5-pro'
 
+// NOTE: Only `gemini-2.5-flash-image` ("Nano Banana") returns image bytes via
+// generateContent. The plain `gemini-2.5-flash`/`pro` models are text-only and
+// make image generation fail with "Gemini did not return an image". Both slots
+// point to the image model (matches oreaster) so every default and the model
+// selector resolve to a model that can actually produce images.
 export const GEMINI_MODELS = {
-  FLASH: 'gemini-2.5-flash' as const,
-  PRO: 'gemini-2.5-pro' as const,
+  FLASH: 'gemini-2.5-flash-image' as const,
+  PRO: 'gemini-2.5-flash-image' as const,
 }
 
 export interface ReferenceImage {
   path: string
   type: 'person' | 'object' | 'style' | 'pose'
   filename: string
+  /** Public URL for preview only (resolved from storage, not persisted). */
+  url?: string
 }
 
 export interface BrandModelProfileData {

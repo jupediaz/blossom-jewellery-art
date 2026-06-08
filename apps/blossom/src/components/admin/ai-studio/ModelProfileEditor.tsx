@@ -56,6 +56,7 @@ export function ModelProfileEditor({ initialProfile }: ModelProfileEditorProps) 
             path: data.path,
             type: 'person' as const,
             filename: `${slotKey}-${data.filename}`,
+            url: data.url,
           },
         }))
       } catch (err) {
@@ -69,7 +70,10 @@ export function ModelProfileEditor({ initialProfile }: ModelProfileEditorProps) 
     setSaving(true)
     setMessage('')
 
-    const referenceImages = Object.values(photos).filter(Boolean) as ReferenceImage[]
+    const referenceImages = (Object.values(photos).filter(Boolean) as ReferenceImage[]).map(
+      // Drop the preview-only url so it is never persisted.
+      ({ url: _url, ...ref }) => ref
+    )
 
     try {
       const res = await fetch('/api/ai/model-profile', {
@@ -132,7 +136,7 @@ export function ModelProfileEditor({ initialProfile }: ModelProfileEditorProps) 
                     onClear={() =>
                       setPhotos((prev) => ({ ...prev, [slot.key]: null }))
                     }
-                    preview={photo ? `/uploads/ai-studio/${photo.path}` : null}
+                    preview={photo?.url ?? (photo ? `/uploads/ai-studio/${photo.path}` : null)}
                     compact
                     label={slot.label}
                   />
