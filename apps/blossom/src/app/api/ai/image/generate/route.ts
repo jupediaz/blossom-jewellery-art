@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { generateImageWithReferences } from '@/lib/ai/gemini-image'
+import { generateViaFotifai, isFotifaiEnabled } from '@/lib/ai/fotifai'
 import { imageStorage } from '@/lib/ai/storage'
 import { rateLimit } from '@/lib/rate-limit'
 import { GEMINI_MODELS, type GeminiModel, type ReferenceImage } from '@/lib/ai/types'
@@ -87,17 +88,16 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now()
 
   try {
-    // Generate images (run multiple times for numberOfImages > 1)
+    // Generate images (run multiple times for numberOfImages > 1).
+    // When Fotifai is configured, route generation through the central engine
+    // (api.fotifai.com) instead of the embedded Gemini engine — same result shape.
     const allResults = []
     const iterations = Math.min(numberOfImages, 4)
 
     for (let i = 0; i < iterations; i++) {
-      const results = await generateImageWithReferences({
-        prompt,
-        references,
-        model: geminiModel,
-        aspectRatio,
-      })
+      const results = isFotifaiEnabled()
+        ? await generateViaFotifai({ productImageBase64, prompt, includeModel })
+        : await generateImageWithReferences({ prompt, references, model: geminiModel, aspectRatio })
       allResults.push(...results)
     }
 
