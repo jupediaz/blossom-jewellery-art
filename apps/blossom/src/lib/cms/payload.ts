@@ -1,13 +1,9 @@
-import config from '@payload-config'
+import configPromise from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 
-// Cached Payload local-API client. getPayload memoizes internally, but we also
-// pin it on globalThis to survive dev HMR.
-const globalForPayload = globalThis as unknown as { _payload?: Promise<Payload> }
-
+// Canonical Payload 3 local-API access for Next. getPayload memoizes the
+// instance internally by config, so this shares the same Payload instance the
+// @payloadcms/next route handlers use (no second init, no connection storm).
 export function getPayloadClient(): Promise<Payload> {
-  if (!globalForPayload._payload) {
-    globalForPayload._payload = getPayload({ config })
-  }
-  return globalForPayload._payload
+  return getPayload({ config: configPromise })
 }
