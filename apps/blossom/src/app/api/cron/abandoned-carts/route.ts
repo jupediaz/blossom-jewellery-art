@@ -11,7 +11,7 @@ function buildUnsubToken(email: string): string {
   return createHmac('sha256', secret).update(email.toLowerCase()).digest('hex')
 }
 
-// This endpoint should be called by a cron job (e.g., Vercel Cron, Railway Cron)
+// This endpoint should be called by a cron job
 // every 15 minutes to check for abandoned carts.
 // Protect with a secret key in production.
 

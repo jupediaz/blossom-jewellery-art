@@ -420,7 +420,7 @@ blossomjewelry.com (GoDaddy, 2013), byblossom.com (DropCatch, Nov 2025), byolha.
 | Hosting | Vercel (free tier) | 0€ |
 | Pagos | Stripe (EU: 1.5% + 0.25€) | Variable |
 | CMS/Contenido | Sanity (free tier) o MDX | 0€ |
-| Base de datos | Neon PostgreSQL (free tier) | 0€ |
+| Base de datos | PostgreSQL self-hosted | 0€ |
 | Email transaccional | Resend (free tier 100/día) | 0€ |
 | Dominio | Via Spaceship | ~15€/año |
 | **Total fijo anual** | | **~15€** |

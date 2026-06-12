@@ -159,7 +159,7 @@ const roadmapItems = [
     Priority: sel('Critical'),
     'Start Date': date('2026-04-25'),
     'End Date': date('2026-05-01'),
-    Notes: text('Buy domain blossomjewellery.art, configure DNS, deploy on Railway, verify email (SPF/DKIM/DMARC), enable SSL, full store test.'),
+    Notes: text('Buy domain blossomjewellery.art, configure DNS, deploy on the EPYC server, verify email (SPF/DKIM/DMARC), enable SSL, full store test.'),
   },
 
   // PHASE 4 — Launch
@@ -331,7 +331,7 @@ const tasks = [
     Phase: sel('Phase 3 — Pre-launch'),
     Priority: sel('Critical'),
     'Due Date': date('2026-05-01'),
-    Notes: text('1. Buy domain blossomjewellery.art\n2. Configure DNS\n3. Deploy on Railway with production env vars\n4. Verify email (SPF, DKIM, DMARC)\n5. Enable SSL\n6. Full store end-to-end test'),
+    Notes: text('1. Buy domain blossomjewellery.art\n2. Configure DNS\n3. Deploy on the EPYC server with production env vars\n4. Verify email (SPF, DKIM, DMARC)\n5. Enable SSL\n6. Full store end-to-end test'),
   },
 
   // OLA — PHASE 3
@@ -386,7 +386,7 @@ const decisions = [
     Area: sel('Tech'),
     'Made By': sel('José'),
     Date: date('2026-02-12'),
-    Rationale: text('Shopify charges 2-3% per sale + €29-79/month plan. Custom Next.js costs only hosting (~€20/month on Railway). More control, lower long-term cost.'),
+    Rationale: text('Shopify charges 2-3% per sale + €29-79/month plan. Custom Next.js costs only hosting on the self-hosted server. More control, lower long-term cost.'),
   },
   {
     Decision: title('Retail pricing: 3-5x production cost'),

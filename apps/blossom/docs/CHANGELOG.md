@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gemini models updated to gemini-2.5-flash and gemini-2.5-pro (previous model names deprecated)
   - Dependencies: sharp (image processing), piexifjs (EXIF preservation), @aws-sdk/client-s3 (R2)
 - **Health Check Endpoint** (/api/health) — status, uptime, database connectivity check
-- **Railway Deployment Config** (railway.toml) — standalone output, health check, restart policy
+- **Deployment Config** — standalone output, health check, restart policy
 - **Admin Error Pages** — error.tsx with Sentry capture, not-found.tsx with back-to-dashboard
 - **Playwright Test Suite** — 15 smoke tests, 4 browser targets (Chromium, Firefox, WebKit, Mobile Chrome)
 - **Sentry Error Tracking**
@@ -84,7 +84,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Notion API client for project management integration (roadmap, tasks, products)
   - Admin/PM seed script with 5 shipping zones and 10 shipping methods
   - Node.js upgraded to v20.19.0 (Prisma 7 requirement)
-  - Neon PostgreSQL database created (project: delicate-thunder-60781733, region: aws-eu-central-1)
+  - PostgreSQL database created
   - Database migrated and seeded (admin user, product manager, 5 shipping zones, 10 methods)
 - **Admin Panel - Core (Phase 1)**
   - Admin layout shell with responsive sidebar navigation (10 sections)

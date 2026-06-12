@@ -311,7 +311,7 @@ Features:
 - [x] Create admin seed script (admin + product manager users, shipping zones/methods)
 - [x] Update .env.example with all new environment variables
 - [x] TypeScript compiles clean (zero errors)
-- [x] Set up Neon PostgreSQL database (project: delicate-thunder-60781733)
+- [x] Set up PostgreSQL database
 - [x] Run initial Prisma migration (20260220081643_init)
 - [x] Seed database (admin/PM users, 5 shipping zones, 10 methods)
 - [ ] Verify admin login works end-to-end
@@ -720,7 +720,7 @@ Features:
 
 - [x] Fix build errors — next/dynamic ssr:false in server components (AnalyticsCharts, AIDescriptionGenerator)
 - [x] Health check endpoint (/api/health — status, uptime, DB connectivity)
-- [x] Railway deployment config (railway.toml with standalone output, health check, restart policy)
+- [x] Deployment config (standalone output, health check, restart policy)
 - [x] Standalone output mode (next.config.ts output: "standalone" for minimal deploy bundle)
 - [x] Admin error page (src/app/admin/error.tsx with Sentry capture)
 - [x] Admin not-found page (src/app/admin/not-found.tsx)
@@ -737,7 +737,6 @@ Features:
 - `src/app/admin/not-found.tsx` - Admin 404 page
 - `src/app/admin/analytics/AnalyticsChartsLoader.tsx` - Client wrapper for dynamic import
 - `src/app/admin/products/AIDescriptionGeneratorLoader.tsx` - Client wrapper for dynamic import
-- `railway.toml` - Railway deployment configuration
 - `playwright.config.ts` - Playwright test configuration
 - `tests/smoke.spec.ts` - 15 smoke tests
 
@@ -754,7 +753,7 @@ Features:
 **Priority:** Critical
 
 - [ ] Domain DNS configuration
-- [ ] Railway production deployment
+- [ ] Production deployment
 - [ ] Stripe live mode
 - [ ] Email domain verification (SPF, DKIM, DMARC)
 - [x] Sentry error tracking configured
@@ -765,7 +764,7 @@ Features:
 - [x] Open Graph / Twitter Cards configured
 - [x] Performance optimizations (dynamic imports, image sizes, standalone output)
 - [x] Health check endpoint
-- [x] Railway deployment config
+- [x] Deployment config
 - [x] Cross-browser testing (60/60 Playwright tests pass)
 - [x] Production build passes clean (zero errors)
 - [ ] Final QA with Olha
@@ -839,9 +838,9 @@ UPDATE "User" SET email = 'olha@blossombyolha.com' WHERE email = 'olha@blossomje
 #### BLOCK-003: Stripe in Test Mode — No Live Payments
 **Status:** 🚨 OPEN
 **Priority:** CRITICAL
-**Detail:** Stripe keys in `.env.local` and Railway are test keys (`sk_test_*`). No real money can be collected.
+**Detail:** Stripe keys in `.env.local` and the production environment are test keys (`sk_test_*`). No real money can be collected.
 **Action:**
-1. Switch to live Stripe keys in Railway environment variables
+1. Switch to live Stripe keys in the production environment variables
 2. Configure Stripe webhook in dashboard with `https://www.blossombyolha.com/api/webhook`
 3. Set `STRIPE_WEBHOOK_SECRET` with the live webhook signing secret
 4. Test with a real card in live mode before publicizing
@@ -850,7 +849,7 @@ UPDATE "User" SET email = 'olha@blossombyolha.com' WHERE email = 'olha@blossomje
 **Status:** 🚨 OPEN
 **Priority:** CRITICAL
 **Detail:** Server logs show `[env] Missing STRIPE_WEBHOOK_SECRET — using fallback`. Without a valid webhook secret, Stripe payment confirmations won't be processed: no orders created in DB, no inventory decremented, no confirmation emails sent.
-**Action:** Set `STRIPE_WEBHOOK_SECRET` in `.env.local` and Railway to the webhook signing secret from Stripe dashboard.
+**Action:** Set `STRIPE_WEBHOOK_SECRET` in `.env.local` and the production environment to the webhook signing secret from Stripe dashboard.
 
 #### BLOCK-005: Admin Password Is Default 'changeme-in-production'
 **Status:** 🚨 OPEN
@@ -957,7 +956,7 @@ UPDATE "User" SET "passwordHash" = '<bcrypt_hash>' WHERE role IN ('ADMIN', 'STOR
 #### TECH-002: Rate Limiting Uses In-Memory Store
 **Status:** 🟡 OPEN
 **Priority:** MEDIUM
-**Detail:** `src/lib/rate-limit.ts` uses an in-memory Map. On Railway with multiple instances, each instance has its own counter — limits won't be enforced across the cluster.
+**Detail:** `src/lib/rate-limit.ts` uses an in-memory Map. With multiple instances, each instance has its own counter — limits won't be enforced across the cluster.
 **Action:** Replace with Redis-based rate limiting (Upstash is free tier compatible) before scaling.
 
 #### TECH-003: Cart Save API Should Gracefully Degrade
@@ -976,7 +975,7 @@ UPDATE "User" SET "passwordHash" = '<bcrypt_hash>' WHERE role IN ('ADMIN', 'STOR
 **Status:** 🟡 OPEN
 **Priority:** LOW
 **Detail:** Console shows `Failed to decode downloaded font: OTS parsing error: invalid sfntVersion`. This is a network/sandbox issue in the test environment, but should be verified in production. Could indicate font loading issues with subsets.
-**Action:** Verify fonts load correctly in production deployment on Railway.
+**Action:** Verify fonts load correctly in production deployment.
 
 #### TECH-006: Sanity Webhook Route Needs Secret Verification
 **Status:** 🟡 OPEN
@@ -991,8 +990,8 @@ UPDATE "User" SET "passwordHash" = '<bcrypt_hash>' WHERE role IN ('ADMIN', 'STOR
 **Pre-launch Must-Haves:**
 - [ ] BLOCK-001: Populate Sanity CMS with all 16 products + 9 collection covers
 - [ ] BLOCK-002: Update admin/Olha user emails to @blossombyolha.com domain
-- [ ] BLOCK-003: Switch to Stripe live keys in Railway
-- [ ] BLOCK-004: Set STRIPE_WEBHOOK_SECRET in Railway + configure webhook in Stripe dashboard
+- [ ] BLOCK-003: Switch to Stripe live keys in the production environment
+- [ ] BLOCK-004: Set STRIPE_WEBHOOK_SECRET in the production environment + configure webhook in Stripe dashboard
 - [ ] BLOCK-005: Change admin password from 'changeme-in-production' to a strong password
 - [ ] BLOCK-006: Add collection cover images
 - [ ] UX-001: Add quantity selector to product detail
@@ -1040,7 +1039,7 @@ Features:
 - Status: analyzed (score: 82/100)
 - All 10 sections populated with content from research docs
 - Accessible at: hub.codelabs.studio (Ideas section)
-- Method: Direct database insert via psql to Neon PostgreSQL
+- Method: Direct database insert via psql to PostgreSQL
 
 ---
 
@@ -1115,4 +1114,4 @@ Features:
 - [x] StockMovement.inventory: added onDelete: Cascade
 - [x] Order.coupon: added onDelete: SetNull (preserve orders on coupon deletion)
 - [x] Order.shippingMethod: added onDelete: SetNull (preserve orders on method deletion)
-- [x] Applied via prisma db push (Neon PostgreSQL)
+- [x] Applied via prisma db push (PostgreSQL)
