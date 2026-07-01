@@ -7,7 +7,6 @@
 # and zero-downtime swaps replace the running instance instead of spawning a
 # parallel project. Mirrors apps/blossom/docker-compose.prod.yml (used for
 # manual deploys) but with root-relative paths.
-name: blossom
 services:
   app:
     build:
