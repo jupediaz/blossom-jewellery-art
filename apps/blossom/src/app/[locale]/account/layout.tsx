@@ -15,7 +15,7 @@ export default async function AccountLayout({
 
   if (!session?.user) {
     const locale = await getLocale()
-    redirect(`/${locale}/account/login`)
+    redirect(`/${locale}/login`)
   }
 
   const [t, wishlistCount, activeReturns] = await Promise.all([
