@@ -2,16 +2,16 @@
 
 export type ImageMode = 'SCENE' | 'ENHANCE' | 'COMPOSE'
 export type GenerationStatusType = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
-export type GeminiModel = 'gemini-3-pro-image-preview' | 'gemini-2.5-flash-image'
+export type GeminiModel = 'gemini-3-pro-image-preview' | 'gemini-3.1-flash-image-preview'
 
 // Only image-capable models here — plain gemini-2.5-flash/pro are text-only and
 // fail with "Gemini did not return an image".
 //  - PRO  = gemini-3-pro-image-preview ("Nano Banana Pro"): best identity/jewelry
 //    fidelity, default for on-model generation (SceneMode/ComposeMode).
-//  - FLASH = gemini-2.5-flash-image: faster/cheaper, used for quick product
+//  - FLASH = gemini-3.1-flash-image-preview: faster/cheaper, used for quick product
 //    enhancement (EnhanceMode) where character identity matters less.
 export const GEMINI_MODELS = {
-  FLASH: 'gemini-2.5-flash-image' as const,
+  FLASH: 'gemini-3.1-flash-image-preview' as const,
   PRO: 'gemini-3-pro-image-preview' as const,
 }
 

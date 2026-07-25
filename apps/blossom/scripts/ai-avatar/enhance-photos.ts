@@ -46,7 +46,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 // Models (NanoBanana family)
 const MODELS = {
   pro: "gemini-3-pro-image-preview", // Highest quality, slower
-  flash: "gemini-2.5-flash-image", // Fast, good quality
+  flash: "gemini-3.1-flash-image-preview", // Fast, good quality
 } as const;
 
 type ModelKey = keyof typeof MODELS;

@@ -99,7 +99,7 @@ async function main() {
   const jewelryB64 = readFileSync(JEWELRY_CROP).toString('base64')
   const parts = buildParts(personB64, jewelryB64)
 
-  const models = ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview']
+  const models = ['gemini-3.1-flash-image-preview', 'gemini-3-pro-image-preview']
   for (const m of models) {
     process.stdout.write(`\nGenerating with ${m} ... `)
     try {
