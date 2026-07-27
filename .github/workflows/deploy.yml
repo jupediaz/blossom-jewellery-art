@@ -20,20 +20,31 @@ jobs:
     runs-on: [self-hosted, linux, x64, xeon]
     env:
       DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
-      GH_TOKEN: ${{ github.token }}
+      FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
     steps:
       - name: Deploy blossom to Xeon
         run: |
           set -euo pipefail
           cd "$DEPLOY_DIR"
-          git remote set-url origin https://github.com/${{ github.repository }}.git
-          AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
+          # Forgejo is the source of truth for what gets deployed; GitHub only
+          # triggers this workflow. Whoever pushes to main is expected to push
+          # to both remotes.
+          git remote set-url origin "http://100.126.7.116:3300/jose/blossom-jewellery-art.git"
+          AUTH_HEADER="AUTHORIZATION: basic $(printf 'jose:%s' "$FORGEJO_TOKEN" | base64 | tr -d '\n')"
           git -c http.extraheader="$AUTH_HEADER" fetch origin +refs/heads/main:refs/remotes/origin/main
           git reset --hard refs/remotes/origin/main
-          EXPECTED="${{ github.sha }}"
-          ACTUAL=$(git rev-parse HEAD)
-          if [ "$ACTUAL" != "$EXPECTED" ]; then
-            echo "::error::Commit drift: expected $EXPECTED got $ACTUAL"
+
+          # Deploy whatever is actually HEAD of Forgejo's main right now, not
+          # whatever commit happened to trigger this run. cancel-in-progress:
+          # false means deploys queue up; by the time an older queued run
+          # reaches this line, a later push may already have moved main past
+          # its own trigger SHA. Only fail if the trigger commit isn't even in
+          # this history (real drift: history rewritten, wrong remote, or
+          # Forgejo hasn't received the corresponding push yet).
+          TRIGGER_SHA="${{ github.sha }}"
+          EXPECTED=$(git rev-parse HEAD)
+          if ! git merge-base --is-ancestor "$TRIGGER_SHA" "$EXPECTED"; then
+            echo "::error::Forgejo main does not contain $TRIGGER_SHA (the commit that triggered this run). Push it to Forgejo too, or history was rewritten."
             exit 1
           fi
           docker compose -f apps/blossom/docker-compose.prod.yml build
