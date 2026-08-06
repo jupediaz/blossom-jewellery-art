@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, x64, xeon]
+    runs-on: [self-hosted, linux, x64, epyc]
     env:
       DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
       FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
