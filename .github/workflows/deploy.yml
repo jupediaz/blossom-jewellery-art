@@ -1,4 +1,4 @@
-name: Deploy Blossom to Xeon
+name: Deploy Blossom to EPYC
 
 on:
   push:
@@ -9,7 +9,6 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'turbo.json'
-      - '.github/workflows/deploy.yml'
 
 concurrency:
   group: deploy-blossom-${{ github.repository }}
@@ -22,7 +21,7 @@ jobs:
       DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
       FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
     steps:
-      - name: Deploy blossom to Xeon
+      - name: Deploy blossom to EPYC
         run: |
           set -euo pipefail
           cd "$DEPLOY_DIR"
