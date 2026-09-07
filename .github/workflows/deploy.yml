@@ -46,17 +46,23 @@ jobs:
             echo "::error::Forgejo main does not contain $TRIGGER_SHA (the commit that triggered this run). Push it to Forgejo too, or history was rewritten."
             exit 1
           fi
-          docker compose -f apps/blossom/docker-compose.prod.yml build
+          # Same project name and same compose file that Dokploy and cb-deploy
+          # use. Without -p, compose infers the project from the directory it
+          # runs in, so deploying apps/blossom/docker-compose.prod.yml raised a
+          # second stack called `blossom` that published the identical Traefik
+          # router and split traffic across two containers.
+          COMPOSE="docker compose -p compose-synthesize-cross-platform-panel-c4m29k -f docker-compose.prod.yml"
+          $COMPOSE build
           # Apply pending DB migrations before starting the app. If this fails,
           # set -e aborts the deploy and the app is left untouched.
-          docker compose -f apps/blossom/docker-compose.prod.yml run --rm migrate
-          docker compose -f apps/blossom/docker-compose.prod.yml up -d --no-build app
+          $COMPOSE run --rm migrate
+          $COMPOSE up -d --no-build app
           echo "Checking app container is running..."
           sleep 10
-          FAILED=$(docker compose -f apps/blossom/docker-compose.prod.yml ps --status exited --quiet app | wc -l)
+          FAILED=$($COMPOSE ps --status exited --quiet app | wc -l)
           if [ "$FAILED" -gt 0 ]; then
             echo "ERROR: $FAILED container(s) exited after deploy"
-            docker compose -f apps/blossom/docker-compose.prod.yml logs --tail=50
+            $COMPOSE logs --tail=50
             exit 1
           fi
           echo "Deploy completed successfully"

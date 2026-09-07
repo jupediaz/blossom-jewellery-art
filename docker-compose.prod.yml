@@ -3,10 +3,15 @@
 # left Dokploy's git deploy without a root compose to find. This restores it,
 # pointing at the monorepo Dockerfile so the build context is the repo root.
 #
-# `name: blossom` pins the compose project name so containers stay blossom-app-*
-# and zero-downtime swaps replace the running instance instead of spawning a
-# parallel project. Mirrors apps/blossom/docker-compose.prod.yml (used for
-# manual deploys) but with root-relative paths.
+# There is deliberately no `name:` key here. Dokploy and cb-deploy both invoke
+# compose with `-p <appName>` (compose-synthesize-cross-platform-panel-c4m29k),
+# and the -p flag overrides any `name:` in the file, so writing one would only
+# describe a project that never gets used. Containers are therefore
+# compose-synthesize-cross-platform-panel-c4m29k-app-N, not blossom-app-N.
+# apps/blossom/docker-compose.prod.yml mirrors this file for manual runs from
+# that directory; anything that deploys it must pass the same -p, or Docker
+# infers the project from the directory name (`blossom`) and raises a second,
+# parallel stack behind the very same Traefik router.
 services:
   app:
     build:
