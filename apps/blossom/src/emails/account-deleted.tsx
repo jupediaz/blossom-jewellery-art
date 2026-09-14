@@ -41,9 +41,10 @@ export default function AccountDeleted({ name = 'there' }: AccountDeletedProps) 
   )
 }
 
-const content: React.CSSProperties = { padding: '24px' }
+const content: React.CSSProperties = { color: '#1A1A1A', padding: '24px' }
 
 const heading: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '22px',
   fontWeight: 'normal',
   margin: '0 0 16px',

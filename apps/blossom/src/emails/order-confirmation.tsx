@@ -60,12 +60,12 @@ export default function OrderConfirmation({
           Thank you for your order. We are preparing your handcrafted pieces
           with care.
         </Text>
-        <Text style={orderNum}>Order: {orderNumber}</Text>
+        <Text className="bl-surface" style={orderNum}>Order: {orderNumber}</Text>
       </Section>
 
       <Section style={itemsSection}>
         {items.map((item, i) => (
-          <Row key={i} style={itemRow}>
+          <Row key={i} className="bl-hair" style={itemRow}>
             <Column style={{ width: '48px' }}>
               {item.image ? (
                 <Img
@@ -76,7 +76,7 @@ export default function OrderConfirmation({
                   style={itemImage}
                 />
               ) : (
-                <div style={imagePlaceholder} />
+                <div className="bl-surface" style={imagePlaceholder} />
               )}
             </Column>
             <Column style={itemDetails}>
@@ -95,7 +95,7 @@ export default function OrderConfirmation({
         ))}
       </Section>
 
-      <Section style={totalsSection}>
+      <Section className="bl-rule-strong" style={totalsSection}>
         <Row>
           <Column>
             <Text style={totalLabel}>Subtotal</Text>
@@ -107,10 +107,10 @@ export default function OrderConfirmation({
         {discountAmount > 0 && (
           <Row>
             <Column>
-              <Text style={{ ...totalLabel, color: '#059669' }}>Discount</Text>
+              <Text className="bl-ok" style={{ ...totalLabel, color: '#059669' }}>Discount</Text>
             </Column>
             <Column style={{ textAlign: 'right' as const }}>
-              <Text style={{ ...totalValue, color: '#059669' }}>
+              <Text className="bl-ok" style={{ ...totalValue, color: '#059669' }}>
                 -&euro;{discountAmount.toFixed(2)}
               </Text>
             </Column>
@@ -136,7 +136,7 @@ export default function OrderConfirmation({
         </Row>
       </Section>
 
-      <Section style={addressSection}>
+      <Section className="bl-surface" style={addressSection}>
         <Text style={sectionTitle}>Shipping To</Text>
         <Text style={addressText}>{shippingAddress.name}</Text>
         <Text style={addressText}>{shippingAddress.line1}</Text>
@@ -159,9 +159,10 @@ export default function OrderConfirmation({
   )
 }
 
-const content: React.CSSProperties = { padding: '24px' }
+const content: React.CSSProperties = { color: '#1A1A1A', padding: '24px' }
 
 const heading: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '22px',
   fontWeight: 'normal',
   margin: '0 0 8px',
@@ -175,6 +176,7 @@ const subheading: React.CSSProperties = {
 }
 
 const orderNum: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0',
@@ -184,10 +186,12 @@ const orderNum: React.CSSProperties = {
 }
 
 const itemsSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '0 24px',
 }
 
 const itemRow: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '12px 0',
   borderBottom: '1px solid #f0f0f0',
 }
@@ -198,6 +202,7 @@ const itemImage: React.CSSProperties = {
 }
 
 const imagePlaceholder: React.CSSProperties = {
+  color: '#1A1A1A',
   width: '48px',
   height: '48px',
   backgroundColor: '#f0f0f0',
@@ -205,11 +210,13 @@ const imagePlaceholder: React.CSSProperties = {
 }
 
 const itemDetails: React.CSSProperties = {
+  color: '#1A1A1A',
   paddingLeft: '12px',
   verticalAlign: 'top',
 }
 
 const itemName: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0',
@@ -228,17 +235,20 @@ const itemQty: React.CSSProperties = {
 }
 
 const itemPrice: React.CSSProperties = {
+  color: '#1A1A1A',
   textAlign: 'right' as const,
   verticalAlign: 'top',
 }
 
 const priceText: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0',
 }
 
 const totalsSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '16px 24px',
   borderTop: '2px solid #1a1a1a',
 }
@@ -250,18 +260,21 @@ const totalLabel: React.CSSProperties = {
 }
 
 const totalValue: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '13px',
   margin: '4px 0',
   textAlign: 'right' as const,
 }
 
 const grandTotalLabel: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '8px 0 0',
 }
 
 const grandTotalValue: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '8px 0 0',
@@ -269,6 +282,7 @@ const grandTotalValue: React.CSSProperties = {
 }
 
 const addressSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '16px 24px',
   backgroundColor: '#fafaf9',
 }

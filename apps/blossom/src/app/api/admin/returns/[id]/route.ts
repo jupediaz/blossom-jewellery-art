@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
+import {
+  emailButton,
+  emailHeading,
+  emailNoteBox,
+  emailParagraph,
+  emailShell,
+  esc,
+} from '@/lib/email-shell'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -57,38 +65,20 @@ function buildReturnStatusEmail({
   const msg = statusMessages[status]
   if (!msg) return null
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f9f6f2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f6f2;padding:40px 20px;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
-        <tr>
-          <td style="background:#2c2c2c;padding:28px 40px;text-align:center;">
-            <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;letter-spacing:2px;">BLOSSOM BY OLHA</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:40px;">
-            <h1 style="margin:0 0 16px;font-size:22px;font-weight:400;color:#2c2c2c;">${msg.heading}</h1>
-            <p style="margin:0 0 16px;font-size:15px;color:#666;line-height:1.6;">Order: <strong>${orderNumber}</strong></p>
-            <p style="margin:0 0 24px;font-size:15px;color:#444;line-height:1.7;">${msg.body}</p>
-            ${adminNote ? `<div style="background:#f5f5f5;border-left:3px solid #2c2c2c;padding:12px 16px;margin-bottom:24px;border-radius:4px;"><p style="margin:0;font-size:14px;color:#444;font-style:italic;">${adminNote}</p></div>` : ''}
-            <a href="${baseUrl}/account/returns" style="display:inline-block;background:#2c2c2c;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-size:14px;letter-spacing:0.5px;">View My Returns</a>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:24px 40px;border-top:1px solid #eee;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#aaa;">Questions? Reply to this email or contact us at <a href="mailto:hello@blossombyolha.com" style="color:#2c2c2c;">hello@blossombyolha.com</a></p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
+  const html = emailShell(
+    [
+      emailHeading(msg.heading),
+      emailParagraph(`Order: <strong>${esc(orderNumber)}</strong>`, true),
+      emailParagraph(esc(msg.body)),
+      adminNote ? emailNoteBox(esc(adminNote)) : '',
+      emailButton(`${baseUrl}/account/returns`, 'View My Returns'),
+    ].join('\n'),
+    {
+      preheader: msg.heading,
+      footerHtml:
+        '<p style="margin:0 0 8px;font-size:12px;">Questions? Reply to this email or contact us at <a href="mailto:hello@blossombyolha.com" class="bl-link" style="color:#1A1A1A;">hello@blossombyolha.com</a></p>',
+    },
+  )
 
   return { subject: msg.subject, html }
 }

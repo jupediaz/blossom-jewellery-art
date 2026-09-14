@@ -26,7 +26,7 @@ export default function EmailVerification({
       </Section>
 
       <Section style={ctaSection}>
-        <Button style={button} href={verifyUrl}>
+        <Button className="bl-cta" style={button} href={verifyUrl}>
           Verify Email Address
         </Button>
       </Section>
@@ -46,10 +46,10 @@ export default function EmailVerification({
   )
 }
 
-const content: React.CSSProperties = { padding: '24px' }
-const heading: React.CSSProperties = { fontSize: '22px', fontWeight: 'normal', margin: '0 0 16px' }
+const content: React.CSSProperties = { color: '#1A1A1A', padding: '24px' }
+const heading: React.CSSProperties = { color: '#1A1A1A', fontSize: '22px', fontWeight: 'normal', margin: '0 0 16px' }
 const body: React.CSSProperties = { fontSize: '14px', color: '#333', lineHeight: '1.7', margin: '0 0 12px' }
-const ctaSection: React.CSSProperties = { padding: '0 24px 24px', textAlign: 'center' as const }
+const ctaSection: React.CSSProperties = { color: '#1A1A1A', padding: '0 24px 24px', textAlign: 'center' as const }
 const button: React.CSSProperties = {
   backgroundColor: '#1a1a1a', color: '#ffffff', padding: '12px 32px',
   borderRadius: '8px', fontSize: '14px', fontWeight: 'bold', textDecoration: 'none',

@@ -62,7 +62,7 @@ export default function NewsletterWelcome({ email = "", locale = "en" }: Newslet
       </Section>
 
       <Section style={ctaSection}>
-        <Button style={button} href={`${BASE_URL}/products`}>
+        <Button className="bl-cta" style={button} href={`${BASE_URL}/products`}>
           {t.cta}
         </Button>
       </Section>
@@ -86,9 +86,10 @@ export default function NewsletterWelcome({ email = "", locale = "en" }: Newslet
   );
 }
 
-const content: React.CSSProperties = { padding: "24px" };
+const content: React.CSSProperties = { color: '#1A1A1A', padding: "24px" };
 
 const heading: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: "22px",
   fontWeight: "normal",
   margin: "0 0 16px",
@@ -102,6 +103,7 @@ const body: React.CSSProperties = {
 };
 
 const ctaSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: "0 24px 24px",
   textAlign: "center" as const,
 };

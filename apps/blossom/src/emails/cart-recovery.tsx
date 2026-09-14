@@ -58,9 +58,9 @@ export default function CartRecovery({
       </Section>
 
       {discountCode && (
-        <Section style={discountSection}>
+        <Section className="bl-accent-surface" style={discountSection}>
           <Text style={discountLabel}>Your exclusive discount code</Text>
-          <Text style={discountCodeStyle}>{discountCode}</Text>
+          <Text className="bl-accent" style={discountCodeStyle}>{discountCode}</Text>
           <Text style={discountNote}>10% off your order</Text>
         </Section>
       )}
@@ -68,7 +68,7 @@ export default function CartRecovery({
       <Section style={itemsSection}>
         <Text style={sectionTitle}>Your Cart</Text>
         {items.map((item, i) => (
-          <Row key={i} style={itemRow}>
+          <Row key={i} className="bl-hair" style={itemRow}>
             <Column style={{ width: '56px' }}>
               {item.image ? (
                 <Img
@@ -79,7 +79,7 @@ export default function CartRecovery({
                   style={itemImage}
                 />
               ) : (
-                <div style={imagePlaceholder} />
+                <div className="bl-surface" style={imagePlaceholder} />
               )}
             </Column>
             <Column style={{ paddingLeft: '12px' }}>
@@ -94,7 +94,7 @@ export default function CartRecovery({
       </Section>
 
       <Section style={ctaSection}>
-        <Button style={button} href={recoveryUrl}>
+        <Button className="bl-cta" style={button} href={recoveryUrl}>
           Complete Your Order
         </Button>
       </Section>
@@ -108,9 +108,10 @@ export default function CartRecovery({
   )
 }
 
-const content: React.CSSProperties = { padding: '24px' }
+const content: React.CSSProperties = { color: '#1A1A1A', padding: '24px' }
 
 const headingStyle: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '22px',
   fontWeight: 'normal',
   margin: '0 0 8px',
@@ -124,6 +125,7 @@ const bodyStyle: React.CSSProperties = {
 }
 
 const discountSection: React.CSSProperties = {
+  color: '#1A1A1A',
   margin: '0 24px',
   padding: '20px',
   backgroundColor: '#fdf2f8',
@@ -155,6 +157,7 @@ const discountNote: React.CSSProperties = {
 }
 
 const itemsSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '16px 24px',
 }
 
@@ -168,6 +171,7 @@ const sectionTitle: React.CSSProperties = {
 }
 
 const itemRow: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '8px 0',
   borderBottom: '1px solid #f0f0f0',
 }
@@ -178,6 +182,7 @@ const itemImage: React.CSSProperties = {
 }
 
 const imagePlaceholder: React.CSSProperties = {
+  color: '#1A1A1A',
   width: '56px',
   height: '56px',
   backgroundColor: '#f0f0f0',
@@ -185,6 +190,7 @@ const imagePlaceholder: React.CSSProperties = {
 }
 
 const itemName: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0',
@@ -197,6 +203,7 @@ const itemPrice: React.CSSProperties = {
 }
 
 const subtotalText: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '12px 0 0',
@@ -204,6 +211,7 @@ const subtotalText: React.CSSProperties = {
 }
 
 const ctaSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '0 24px 24px',
   textAlign: 'center' as const,
 }

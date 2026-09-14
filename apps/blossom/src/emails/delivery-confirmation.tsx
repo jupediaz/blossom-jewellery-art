@@ -30,7 +30,7 @@ export default function DeliveryConfirmation({
         </Text>
       </Section>
 
-      <Section style={orderSection}>
+      <Section className="bl-surface" style={orderSection}>
         <Text style={label}>Order</Text>
         <Text style={value}>{orderNumber}</Text>
 
@@ -52,7 +52,7 @@ export default function DeliveryConfirmation({
       </Section>
 
       <Section style={{ padding: '0 24px 24px', textAlign: 'center' as const }}>
-        <Button style={button} href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'}/products`}>
+        <Button className="bl-cta" style={button} href={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'}/products`}>
           Explore More Pieces
         </Button>
       </Section>
@@ -68,9 +68,10 @@ export default function DeliveryConfirmation({
   )
 }
 
-const content: React.CSSProperties = { padding: '24px' }
+const content: React.CSSProperties = { color: '#1A1A1A', padding: '24px' }
 
 const heading: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '22px',
   fontWeight: 'normal',
   margin: '0 0 8px',
@@ -84,6 +85,7 @@ const subtext: React.CSSProperties = {
 }
 
 const orderSection: React.CSSProperties = {
+  color: '#1A1A1A',
   padding: '16px 24px',
   backgroundColor: '#fafaf9',
 }
@@ -98,17 +100,20 @@ const label: React.CSSProperties = {
 }
 
 const value: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0',
 }
 
 const itemText: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   margin: '4px 0',
 }
 
 const careTitle: React.CSSProperties = {
+  color: '#1A1A1A',
   fontSize: '14px',
   fontWeight: 'bold',
   margin: '0 0 8px',

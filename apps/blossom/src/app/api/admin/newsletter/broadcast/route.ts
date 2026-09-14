@@ -3,6 +3,12 @@ import { createHmac } from 'crypto'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email'
+import {
+  emailButton,
+  emailHeading,
+  emailShell,
+  esc,
+} from '@/lib/email-shell'
 import { z } from 'zod'
 
 function computeUnsubscribeToken(email: string): string {
@@ -21,43 +27,26 @@ const schema = z.object({
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blossombyolha.com'
 
 function buildBroadcastHtml(subject: string, previewText: string, body: string) {
-  // Convert newlines to <br> for simple plain-text bodies
-  const htmlBody = body.replace(/\n\n/g, '</p><p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.7;">').replace(/\n/g, '<br>')
+  // Admin-authored plain text: escaped first, then blank lines become
+  // paragraphs and single newlines <br>. Every paragraph carries its own color
+  // so nothing depends on inherited text color (see src/emails/theme.ts).
+  const paragraph = 'margin:0 0 16px;font-size:15px;line-height:1.7;color:#333333;'
+  const htmlBody = esc(body)
+    .replace(/\n\n/g, `</p><p style="${paragraph}">`)
+    .replace(/\n/g, '<br>')
 
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8">
-${previewText ? `<div style="display:none;max-height:0;overflow:hidden;">${previewText}</div>` : ''}
-</head>
-<body style="margin:0;padding:0;background:#f9f6f2;font-family:Georgia,serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f6f2;padding:40px 20px;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
-        <tr>
-          <td style="background:#2c2c2c;padding:28px 40px;text-align:center;">
-            <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:400;color:#fff;letter-spacing:2px;">BLOSSOM BY OLHA</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:40px;">
-            <h1 style="margin:0 0 24px;font-size:24px;font-weight:400;color:#2c2c2c;line-height:1.3;">${subject}</h1>
-            <p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.7;">${htmlBody}</p>
-            <div style="margin-top:32px;text-align:center;">
-              <a href="${BASE_URL}/products" style="display:inline-block;background:#2c2c2c;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:14px;letter-spacing:1px;">Shop Now</a>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:24px 40px;border-top:1px solid #eee;text-align:center;">
-            <p style="margin:0 0 8px;font-size:12px;color:#aaa;">You're receiving this because you subscribed to Blossom by Olha updates.</p>
-            <p style="margin:0;font-size:12px;color:#aaa;"><a href="${BASE_URL}/api/newsletter/unsubscribe?email={{EMAIL}}&token={{TOKEN}}" style="color:#aaa;">Unsubscribe</a></p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`
+  return emailShell(
+    [
+      emailHeading(subject),
+      `<p style="${paragraph}">${htmlBody}</p>`,
+      `<div style="margin-top:32px;text-align:center;">${emailButton(`${BASE_URL}/products`, 'Shop Now')}</div>`,
+    ].join('\n'),
+    {
+      preheader: previewText,
+      footerHtml: `<p style="margin:0 0 8px;font-size:12px;">You're receiving this because you subscribed to Blossom by Olha updates.</p>
+            <p style="margin:0 0 8px;font-size:12px;"><a href="${BASE_URL}/api/newsletter/unsubscribe?email={{EMAIL}}&amp;token={{TOKEN}}" style="color:#999999;">Unsubscribe</a></p>`,
+    },
+  )
 }
 
 export async function POST(req: NextRequest) {

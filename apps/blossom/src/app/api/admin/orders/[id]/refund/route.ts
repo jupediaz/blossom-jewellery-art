@@ -3,6 +3,14 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { stripe } from '@/lib/stripe'
 import { sendEmail } from '@/lib/email'
+import {
+  emailDataRow,
+  emailDataTable,
+  emailHeading,
+  emailParagraph,
+  emailShell,
+  esc,
+} from '@/lib/email-shell'
 
 export async function POST(
   req: NextRequest,
@@ -197,45 +205,29 @@ export async function POST(
         requested_by_customer: 'Customer request',
       }
 
-      const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f9f9; margin: 0; padding: 40px 20px;">
-  <div style="max-width: 520px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
-    <h1 style="font-size: 22px; font-weight: 600; color: #1a1a1a; margin: 0 0 8px;">Refund Confirmed</h1>
-    <p style="color: #666; font-size: 14px; margin: 0 0 32px;">Hi ${customerName}, your refund has been processed.</p>
-
-    <div style="background: #f4f4f4; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <span style="color: #666; font-size: 14px;">Order</span>
-        <span style="color: #1a1a1a; font-size: 14px; font-weight: 500;">${order.orderNumber}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <span style="color: #666; font-size: 14px;">Refund Amount</span>
-        <span style="color: #1a1a1a; font-size: 14px; font-weight: 600;">${formattedAmount}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <span style="color: #666; font-size: 14px;">Reason</span>
-        <span style="color: #1a1a1a; font-size: 14px;">${reasonLabel[reason] || reason}</span>
-      </div>
-      <div style="display: flex; justify-content: space-between;">
-        <span style="color: #666; font-size: 14px;">Refund ID</span>
-        <span style="color: #999; font-size: 12px; font-family: monospace;">${stripeRefund.id}</span>
-      </div>
-    </div>
-
-    <p style="color: #666; font-size: 13px; line-height: 1.6; margin: 0 0 24px;">
-      The refund has been submitted to your original payment method. Depending on your bank, it may take
-      <strong>5–10 business days</strong> to appear on your statement.
-    </p>
-
-    <p style="color: #999; font-size: 12px; margin: 0;">
-      Questions? Reply to this email or contact us at <a href="mailto:hello@blossombyolha.com" style="color: #4a4a4a;">hello@blossombyolha.com</a>
-    </p>
-  </div>
-</body>
-</html>`
+      const html = emailShell(
+        [
+          emailHeading('Refund Confirmed'),
+          emailParagraph(`Hi ${esc(customerName)}, your refund has been processed.`, true),
+          emailDataTable(
+            [
+              emailDataRow('Order', order.orderNumber),
+              emailDataRow('Refund Amount', formattedAmount),
+              emailDataRow('Reason', reasonLabel[reason] || reason),
+              emailDataRow('Refund ID', stripeRefund.id, true),
+            ].join('\n'),
+          ),
+          emailParagraph(
+            'The refund has been submitted to your original payment method. Depending on your bank, it may take <strong>5&ndash;10 business days</strong> to appear on your statement.',
+            true,
+          ),
+        ].join('\n'),
+        {
+          preheader: `Refund confirmed for order ${order.orderNumber}`,
+          footerHtml:
+            '<p style="margin:0 0 8px;font-size:12px;">Questions? Reply to this email or contact us at <a href="mailto:hello@blossombyolha.com" class="bl-link" style="color:#1A1A1A;">hello@blossombyolha.com</a></p>',
+        },
+      )
 
       await sendEmail({
         to: customerEmail,
