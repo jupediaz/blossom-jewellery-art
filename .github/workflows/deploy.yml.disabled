@@ -1,3 +1,15 @@
+# RETIRED 2026-10-01. Kept (renamed, not deleted) so a `git revert` restores it.
+#
+# This workflow deployed from INSIDE the GitHub Actions job (`git reset` and
+# docker compose on the checkout under /etc/dokploy/compose). That made
+# /etc/dokploy (every product's production .env and secrets) readable by every
+# job on the EPYC runners, and the runners no longer see it at all
+# (codelabs-core infra/gh-runners/70-ghrunners-no-dokploy.conf), so this could
+# not run anyway. The project has no live deploy path today (switched off);
+# when it comes back, it deploys like the rest of the portfolio: an entry in
+# the deploy registry plus the Forgejo deploy-forgejo webhook (deploy-any,
+# zero-downtime-deploy), never from inside a job.
+#
 name: Deploy Blossom to EPYC
 
 on:
